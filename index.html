@@ -637,11 +637,21 @@
         
         async function actualizarClima() {
             try {
-                const response = await fetch('https://wttr.in/?format=%l:+%c+%t&lang=es');
-                const clima = await response.text();
-                mensajes[2] = `🌤️ ${clima}`;
+                // Usamos format=3 que devuelve texto m�s simple
+                const response = await fetch('https://wttr.in/?format=3&lang=es');
+                let clima = await response.text();
+                
+                // Limpiamos el texto por si viene con caracteres raros
+                clima = clima.trim().replace(/[<>]/g, '');
+                
+                // Si el texto es muy largo o tiene c�digo, usamos un fallback
+                if (clima.length > 100 || clima.includes('{') || clima.includes('.')) {
+                    clima = "Clima no disponible";
+                }
+                
+                mensajes[2] = ` ${clima}`;
             } catch (e) {
-                mensajes[2] = "🌤️ Clima no disponible";
+                mensajes[2] = " Clima no disponible";
             }
         }
         
