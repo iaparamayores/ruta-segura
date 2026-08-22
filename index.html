@@ -6,297 +6,82 @@
     <title>Ruta Segura - Para Mayores</title>
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#1976d2">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background-color: #f5f5f5;
-        }
-
-        .contenedor {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            padding: 12px;
-            gap: 10px;
-        }
-
-        .fila-superior {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .nombre-app {
-            font-size: 22px;
-            font-weight: bold;
-            color: #222;
-            text-align: center;
-            flex: 1;
-            padding: 0 10px;
-        }
-
-        .boton-cuadrado {
-            width: 70px;
-            height: 70px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            font-weight: bold;
-            flex-shrink: 0;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+        html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
+        .contenedor { height: 100%; display: flex; flex-direction: column; padding: 12px; gap: 10px; }
+        .fila-superior { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .nombre-app { font-size: 22px; font-weight: bold; color: #222; text-align: center; flex: 1; padding: 0 10px; }
+        .boton-cuadrado { width: 70px; height: 70px; border: none; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-weight: bold; flex-shrink: 0; user-select: none; -webkit-user-select: none; }
         .boton-cuadrado .icono { font-size: 24px; margin-bottom: 4px; }
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
-
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
-
-        #mapa {
-            flex: 1;
-            max-height: 60vh;
-            border-radius: 12px;
-            border: 3px solid #999;
-            min-height: 200px;
-            z-index: 1;
-        }
-
-        #cajaMensaje {
-            background-color: white;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .fila-botones-accion {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .boton-accion-cuadrado {
-            height: 70px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            font-weight: bold;
-            font-size: 14px;
-            color: white;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+        #mapa { flex: 1; max-height: 60vh; border-radius: 12px; border: 3px solid #999; min-height: 200px; z-index: 1; }
+        #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
+        .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
+        .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
         .boton-accion-cuadrado .icono { font-size: 26px; margin-bottom: 4px; }
-
         #btnCompartir { background-color: #f57c00; }
         #btnLlegueBien { background-color: #43a047; }
         #botonVoz { background-color: #1976d2; }
         #btnRutaRapida { background-color: #388e3c; }
         #botonVoz.escuchando { animation: pulsar 1.5s infinite; }
-        
-        @keyframes pulsar {
-            0% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4); }
-            70% { box-shadow: 0 0 0 12px rgba(25, 118, 210, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0); }
-        }
-
-        #espacioConsejos {
-            height: 70px;
-            background-color: #fff3e0;
-            border: 2px dashed #ffb74d;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 8px;
-            font-size: 15px;
-            color: #e65100;
-            font-weight: bold;
-            flex-shrink: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        footer {
-            height: 50px;
-            line-height: 50px;
-            text-align: center;
-            font-size: 14px;
-            color: #555;
-            background-color: #e8e8e8;
-            border-radius: 8px;
-            flex-shrink: 0;
-        }
-
-        .progreso-sos {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            height: 6px;
-            background: rgba(255,255,255,0.85);
-            transition: width 1.5s linear;
-        }
-
-        #panelAjustes {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 350px;
-            max-height: 85vh;
-            overflow-y: auto;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 100;
-        }
+        @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(25, 118, 210, 0); } 100% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0); } }
+        #espacioConsejos { height: 70px; background-color: #fff3e0; border: 2px dashed #ffb74d; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: 15px; color: #e65100; font-weight: bold; flex-shrink: 0; transition: opacity 0.3s ease-in-out; }
+        footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
+        .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
+        #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
-        #panelAjustes button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            font-size: 17px;
-            border: none;
-            border-radius: 8px;
-            background: #f0f0f0;
-            cursor: pointer;
-        }
+        #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
         #cerrarAjustes { background: #d32f2f; color: white; margin-top:15px; }
         #botonSalir { background-color: #424242; color: white; }
-
-        #inputDestino {
-            display: none;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            font-size: 17px;
-            border: 2px solid #1976d2;
-            border-radius: 8px;
-        }
-        #btnBuscarDestino {
-            display: none;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            font-size: 17px;
-            border: none;
-            border-radius: 8px;
-            background: #1976d2;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
+        #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
+        #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="contenedor">
         <div class="fila-superior">
-            <button id="botonSOS" class="boton-cuadrado">
-                <span class="icono">SOS</span>
-                <span class="texto">EMERGENCIA</span>
-                <div class="progreso-sos"></div>
-            </button>
-
-            <div class="nombre-app">RUTA SEGURA</div>
-
-            <button id="botonAjustes" class="boton-cuadrado">
-                <span class="icono">AJ</span>
-                <span class="texto">AJUSTES</span>
-            </button>
+            <button id="botonSOS" class="boton-cuadrado"><span class="icono"></span><span class="texto">EMERGENCIA</span><div class="progreso-sos"></div></button>
+            <div class="nombre-app"> RUTA SEGURA</div>
+            <button id="botonAjustes" class="boton-cuadrado"><span class="icono"></span><span class="texto">AJUSTES</span></button>
         </div>
-
         <div id="mapa"></div>
-
-        <div id="cajaMensaje">Lista para ayudarte</div>
-
+        <div id="cajaMensaje"> Lista para ayudarte</div>
         <div class="fila-botones-accion">
-            <button id="btnCompartir" class="boton-accion-cuadrado">
-                <span class="icono">PIN</span>
-                <span>Compartir</span>
-            </button>
-            
-            <button id="btnLlegueBien" class="boton-accion-cuadrado">
-                <span class="icono">CASA</span>
-                <span>Llegu&eacute; bien</span>
-            </button>
-            
-            <button id="botonVoz" class="boton-accion-cuadrado">
-                <span class="icono">MIC</span>
-                <span>Hablar</span>
-            </button>
-            
-            <button id="btnRutaRapida" class="boton-accion-cuadrado">
-                <span class="icono">RUTA</span>
-                <span>Ir a...</span>
-            </button>
+            <button id="btnCompartir" class="boton-accion-cuadrado"><span class="icono"></span><span>Compartir</span></button>
+            <button id="btnLlegueBien" class="boton-accion-cuadrado"><span class="icono"></span><span>Llegu&eacute; bien</span></button>
+            <button id="botonVoz" class="boton-accion-cuadrado"><span class="icono"></span><span>Hablar</span></button>
+            <button id="btnRutaRapida" class="boton-accion-cuadrado"><span class="icono"></span><span>Ir a...</span></button>
         </div>
-
-        <div id="espacioConsejos">
-            Consejo: Mantene presionado el boton SOS por 2 segundos en emergencia.
-        </div>
-
+        <div id="espacioConsejos"> Consejo: Mantené presionado el botón  por 2 segundos en caso de emergencia.</div>
         <footer>Sugerencias a: iaparamayoresapp@gmail.com</footer>
     </div>
-
     <div id="panelAjustes">
-        <h3>Mis Datos y Ayuda</h3>
-        
-        <input type="text" id="inputDestino" placeholder="Escribi tu destino (ej: Plaza San Martin)">
-        <button id="btnBuscarDestino">Buscar ruta</button>
-        
-        <button id="btnRuta">Como llego a...?</button>
-        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">Linterna</button>
-        <button id="btnLugares">Mis Lugares guardados</button>
-        <button id="btnContactos">Contactos de confianza</button>
+        <h3> Mis Datos y Ayuda</h3>
+        <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
+        <button id="btnBuscarDestino"> Buscar ruta</button>
+        <button id="btnRuta"> ¿CÓMO LLEGO A...?</button>
+        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;"> Linterna</button>
+        <button id="btnLugares"> Mis Lugares guardados</button>
+        <button id="btnContactos"> Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
-        
-        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">Ayuda Inmediata:</p>
-        
-        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">Centro de Salud / Farmacia</button>
-        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">Llamar a Policia / Emergencias</button>
-        <button id="btnHospital" style="background:#fff3e0; color:#e65100;">Hospital con Guardia</button>
-        
+        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;"> Ayuda Inmediata:</p>
+        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;"> Buscar Centro de Salud / Farmacia</button>
+        <button id="btnPolicia" style="background:#ffebee; color:#c62828;"> Llamar a Policía / Emergencias</button>
+        <button id="btnHospital" style="background:#fff3e0; color:#e65100;"> Buscar Hospital con Guardia</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
-        
-        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">Destinos utiles:</p>
-        
-        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">Banco / Cajero</button>
-        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">Supermercado</button>
-        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">Plaza / Iglesia</button>
-        
+        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;"> Destinos útiles:</p>
+        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;"> Buscar Banco / Cajero</button>
+        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;"> Buscar Supermercado</button>
+        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;"> Buscar Plaza / Iglesia</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
-        <button id="botonSalir" style="background:#424242; color:white;">SALIR DE LA APP</button>
-        <button id="cerrarAjustes" style="background:#d32f2f; color:white;">Cerrar</button>
+        <button id="botonSalir" style="background:#424242; color:white;"> SALIR DE LA APP</button>
+        <button id="cerrarAjustes" style="background:#d32f2f; color:white;"> Cerrar</button>
     </div>
-
     <script>
         const botonSOS = document.getElementById('botonSOS');
         const progresoSOS = document.querySelector('.progreso-sos');
@@ -323,124 +108,64 @@
         const espacioConsejos = document.getElementById('espacioConsejos');
         const inputDestino = document.getElementById('inputDestino');
         const btnBuscarDestino = document.getElementById('btnBuscarDestino');
-        
         let miUbicacion = null, reconocimiento = null;
         let temporizadorSOS = null, sosActivo = false;
         let mapaLeaflet = null, marcadorUsuario = null;
         let linternaActiva = false;
         let linternaStream = null;
-
         function inicializarMapa() {
             mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: 'OpenStreetMap'
-            }).addTo(mapaLeaflet);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapaLeaflet);
         }
-
-        function iniciarSOS() {
-            sosActivo = true; 
-            progresoSOS.style.width = '100%';
-            temporizadorSOS = setTimeout(() => {
-                if(sosActivo) activarSOS();
-            }, 1500);
-        }
-        function cancelarSOS() {
-            sosActivo = false; 
-            progresoSOS.style.width = '0%';
-            if(temporizadorSOS) clearTimeout(temporizadorSOS);
-        }
+        function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
+        function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
         botonSOS.addEventListener('mousedown', iniciarSOS);
         botonSOS.addEventListener('touchstart', e=>{e.preventDefault(); iniciarSOS();}, {passive:false});
         botonSOS.addEventListener('mouseup', cancelarSOS);
         botonSOS.addEventListener('touchend', cancelarSOS);
         botonSOS.addEventListener('mouseleave', cancelarSOS);
-
         function iniciarUbicacion() {
-            if (!navigator.geolocation) {
-                cajaMensaje.textContent = "Navegador no compatible";
-                return;
-            }
-            cajaMensaje.textContent = "Buscando tu ubicacion...";
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    miUbicacion = pos.coords;
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    mapaLeaflet.setView([lat, lng], 16);
-                    if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-                    marcadorUsuario = L.marker([lat, lng]).addTo(mapaLeaflet)
-                        .bindPopup("Estas aqui")
-                        .openPopup();
-                    cajaMensaje.textContent = "Todo listo";
-                },
-                () => cajaMensaje.textContent = "Activa ubicacion en tu telefono",
-                {enableHighAccuracy: true, timeout:10000}
-            );
+            if (!navigator.geolocation) { cajaMensaje.textContent = " Navegador no compatible"; return; }
+            cajaMensaje.textContent = " Buscando tu ubicación...";
+            navigator.geolocation.getCurrentPosition(pos => {
+                miUbicacion = pos.coords;
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                mapaLeaflet.setView([lat, lng], 16);
+                if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+                marcadorUsuario = L.marker([lat, lng]).addTo(mapaLeaflet).bindPopup(" Estás aquí").openPopup();
+                cajaMensaje.textContent = " Todo listo";
+            }, () => cajaMensaje.textContent = " Activa ubicación en tu teléfono", {enableHighAccuracy: true, timeout:10000});
         }
-
         function iniciarVoz() {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!window.SpeechRecognition) {
-                cajaMensaje.textContent = "Usa Chrome/Android para voz";
-                return;
-            }
-            if (reconocimiento) {
-                reconocimiento.stop();
-                botonVoz.classList.remove('escuchando');
-                return;
-            }
+            if (!window.SpeechRecognition) { cajaMensaje.textContent = " Usa Chrome/Android para voz"; return; }
+            if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); return; }
             reconocimiento = new window.SpeechRecognition();
             reconocimiento.lang = 'es-ES';
             reconocimiento.continuous = false;
             reconocimiento.interimResults = false;
-            reconocimiento.onstart = () => { 
-                botonVoz.classList.add('escuchando'); 
-                cajaMensaje.textContent = "Te escucho... deci tu comando"; 
-            };
+            reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = " Te escucho... decí tu comando"; };
             reconocimiento.onresult = e => {
                 const frase = e.results[0][0].transcript.toLowerCase();
-                cajaMensaje.innerHTML = 'Dijiste: <strong>"' + frase + '"</strong>';
+                cajaMensaje.innerHTML = ' Dijiste: <strong>"' + frase + '"</strong>';
                 procesarComando(frase);
                 botonVoz.classList.remove('escuchando');
                 reconocimiento = null;
             };
-            reconocimiento.onerror = (e) => { 
-                botonVoz.classList.remove('escuchando'); 
-                cajaMensaje.textContent = "No te escuche bien. Intenta de nuevo.";
-                reconocimiento = null;
-            };
-            reconocimiento.onend = () => {
-                botonVoz.classList.remove('escuchando');
-                reconocimiento = null;
-            };
+            reconocimiento.onerror = (e) => { botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = " No te escuché bien. Intentá de nuevo."; reconocimiento = null; };
+            reconocimiento.onend = () => { botonVoz.classList.remove('escuchando'); reconocimiento = null; };
             reconocimiento.start();
-            setTimeout(() => {
-                if (reconocimiento) {
-                    reconocimiento.stop();
-                    botonVoz.classList.remove('escuchando');
-                    cajaMensaje.textContent = "Se acabo el tiempo. Toca el microfono de nuevo.";
-                    reconocimiento = null;
-                }
-            }, 8000);
+            setTimeout(() => { if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = " Se acabó el tiempo. Tocá el micrófono de nuevo."; reconocimiento = null; } }, 8000);
         }
-
         function procesarComando(texto) {
-            const lugares = {
-                'hospital': 'hospital cerca de mi',
-                'farmacia': 'farmacia cerca de mi',
-                'policia': 'comisaria cerca de mi',
-                'banco': 'banco cerca de mi',
-                'supermercado': 'supermercado cerca de mi',
-                'plaza': 'plaza cerca de mi',
-                'iglesia': 'iglesia cerca de mi',
-                'salud': 'centro de salud cerca de mi'
-            };
+            const lugares = { 'hospital': 'hospital cerca de mi', 'farmacia': 'farmacia cerca de mi', 'policia': 'comisaria cerca de mi', 'banco': 'banco cerca de mi', 'supermercado': 'supermercado cerca de mi', 'plaza': 'plaza cerca de mi', 'iglesia': 'iglesia cerca de mi', 'salud': 'centro de salud cerca de mi' };
             let encontroLugar = false;
             for (const [clave, busqueda] of Object.entries(lugares)) {
                 if (texto.includes(clave)) {
                     window.open('https://www.google.com/maps/search/' + encodeURIComponent(busqueda), '_blank');
                     encontroLugar = true;
-                    cajaMensaje.innerHTML = 'Buscando <strong>' + busqueda + '</strong> en el mapa...';
+                    cajaMensaje.innerHTML = ' Buscando <strong>' + busqueda + '</strong> en el mapa...';
                     break;
                 }
             }
@@ -450,123 +175,70 @@
                     inputDestino.style.display = 'block';
                     btnBuscarDestino.style.display = 'block';
                     inputDestino.focus();
-                    cajaMensaje.innerHTML += '<br>Escribe o deci tu destino especifico';
-                } else if (texto.includes("compartir")) {
-                    compartirUbicacion();
-                } else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) {
-                    activarSOS();
-                } else if (texto.includes("llegue") || texto.includes("casa")) {
-                    llegueBien();
-                } else if (texto.includes("llamar")) {
-                    if(confirm("Quieres hacer una llamada?")) {
-                        window.location.href = "tel:";
-                    }
-                } else {
+                    cajaMensaje.innerHTML += '<br> Escribí o decí tu destino específico';
+                } else if (texto.includes("compartir")) { compartirUbicacion(); }
+                else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) { activarSOS(); }
+                else if (texto.includes("llegue") || texto.includes("casa")) { llegueBien(); }
+                else if (texto.includes("llamar")) { if(confirm("¿Querés hacer una llamada?")) { window.location.href = "tel:"; } }
+                else {
                     const url = 'https://www.google.com/maps/search/' + encodeURIComponent(texto);
                     window.open(url, '_blank');
-                    cajaMensaje.innerHTML = 'Buscando "' + texto + '" en el mapa...';
+                    cajaMensaje.innerHTML = ' Buscando "<strong>' + texto + '</strong>" en el mapa...';
                 }
             }
         }
-
         function compartirUbicacion() {
-            if (!miUbicacion) {
-                cajaMensaje.textContent = "No tengo ubicacion aun";
-                return;
-            }
-            const enlace = 'https://wa.me/?text=' + encodeURIComponent('Mi ubicacion: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude);
-            cajaMensaje.textContent = "Abriendo WhatsApp...";
+            if (!miUbicacion) { cajaMensaje.textContent = " No tengo ubicación aún"; return; }
+            const enlace = 'https://wa.me/?text=' + encodeURIComponent('Mi ubicación: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude);
+            cajaMensaje.textContent = " Abriendo WhatsApp...";
             window.open(enlace, '_blank');
         }
-
         function llegueBien() {
-            if (!miUbicacion) {
-                cajaMensaje.textContent = "No tengo ubicacion aun";
-                return;
-            }
-            const mensaje = 'Hola! Llegue bien a casa. Mi ubicacion: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude;
+            if (!miUbicacion) { cajaMensaje.textContent = " No tengo ubicación aún"; return; }
+            const mensaje = '¡Hola! Llegué bien a casa. Mi ubicación: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude;
             const enlace = 'https://wa.me/?text=' + encodeURIComponent(mensaje);
-            cajaMensaje.textContent = "Abriendo WhatsApp...";
+            cajaMensaje.textContent = " Abriendo WhatsApp...";
             window.open(enlace, '_blank');
         }
-
         function activarSOS() {
-            if (confirm("ATENCION! Activar emergencia? Se avisara a tus contactos de confianza con tu ubicacion.")) {
-                cajaMensaje.textContent = "SOS ACTIVADO - Avisando a contactos";
+            if (confirm(" ¡ATENCIÓN! ¿Activar emergencia? Se avisará a tus contactos de confianza con tu ubicación.")) {
+                cajaMensaje.textContent = " SOS ACTIVADO — Avisando a contactos";
             }
         }
-
         async function toggleLinterna() {
             try {
                 if (!linternaActiva) {
-                    linternaStream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { facingMode: "environment" } 
-                    });
+                    linternaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
                     const track = linternaStream.getVideoTracks()[0];
                     const capabilities = track.getCapabilities();
                     if (capabilities.torch) {
                         await track.applyConstraints({ advanced: [{ torch: true }] });
                         linternaActiva = true;
-                        cajaMensaje.textContent = "Linterna encendida";
-                        btnLinterna.textContent = "Apagar linterna";
-                    } else {
-                        alert("Tu dispositivo no soporta linterna");
-                        linternaStream.getTracks().forEach(t => t.stop());
-                        linternaStream = null;
-                    }
+                        cajaMensaje.textContent = " Linterna encendida";
+                        btnLinterna.textContent = " Apagar linterna";
+                    } else { alert("Tu dispositivo no soporta linterna"); linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; }
                 } else {
                     linternaStream.getTracks().forEach(t => t.stop());
                     linternaStream = null;
                     linternaActiva = false;
-                    cajaMensaje.textContent = "Linterna apagada";
-                    btnLinterna.textContent = "Linterna";
+                    cajaMensaje.textContent = " Linterna apagada";
+                    btnLinterna.textContent = " Linterna";
                 }
-            } catch (e) {
-                alert("No se pudo activar la linterna. Verifica los permisos de camara.");
-            }
+            } catch (e) { alert("No se pudo activar la linterna. Verificá los permisos de cámara."); }
         }
-
         btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
-        btnPolicia.addEventListener('click', () => {
-            if(confirm("Quieres llamar ahora al numero de emergencias?")) window.location.href = "tel:911"; 
-        });
+        btnPolicia.addEventListener('click', () => { if(confirm("¿Querés llamar ahora al número de emergencias?")) window.location.href = "tel:911"; });
         btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
         btnBanco.addEventListener('click', () => window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank'));
         btnSuper.addEventListener('click', () => window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank'));
         btnPlaza.addEventListener('click', () => window.open('https://www.google.com/maps/search/plaza+o+iglesia+cerca+de+mi', '_blank'));
-        
         btnLinterna.addEventListener('click', toggleLinterna);
-        btnLugares.addEventListener('click', () => alert("Proximamente: Aca vas a poder guardar tus lugares favoritos."));
-        btnContactos.addEventListener('click', () => alert("Proximamente: Aca vas a poder agregar contactos de emergencia."));
-
-        botonSalir.addEventListener('click', () => {
-            if(confirm("Seguro que quieres salir de Ruta Segura?")) {
-                cajaMensaje.textContent = "Gracias por usar Ruta Segura. Cuidate!";
-                setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
-            }
-        });
-
-        botonAjustes.addEventListener('click', () => {
-            panelAjustes.style.display = 'block';
-            inputDestino.style.display = 'none';
-            btnBuscarDestino.style.display = 'none';
-        });
-        
-        cerrarAjustes.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            panelAjustes.style.display = 'none';
-            inputDestino.style.display = 'none';
-            btnBuscarDestino.style.display = 'none';
-            inputDestino.value = '';
-        });
-
-        btnRuta.addEventListener('click', () => {
-            inputDestino.style.display = 'none';
-            btnBuscarDestino.style.display = 'none';
-            cajaMensaje.textContent = "Elegi una opcion del menu";
-        });
-
+        btnLugares.addEventListener('click', () => alert(" Próximamente: Acá vas a poder guardar tus lugares favoritos."));
+        btnContactos.addEventListener('click', () => alert(" Próximamente: Acá vas a poder agregar contactos de emergencia."));
+        botonSalir.addEventListener('click', () => { if(confirm("¿Seguro que querés salir de Ruta Segura?")) { cajaMensaje.textContent = " Gracias por usar Ruta Segura. ¡Cuidate!"; setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000); } });
+        botonAjustes.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; });
+        cerrarAjustes.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = ''; });
+        btnRuta.addEventListener('click', () => { inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; cajaMensaje.textContent = " Elegí una opción del menú"; });
         btnBuscarDestino.addEventListener('click', () => {
             const destino = inputDestino.value.trim();
             if (destino) {
@@ -575,54 +247,31 @@
                 inputDestino.style.display = 'none';
                 btnBuscarDestino.style.display = 'none';
                 inputDestino.value = '';
-            } else {
-                alert("Escribe un destino primero");
-            }
+            } else { alert(" Escribí un destino primero"); }
         });
-
-        btnRutaRapida.addEventListener('click', () => {
-            panelAjustes.style.display = 'block';
-            inputDestino.style.display = 'block';
-            btnBuscarDestino.style.display = 'block';
-            inputDestino.focus();
-            cajaMensaje.textContent = "Escribe tu destino o toca el microfono";
-        });
-
-        window.addEventListener('load', () => {
-            inicializarMapa();
-            iniciarUbicacion();
-        });
-        
+        btnRutaRapida.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus(); cajaMensaje.textContent = " Escribí tu destino o tocá el micrófono"; });
+        window.addEventListener('load', () => { inicializarMapa(); iniciarUbicacion(); });
         botonVoz.addEventListener('click', iniciarVoz);
         btnCompartir.addEventListener('click', compartirUbicacion);
         btnLlegueBien.addEventListener('click', llegueBien);
-
         const mensajes = [
-            "Consejo: Mantene presionado el boton SOS por 2 segundos en emergencia.",
-            "Sabias que podes tocar el microfono y decir Compartir para enviar tu ubicacion?",
-            "Recorda cargar la bateria de tu celular antes de salir a caminar.",
-            "Conoce nuestras otras apps educativas en: Cursos IA para Mayores.",
-            "Caminar 20 minutos al dia mejora tu salud y tu animo. Vos podes!",
-            "En el menu Ajustes tenes acceso directo a hospitales y farmacias.",
-            "Sabias que el modo avion gasta menos bateria? Usalo si necesitas ahorrar.",
-            "Lleva siempre agua cuando salgas a caminar. Tu cuerpo te lo agradecera."
+            " Consejo: Mantené presionado el botón  por 2 segundos en caso de emergencia.",
+            " ¿Sabías que podés tocar el micrófono  y decir 'Compartir' para enviar tu ubicación?",
+            " Recordá cargar la batería de tu celular antes de salir a caminar.",
+            " Conocé nuestras otras apps educativas en: Cursos IA para Mayores.",
+            " Caminar 20 minutos al día mejora tu salud y tu ánimo. ¡Vos podés!",
+            " En el menú Ajustes tenés acceso directo a hospitales y farmacias.",
+            " ¿Sabías que el modo avión gasta menos batería? Usalo si necesitás ahorrar."
         ];
-        
         let indiceMensaje = 0;
         setInterval(() => {
             indiceMensaje = (indiceMensaje + 1) % mensajes.length;
             espacioConsejos.style.opacity = 0;
-            setTimeout(() => {
-                espacioConsejos.textContent = mensajes[indiceMensaje];
-                espacioConsejos.style.opacity = 1;
-            }, 300);
+            setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
         }, 17000);
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log('SW registrado correctamente:', reg))
-                    .catch(err => console.error('Error al registrar SW:', err));
+                navigator.serviceWorker.register('./service-worker.js').then(reg => console.log(' SW registrado correctamente:', reg)).catch(err => console.error(' Error al registrar SW:', err));
             });
         }
     </script>
