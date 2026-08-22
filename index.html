@@ -90,7 +90,7 @@
             flex-shrink: 0;
         }
 
-        /*  FILA DE 4 BOTONES EN 2x2 */
+        /*  FILA DE 4 BOTONES EN 2x2 (Más ordenado) */
         .fila-botones-accion {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -230,7 +230,7 @@
             <div class="nombre-app"> RUTA SEGURA</div>
 
             <button id="botonAjustes" class="boton-cuadrado">
-                <span class="icono"></span>
+                <span class="icono"></span>
                 <span class="texto">AJUSTES</span>
             </button>
         </div>
@@ -276,12 +276,12 @@
         <button id="btnBuscarDestino"> Buscar ruta</button>
         
         <button id="btnRuta"> ¿CÓMO LLEGO A...?</button>
-        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;"> Linterna</button>
+        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;"> Linterna</button>
         <button id="btnLugares"> Mis Lugares guardados</button>
         <button id="btnContactos"> Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
         
-        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;"> Ayuda Inmediata:</p>
+        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;"> Ayuda Inmediata:</p>
         
         <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;"> Buscar Centro de Salud / Farmacia</button>
         <button id="btnPolicia" style="background:#ffebee; color:#c62828;"> Llamar a Policía / Emergencias</button>
@@ -289,7 +289,7 @@
         
         <hr style="margin:15px 0; border: 1px solid #eee;">
         
-        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;"> Destinos útiles:</p>
+        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;"> Destinos útiles:</p>
         
         <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;"> Buscar Banco / Cajero</button>
         <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;"> Buscar Supermercado</button>
@@ -301,6 +301,7 @@
     </div>
 
     <script>
+        // Elementos
         const botonSOS = document.getElementById('botonSOS');
         const progresoSOS = document.querySelector('.progreso-sos');
         const botonVoz = document.getElementById('botonVoz');
@@ -475,7 +476,7 @@
 
         function compartirUbicacion() {
             if (!miUbicacion) {
-                cajaMensaje.textContent = " No tengo ubicación aún";
+                cajaMensaje.textContent = " No tengo ubicación aún";
                 return;
             }
             const enlace = `https://wa.me/?text=${encodeURIComponent(`Mi ubicación: https://maps.google.com/?q=${miUbicacion.latitude},${miUbicacion.longitude}`)}`;
@@ -531,41 +532,24 @@
             }
         }
 
-        btnSalud.addEventListener('click', () => {
-            window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank');
-        });
+        // Event Listeners de botones
+        btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
         btnPolicia.addEventListener('click', () => {
-            if(confirm("¿Querés llamar ahora al número de emergencias?")) {
-                window.location.href = "tel:911"; 
-            }
+            if(confirm("¿Querés llamar ahora al número de emergencias?")) window.location.href = "tel:911"; 
         });
-        btnHospital.addEventListener('click', () => {
-            window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank');
-        });
-        btnBanco.addEventListener('click', () => {
-            window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank');
-        });
-        btnSuper.addEventListener('click', () => {
-            window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank');
-        });
-        btnPlaza.addEventListener('click', () => {
-            window.open('https://www.google.com/maps/search/plaza+o+iglesia+cerca+de+mi', '_blank');
-        });
+        btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
+        btnBanco.addEventListener('click', () => window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank'));
+        btnSuper.addEventListener('click', () => window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank'));
+        btnPlaza.addEventListener('click', () => window.open('https://www.google.com/maps/search/plaza+o+iglesia+cerca+de+mi', '_blank'));
+        
         btnLinterna.addEventListener('click', toggleLinterna);
-
-        btnLugares.addEventListener('click', () => {
-            alert(" Próximamente: Acá vas a poder guardar tus lugares favoritos (casa, médico, etc.)");
-        });
-        btnContactos.addEventListener('click', () => {
-            alert(" Próximamente: Acá vas a poder agregar contactos de emergencia que recibirán tu ubicación con el botón SOS.");
-        });
+        btnLugares.addEventListener('click', () => alert(" Próximamente: Acá vas a poder guardar tus lugares favoritos."));
+        btnContactos.addEventListener('click', () => alert(" Próximamente: Acá vas a poder agregar contactos de emergencia."));
 
         botonSalir.addEventListener('click', () => {
             if(confirm("¿Seguro que querés salir de Ruta Segura?")) {
                 cajaMensaje.textContent = " Gracias por usar Ruta Segura. ¡Cuidate!";
-                setTimeout(() => { 
-                    window.location.replace("https://www.google.com");
-                }, 1000);
+                setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
             }
         });
 
@@ -593,8 +577,7 @@
         btnBuscarDestino.addEventListener('click', () => {
             const destino = inputDestino.value.trim();
             if (destino) {
-                const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}&travelmode=walking`;
-                window.open(url, '_blank');
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}&travelmode=walking`, '_blank');
                 panelAjustes.style.display = 'none';
                 inputDestino.style.display = 'none';
                 btnBuscarDestino.style.display = 'none';
@@ -621,21 +604,18 @@
         btnCompartir.addEventListener('click', compartirUbicacion);
         btnLlegueBien.addEventListener('click', llegueBien);
 
-        //  MENSAJES EN LOS SLIDES (Codificación a prueba de fallos)
+        // SLIDER AUTOMÁTICO DE CONSEJOS (Sin clima, limpio y seguro)
         const mensajes = [
-            " Consejo: Manten&eacute; presionado el bot&oacute;n  por 2 segundos en caso de emergencia.",
-            " &iquest;Sab&iacute;as que pod&eacute;s tocar el micr&oacute;fono  y decir 'Compartir' para enviar tu ubicaci&oacute;n?",
-            " Record&aacute; cargar la bater&iacute;a de tu celular antes de salir a caminar.",
-            " Conoc&eacute; nuestras otras apps educativas en: Cursos IA para Mayores.",
-            " Caminar 20 minutos al d&iacute;a mejora tu salud y tu &aacute;nimo. &iexcl;Vos pod&eacute;s!",
-            " En el men&uacute; Ajustes ten&eacute;s acceso directo a hospitales y farmacias.",
-            " &iquest;Sab&iacute;as que el modo avi&oacute;n gasta menos bater&iacute;a? Usalo si necesit&aacute;s ahorrar.",
-            " Llev&aacute; siempre agua cuando salgas a caminar. Tu cuerpo te lo agradecer&aacute;."
+            " Consejo: Mantené presionado el botón  por 2 segundos en caso de emergencia.",
+            " ¿Sabías que podés tocar el micrófono  y decir 'Compartir' para enviar tu ubicación?",
+            " Recordá cargar la batería de tu celular antes de salir a caminar.",
+            " Conocé nuestras otras apps educativas en: Cursos IA para Mayores.",
+            " Caminar 20 minutos al día mejora tu salud y tu ánimo. ¡Vos podés!",
+            " En el menú Ajustes tenés acceso directo a hospitales y farmacias.",
+            " ¿Sabías que el modo avión gasta menos batería? Usalo si necesitás ahorrar."
         ];
         
         let indiceMensaje = 0;
-        
-        // Rotar mensajes cada 17 segundos
         setInterval(() => {
             indiceMensaje = (indiceMensaje + 1) % mensajes.length;
             espacioConsejos.style.opacity = 0;
@@ -645,11 +625,41 @@
             }, 300);
         }, 17000);
 
-        //  PWA: Registro del Service Worker
+        //  PWA: Botón de instalación y Service Worker
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.id = 'btnInstalar';
+        installButton.textContent = ' Instalar app';
+        installButton.style.cssText = `
+            position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+            background: #1976d2; color: white; border: none; padding: 12px 24px;
+            border-radius: 25px; font-size: 16px; font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; display: none; z-index: 99;
+        `;
+        document.body.appendChild(installButton);
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
-                    .then(reg => console.log(' SW registrado correctamente:', reg))
+                    .then(reg => {
+                        console.log(' SW registrado correctamente:', reg);
+                        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    })
                     .catch(err => console.error(' Error al registrar SW:', err));
             });
         }
