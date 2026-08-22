@@ -1,10 +1,10 @@
-const CACHE_NAME = 'ruta-segura-v1';
+const CACHE_NAME = 'ruta-segura-v2';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './icono_ruta_segura_192.png',
+  './icono_ruta_segura_512.png'
 ];
 
 // Instalar el Service Worker y cachear archivos
@@ -15,7 +15,10 @@ self.addEventListener('install', event => {
         console.log('✅ Archivos cacheados');
         return cache.addAll(urlsToCache);
       })
+      .catch(err => console.log('⚠️ Algunos archivos no se cachearon:', err))
   );
+  // Forzar activación inmediata
+  self.skipWaiting();
 });
 
 // Activar el Service Worker
@@ -32,6 +35,8 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  // Tomar control inmediato de todas las pestañas
+  self.clients.claim();
 });
 
 // Interceptar peticiones y servir desde caché si no hay internet
@@ -41,6 +46,10 @@ self.addEventListener('fetch', event => {
       .then(response => {
         // Si está en caché, lo sirve. Si no, lo busca en internet
         return response || fetch(event.request);
+      })
+      .catch(() => {
+        // Si falla todo, mostrar página offline
+        return caches.match('./index.html');
       })
   );
 });
