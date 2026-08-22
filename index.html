@@ -458,19 +458,52 @@
         }
 
         function procesarComando(texto) {
-            if (texto.includes("camino") || texto.includes("llegar") || texto.includes("ruta")) {
-                panelAjustes.style.display = 'block';
-                cajaMensaje.innerHTML += `<br>🧭 Abrí el menú para elegir tu destino`;
-            } else if (texto.includes("compartir")) {
-                compartirUbicacion();
-            } else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) {
-                activarSOS();
-            } else if (texto.includes("policía") || texto.includes("policia")) {
-                window.location.href = "tel:911";
-            } else if (texto.includes("hospital")) {
-                window.open('https://www.google.com/maps/search/hospital+cerca+de+mi', '_blank');
-            } else if (texto.includes("farmacia") || texto.includes("salud")) {
-                window.open('https://www.google.com/maps/search/farmacia+cerca+de+mi', '_blank');
+            // Si dice un lugar específico, lo busca en Google Maps
+            const lugares = {
+                'hospital': 'hospital cerca de mi',
+                'farmacia': 'farmacia cerca de mi',
+                'policía': 'comisaria cerca de mi',
+                'policia': 'comisaria cerca de mi',
+                'banco': 'banco cerca de mi',
+                'supermercado': 'supermercado cerca de mi',
+                'plaza': 'plaza cerca de mi',
+                'iglesia': 'iglesia cerca de mi',
+                'salud': 'centro de salud cerca de mi'
+            };
+            
+            let encontroLugar = false;
+            
+            for (const [clave, busqueda] of Object.entries(lugares)) {
+                if (texto.includes(clave)) {
+                    window.open(`https://www.google.com/maps/search/${encodeURIComponent(busqueda)}`, '_blank');
+                    encontroLugar = true;
+                    cajaMensaje.innerHTML = ` Buscando <strong>${busqueda}</strong> en el mapa...`;
+                    break;
+                }
+            }
+            
+            // Si no es un lugar conocido, intenta buscarlo como destino genérico
+            if (!encontroLugar) {
+                if (texto.includes("camino") || texto.includes("llegar") || texto.includes("ruta") || texto.includes("ir a")) {
+                    panelAjustes.style.display = 'block';
+                    inputDestino.style.display = 'block';
+                    btnBuscarDestino.style.display = 'block';
+                    inputDestino.focus();
+                    cajaMensaje.innerHTML += `<br> Escribí o decí tu destino específico`;
+                } else if (texto.includes("compartir")) {
+                    compartirUbicacion();
+                } else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) {
+                    activarSOS();
+                } else if (texto.includes("llamar")) {
+                    if(confirm("¿Querés hacer una llamada?")) {
+                        window.location.href = "tel:";
+                    }
+                } else {
+                    // Si no reconoce el comando, intenta buscarlo en Google Maps
+                    const url = `https://www.google.com/maps/search/${encodeURIComponent(texto)}`;
+                    window.open(url, '_blank');
+                    cajaMensaje.innerHTML = `🔍 Buscando "<strong>${texto}</strong>" en el mapa...`;
+                }
             }
         }
 
@@ -529,30 +562,41 @@
             alert("👥 Próximamente: Acá vas a poder agregar contactos de emergencia que recibirán tu ubicación con el botón SOS.");
         });
 
-        // 🚪 BOTÓN SALIR
+    // 🚪 BOTÓN SALIR - Cierra completamente
         botonSalir.addEventListener('click', () => {
-            if(confirm("¿Seguro que querés salir? Se cerrará la vista actual.")) {
+            if(confirm("¿Seguro que querés salir de Ruta Segura?")) {
                 cajaMensaje.textContent = "👋 Gracias por usar Ruta Segura. ¡Cuidate!";
+                
+                // Intenta cerrar la ventana (funciona en PWAs instaladas)
                 setTimeout(() => { 
-                    window.location.href = "https://www.google.com"; 
-                }, 1500);
+                    // Redirige a una página externa y reemplaza el historial
+                    window.location.replace("https://www.google.com");
+                }, 1000);
             }
         });
 
-        // 📂 Panel Ajustes
-        botonAjustes.addEventListener('click', () => panelAjustes.style.display = 'block');
-        cerrarAjustes.addEventListener('click', () => {
-            panelAjustes.style.display = 'none';
+       //  Panel Ajustes
+        botonAjustes.addEventListener('click', () => {
+            panelAjustes.style.display = 'block';
             inputDestino.style.display = 'none';
             btnBuscarDestino.style.display = 'none';
         });
+        
+        cerrarAjustes.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            panelAjustes.style.display = 'none';
+            inputDestino.style.display = 'none';
+            btnBuscarDestino.style.display = 'none';
+            inputDestino.value = '';
+        });
 
-        // 🧭 ¿CÓMO LLEGO A...? - Muestra input para escribir
+        // 🧭 "¿Cómo llego a...?" - Muestra todo el panel de ajustes
         btnRuta.addEventListener('click', () => {
-            inputDestino.style.display = 'block';
-            btnBuscarDestino.style.display = 'block';
-            inputDestino.focus();
-            cajaMensaje.textContent = "✏️ Escribí tu destino o tocá el micrófono";
+            // Oculta el input temporalmente para mostrar el panel completo
+            inputDestino.style.display = 'none';
+            btnBuscarDestino.style.display = 'none';
+            cajaMensaje.textContent = "📋 Elegí una opción del menú";
         });
 
         // 🔍 Buscar destino y abrir Google Maps
@@ -570,7 +614,7 @@
             }
         });
 
-        //  Botón "Ir a..." - Abre el panel de ajustes directamente
+      // 🧭 "Ir a..." - Abre el input directo sin mostrar todo el panel
         btnRutaRapida.addEventListener('click', () => {
             panelAjustes.style.display = 'block';
             inputDestino.style.display = 'block';
@@ -616,6 +660,60 @@
                 navigator.serviceWorker.register('./service-worker.js')
                     .then(reg => console.log('✅ SW registrado correctamente:', reg))
                     .catch(err => console.error(' Error al registrar SW:', err));
+            });
+        }
+        // 📱 PWA: Forzar botón de instalación
+        let deferredPrompt;
+        const installButton = document.createElement('button');
+        installButton.id = 'btnInstalar';
+        installButton.textContent = '📲 Instalar app';
+        installButton.style.cssText = `
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: none;
+            z-index: 99;
+        `;
+        document.body.appendChild(installButton);
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Resultado de instalación: ${outcome}`);
+                deferredPrompt = null;
+                installButton.style.display = 'none';
+            }
+        });
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => {
+                        console.log('✅ SW registrado correctamente:', reg);
+                        // Forzar actualización
+                        if (reg.waiting) {
+                            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    })
+                    .catch(err => console.error('❌ Error al registrar SW:', err));
             });
         }
     </script>

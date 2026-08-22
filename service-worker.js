@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruta-segura-v2';
+const CACHE_NAME = 'ruta-segura-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -52,4 +52,10 @@ self.addEventListener('fetch', event => {
         return caches.match('./index.html');
       })
   );
+});
+// Escuchar mensaje para forzar actualización
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
