@@ -1,18 +1,18 @@
-const CACHE_NAME = 'ruta-segura-v3';
+const CACHE_NAME = 'ruta-segura-v4';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icono_ruta_segura_192.png',
-  './icono_ruta_segura_512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Instalar el Service Worker y cachear archivos
+// 1. Instalar y guardar los archivos en caché
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('✅ Archivos cacheados');
+        console.log('✅ Archivos cacheados correctamente');
         return cache.addAll(urlsToCache);
       })
       .catch(err => console.log('⚠️ Algunos archivos no se cachearon:', err))
@@ -21,14 +21,14 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activar el Service Worker
+// 2. Activar y borrar versiones viejas
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('🗑️ Borrando caché vieja:', cacheName);
+            console.log('️ Borrando caché vieja:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -39,7 +39,7 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Interceptar peticiones y servir desde caché si no hay internet
+// 3. Interceptar peticiones y servir desde caché si no hay internet
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -53,7 +53,8 @@ self.addEventListener('fetch', event => {
       })
   );
 });
-// Escuchar mensaje para forzar actualización
+
+// 4. Escuchar mensajes para forzar actualización
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
