@@ -19,7 +19,13 @@
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
-        #mapa { flex: 1; max-height: 60vh; border-radius: 12px; border: 3px solid #999; min-height: 200px; z-index: 1; }
+      #mapa {
+    flex: 1;
+    min-height: 280px; 
+    border-radius: 12px;
+    border: 3px solid #999;
+    z-index: 1;
+}
         #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
         .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
         .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
@@ -58,23 +64,26 @@
         .dato-acciones button { flex: 1; padding: 8px; border: none; border-radius: 7px; font-size: 15px; cursor: pointer; }
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
-        /* Franja del clima */
+/* El clima se vuelve una franjita fina y elegante */
 #widgetClima {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    background-color: #e3f2fd; /* Azul muy clarito */
-    border: 2px solid #90caf9;
-    border-radius: 10px;
-    padding: 8px;
-    font-size: 16px;
+    gap: 6px;
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 13px;
     font-weight: bold;
     color: #0d47a1;
     flex-shrink: 0;
-    margin-bottom: 10px;
+    margin: 0;
+    height: 28px; /* Altura fija y chiquita */
 }
-#widgetClima .icono-clima { font-size: 22px; }
+#widgetClima .icono-clima { 
+    font-size: 16px; 
+}
     </style>
 </head>
 <body>
@@ -356,19 +365,28 @@
         const temp = Math.round(data.current_weather.temperature);
         const codigo = data.current_weather.weathercode;
         
-        // Mapeo de códigos de clima a Emojis (usando Unicode para que no se rompa)
+        // Mapeo de códigos de clima a Emojis (Unicode seguro, sin rombos)
         let emoji = '\u2600\uFE0F'; // Sol por defecto
-        if (codigo >= 95) emoji = '\u26C8\uFE0F'; // Tormenta
-        else if (codigo >= 71) emoji = '\u2744\uFE0F'; // Nieve
-        else if (codigo >= 51) emoji = '\uD83C\uDF27\uFE0F'; // Lluvia
-        else if (codigo >= 1) emoji = '\u26C5'; // Nublado
+        let descripcion = "Despejado";
         
-        const textoClima = `${emoji} Temperatura actual: ${temp}\u00B0C`;
+        if (codigo >= 95) { emoji = '\u26C8\uFE0F'; descripcion = "Tormenta"; }
+        else if (codigo >= 71) { emoji = '\u2744\uFE0F'; descripcion = "Nieve"; }
+        else if (codigo >= 51) { emoji = '\uD83C\uDF27\uFE0F'; descripcion = "Lluvia"; }
+        else if (codigo >= 1) { emoji = '\u26C5'; descripcion = "Nublado"; }
         
-        // Lo insertamos al principio del slider
+        // ⚠️ ¡ESTAS SON LAS LÍNEAS CLAVE PARA QUE NO SE QUEDE CARGANDO! ⚠️
+        document.getElementById('iconoClima').innerHTML = emoji;
+        document.getElementById('textoClima').textContent = temp + "\u00B0C " + descripcion;
+        
+        // También lo agregamos al slider de consejos (al principio)
+        const textoClima = emoji + " Temperatura: " + temp + "\u00B0C";
         mensajes.unshift(textoClima);
     })
-    .catch(err => console.log('No se pudo cargar el clima'));
+    .catch(err => {
+        console.log('No se pudo cargar el clima:', err);
+        document.getElementById('textoClima').textContent = "Clima no disponible";
+    });
+}
 }
 
         function iniciarVoz() {
