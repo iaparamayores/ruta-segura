@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruta-segura-v11';
+const CACHE_NAME = 'ruta-segura-v12';
 const urlsToCache = [
   './',
   './index.html',

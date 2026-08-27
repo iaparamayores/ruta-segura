@@ -19,13 +19,16 @@
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
-      #mapa {
-    flex: 1;
-    min-height: 280px; 
-    border-radius: 12px;
-    border: 3px solid #999;
-    z-index: 1;
-}
+        
+        /* MAPA GRANDE Y PROTAGONISTA */
+        #mapa {
+            flex: 1;
+            min-height: 280px; 
+            border-radius: 12px;
+            border: 3px solid #999;
+            z-index: 1;
+        }
+        
         #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
         .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
         .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
@@ -39,6 +42,7 @@
         #espacioConsejos { height: 70px; background-color: #fff3e0; border: 2px dashed #ffb74d; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: 15px; color: #e65100; font-weight: bold; flex-shrink: 0; transition: opacity 0.3s ease-in-out; }
         footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
         .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
+        
         #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
         #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
@@ -46,6 +50,7 @@
         #botonSalir { background-color: #424242; color: white; }
         #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
         #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
+        
         .panel-datos { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 16px; z-index: 200; }
         .panel-datos.visible { display: flex; }
         .panel-datos-contenido { width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 5px 18px rgba(0,0,0,0.35); }
@@ -64,26 +69,6 @@
         .dato-acciones button { flex: 1; padding: 8px; border: none; border-radius: 7px; font-size: 15px; cursor: pointer; }
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
-/* El clima se vuelve una franjita fina y elegante */
-#widgetClima {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    background-color: #e3f2fd;
-    border: 1px solid #90caf9;
-    border-radius: 8px;
-    padding: 4px 8px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #0d47a1;
-    flex-shrink: 0;
-    margin: 0;
-    height: 28px; /* Altura fija y chiquita */
-}
-#widgetClima .icono-clima { 
-    font-size: 16px; 
-}
     </style>
 </head>
 <body>
@@ -100,12 +85,11 @@
                 <span class="texto">AJUSTES</span>
             </button>
         </div>
+        
         <div id="mapa"></div>
-        <div id="widgetClima">
-    <span class="icono-clima" id="iconoClima">&#9728;&#65039;</span>
-    <span id="textoClima">Cargando clima...</span>
-</div>
+        
         <div id="cajaMensaje">&#9989; Todo listo</div>
+        
         <div class="fila-botones-accion">
             <button id="btnCompartir" class="boton-accion-cuadrado">
                 <span class="icono">&#128205;</span>
@@ -124,11 +108,13 @@
                 <span>Ir a...</span>
             </button>
         </div>
+        
         <div id="espacioConsejos">
             &#128161; Consejo: Manten&#233; presionado el bot&#243;n &#128681; por 2 segundos en caso de emergencia.
         </div>
         <footer>Sugerencias a: iaparamayoresapp@gmail.com</footer>
     </div>
+
     <div id="panelAjustes">
         <h3>&#128203; Mis Datos y Ayuda</h3>
         <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
@@ -149,9 +135,10 @@
         <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
         <button id="botonSalir" style="background:#424242; color:white;">&#128682; SALIR DE LA APP</button>
+        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
         <button id="cerrarAjustes" style="background:#d32f2f; color:white;">&#10060; Cerrar</button>
-        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">📲 Instalar aplicación en el celular</button>
     </div>
+
     <div id="panelDatos" class="panel-datos" aria-hidden="true">
         <div class="panel-datos-contenido" role="dialog" aria-modal="true" aria-labelledby="tituloDatos">
             <div class="panel-datos-cabecera">
@@ -166,6 +153,7 @@
             <div id="listaDatos"></div>
         </div>
     </div>
+
     <script>
         const botonSOS = document.getElementById('botonSOS');
         const progresoSOS = document.querySelector('.progreso-sos');
@@ -198,6 +186,7 @@
         const inputDatoValor = document.getElementById('inputDatoValor');
         const guardarDato = document.getElementById('guardarDato');
         const listaDatos = document.getElementById('listaDatos');
+        
         let miUbicacion = null, reconocimiento = null;
         let temporizadorSOS = null, sosActivo = false;
         let mapaLeaflet = null, marcadorUsuario = null;
@@ -338,6 +327,7 @@
             mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(mapaLeaflet);
         }
+
         function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
         function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
         botonSOS.addEventListener('mousedown', iniciarSOS);
@@ -354,40 +344,9 @@
                 mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
                 if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
                 marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Estás aquí").openPopup();
-                obtenerClima(pos.coords.latitude, pos.coords.longitude);
                 cajaMensaje.textContent = "\u2705 Todo listo";
             }, () => cajaMensaje.textContent = "Activa ubicación en tu teléfono", {enableHighAccuracy: true, timeout:10000});
         }
-        function obtenerClima(lat, lng) {
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`)
-    .then(response => response.json())
-    .then(data => {
-        const temp = Math.round(data.current_weather.temperature);
-        const codigo = data.current_weather.weathercode;
-        
-        // Mapeo de códigos de clima a Emojis (Unicode seguro, sin rombos)
-        let emoji = '\u2600\uFE0F'; // Sol por defecto
-        let descripcion = "Despejado";
-        
-        if (codigo >= 95) { emoji = '\u26C8\uFE0F'; descripcion = "Tormenta"; }
-        else if (codigo >= 71) { emoji = '\u2744\uFE0F'; descripcion = "Nieve"; }
-        else if (codigo >= 51) { emoji = '\uD83C\uDF27\uFE0F'; descripcion = "Lluvia"; }
-        else if (codigo >= 1) { emoji = '\u26C5'; descripcion = "Nublado"; }
-        
-        // ⚠️ ¡ESTAS SON LAS LÍNEAS CLAVE PARA QUE NO SE QUEDE CARGANDO! ⚠️
-        document.getElementById('iconoClima').innerHTML = emoji;
-        document.getElementById('textoClima').textContent = temp + "\u00B0C " + descripcion;
-        
-        // También lo agregamos al slider de consejos (al principio)
-        const textoClima = emoji + " Temperatura: " + temp + "\u00B0C";
-        mensajes.unshift(textoClima);
-    })
-    .catch(err => {
-        console.log('No se pudo cargar el clima:', err);
-        document.getElementById('textoClima').textContent = "Clima no disponible";
-    });
-}
-}
 
         function iniciarVoz() {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -485,20 +444,20 @@
 
         botonAjustes.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; });
         cerrarAjustes.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = ''; });
+        
         btnRuta.addEventListener('click', () => {
-    inputDestino.style.display = 'block';
-    btnBuscarDestino.style.display = 'block';
-    inputDestino.focus();
-    inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
-    cajaMensaje.textContent = "🧭 Escribí tu destino y tocá 'Buscar ruta'";
-    
-    // Permitir buscar presionando Enter
-    inputDestino.onkeypress = function(e) {
-        if(e.key === 'Enter') {
-            btnBuscarDestino.click();
-        }
-    };
-});
+            inputDestino.style.display = 'block';
+            btnBuscarDestino.style.display = 'block';
+            inputDestino.focus();
+            inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
+            cajaMensaje.textContent = "\ud83e\udded Escribí tu destino y tocá 'Buscar ruta'";
+            inputDestino.onkeypress = function(e) {
+                if(e.key === 'Enter') {
+                    btnBuscarDestino.click();
+                }
+            };
+        });
+        
         btnBuscarDestino.addEventListener('click', () => {
             const destino = inputDestino.value.trim();
             if (destino) {
@@ -506,21 +465,20 @@
                 panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = '';
             } else { alert("Escribí un destino primero"); }
         });
+        
         btnRutaRapida.addEventListener('click', () => {
-    panelAjustes.style.display = 'block';
-    inputDestino.style.display = 'block';
-    btnBuscarDestino.style.display = 'block';
-    inputDestino.focus();
-    inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
-    cajaMensaje.textContent = "✏️ Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
-    
-    // Permitir buscar presionando Enter
-    inputDestino.onkeypress = function(e) {
-        if(e.key === 'Enter') {
-            btnBuscarDestino.click();
-        }
-    };
-});
+            panelAjustes.style.display = 'block';
+            inputDestino.style.display = 'block';
+            btnBuscarDestino.style.display = 'block';
+            inputDestino.focus();
+            inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
+            cajaMensaje.textContent = "\u270f\ufe0f Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
+            inputDestino.onkeypress = function(e) {
+                if(e.key === 'Enter') {
+                    btnBuscarDestino.click();
+                }
+            };
+        });
 
         window.addEventListener('load', () => { inicializarMapa(); iniciarUbicacion(); });
         botonVoz.addEventListener('click', iniciarVoz);
@@ -542,29 +500,29 @@
             espacioConsejos.style.opacity = 0;
             setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
         }, 17000);
+
         // Lógica para el botón de instalación manual
-let deferredPrompt;
-const btnInstalarManual = document.getElementById('btnInstalarManual');
+        let deferredPrompt;
+        const btnInstalarManual = document.getElementById('btnInstalarManual');
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); // Evita que Chrome muestre su aviso automático
-    deferredPrompt = e;
-    // Mostramos nuestro botón personalizado
-    if(btnInstalarManual) btnInstalarManual.style.display = 'block';
-});
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if(btnInstalarManual) btnInstalarManual.style.display = 'block';
+        });
 
-if(btnInstalarManual) {
-    btnInstalarManual.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt(); // Muestra el aviso nativo de instalación
-            await deferredPrompt.userChoice; // Espera a que el usuario elija
-            deferredPrompt = null; // Limpiamos la variable
-            btnInstalarManual.style.display = 'none'; // Ocultamos el botón
-        } else {
-            alert("La app ya está instalada o tu navegador no permite instalarla desde aquí.");
+        if(btnInstalarManual) {
+            btnInstalarManual.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    btnInstalarManual.style.display = 'none';
+                } else {
+                    alert("La app ya está instalada o tu navegador no permite instalarla desde aquí.");
+                }
+            });
         }
-    });
-}
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
