@@ -58,6 +58,23 @@
         .dato-acciones button { flex: 1; padding: 8px; border: none; border-radius: 7px; font-size: 15px; cursor: pointer; }
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
+        /* Franja del clima */
+#widgetClima {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: #e3f2fd; /* Azul muy clarito */
+    border: 2px solid #90caf9;
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #0d47a1;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+}
+#widgetClima .icono-clima { font-size: 22px; }
     </style>
 </head>
 <body>
@@ -75,6 +92,10 @@
             </button>
         </div>
         <div id="mapa"></div>
+        <div id="widgetClima">
+    <span class="icono-clima" id="iconoClima">&#9728;&#65039;</span>
+    <span id="textoClima">Cargando clima...</span>
+</div>
         <div id="cajaMensaje">&#9989; Todo listo</div>
         <div class="fila-botones-accion">
             <button id="btnCompartir" class="boton-accion-cuadrado">
@@ -324,9 +345,31 @@
                 mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
                 if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
                 marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Estás aquí").openPopup();
+                obtenerClima(pos.coords.latitude, pos.coords.longitude);
                 cajaMensaje.textContent = "\u2705 Todo listo";
             }, () => cajaMensaje.textContent = "Activa ubicación en tu teléfono", {enableHighAccuracy: true, timeout:10000});
         }
+        function obtenerClima(lat, lng) {
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`)
+    .then(response => response.json())
+    .then(data => {
+        const temp = Math.round(data.current_weather.temperature);
+        const codigo = data.current_weather.weathercode;
+        
+        // Mapeo de códigos de clima a Emojis (usando Unicode para que no se rompa)
+        let emoji = '\u2600\uFE0F'; // Sol por defecto
+        if (codigo >= 95) emoji = '\u26C8\uFE0F'; // Tormenta
+        else if (codigo >= 71) emoji = '\u2744\uFE0F'; // Nieve
+        else if (codigo >= 51) emoji = '\uD83C\uDF27\uFE0F'; // Lluvia
+        else if (codigo >= 1) emoji = '\u26C5'; // Nublado
+        
+        const textoClima = `${emoji} Temperatura actual: ${temp}\u00B0C`;
+        
+        // Lo insertamos al principio del slider
+        mensajes.unshift(textoClima);
+    })
+    .catch(err => console.log('No se pudo cargar el clima'));
+}
 
         function iniciarVoz() {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -466,7 +509,7 @@
         btnCompartir.addEventListener('click', compartirUbicacion);
         btnLlegueBien.addEventListener('click', llegueBien);
 
-        const mensajes = [
+        let mensajes = [
             "Consejo: Manten\u00e9 presionado el bot\u00f3n de emergencia por 2 segundos.",
             "Toc\u00e1 el micr\u00f3fono y dec\u00ed 'Compartir' para enviar tu ubicaci\u00f3n.",
             "Record\u00e1 cargar la bater\u00eda de tu celular antes de salir a caminar.",
