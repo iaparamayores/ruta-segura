@@ -20,16 +20,13 @@
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
-        
-        /* MAPA GRANDE Y PROTAGONISTA */
         #mapa {
             flex: 1;
-            min-height: 280px; 
+            min-height: 280px;
             border-radius: 12px;
             border: 3px solid #999;
             z-index: 1;
         }
-        
         #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
         .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
         .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
@@ -43,16 +40,13 @@
         #espacioConsejos { height: 70px; background-color: #fff3e0; border: 2px dashed #ffb74d; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: 15px; color: #e65100; font-weight: bold; flex-shrink: 0; transition: opacity 0.3s ease-in-out; }
         footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
         .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
-        
         #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
         #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
-        #cerrarAjustes { background: #d32f2f; color: white; margin-top:15px; }
-        <button id="btnDebugInsert" style="background:#00695c; color:white;">ðŸ§ª Probar insert Supabase</button>
-        #botonSalir { background-color: #424242; color: white; }
+        #cerrarAjustes { background: #d32f2f !important; color: white !important; margin-top: 15px; }
+        #botonSalir { background-color: #424242 !important; color: white !important; }
         #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
         #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
-        
         .panel-datos { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 16px; z-index: 200; }
         .panel-datos.visible { display: flex; }
         .panel-datos-contenido { width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 5px 18px rgba(0,0,0,0.35); }
@@ -87,11 +81,11 @@
                 <span class="texto">AJUSTES</span>
             </button>
         </div>
-        
+
         <div id="mapa"></div>
-        
+
         <div id="cajaMensaje">&#9989; Todo listo</div>
-        
+
         <div class="fila-botones-accion">
             <button id="btnCompartir" class="boton-accion-cuadrado">
                 <span class="icono">&#128205;</span>
@@ -110,7 +104,7 @@
                 <span>Ir a...</span>
             </button>
         </div>
-        
+
         <div id="espacioConsejos">
             &#128161; Consejo: Manten&#233; presionado el bot&#243;n &#128681; por 2 segundos en caso de emergencia.
         </div>
@@ -119,25 +113,26 @@
 
     <div id="panelAjustes">
         <h3>&#128203; Mis Datos y Ayuda</h3>
-        <input type="text" id="inputDestino" placeholder="EscribÃ­ tu destino (ej: Plaza San MartÃ­n)">
+        <input type="text" id="inputDestino" placeholder="Escrib&#237; tu destino (ej: Plaza San Mart&#237;n)">
         <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
-        <button id="btnRuta">&#129517; Â¿CÃ“MO LLEGO A...?</button>
+        <button id="btnRuta">&#129517; &#191;C&#211;MO LLEGO A...?</button>
         <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
         <button id="btnLugares">&#128204; Mis Lugares guardados</button>
         <button id="btnContactos">&#128101; Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
         <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
         <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
-        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a PolicÃ­a / Emergencias</button>
+        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Polic&#237;a / Emergencias</button>
         <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
-        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos Ãºtiles:</p>
+        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos &#250;tiles:</p>
         <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
         <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
         <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
+        <button id="btnDebugInsert" style="background:#00695c; color:white;">&#129514; Probar insert Supabase</button>
         <button id="botonSalir" style="background:#424242; color:white;">&#128682; SALIR DE LA APP</button>
-        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicaciÃ³n en el celular</button>
+        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicaci&#243;n en el celular</button>
         <button id="cerrarAjustes" style="background:#d32f2f; color:white;">&#10060; Cerrar</button>
     </div>
 
@@ -149,7 +144,7 @@
             </div>
             <div class="form-datos">
                 <input type="text" id="inputDatoNombre" placeholder="Nombre" autocomplete="name">
-                <input type="text" id="inputDatoValor" placeholder="DirecciÃ³n o telÃ©fono" autocomplete="off">
+                <input type="text" id="inputDatoValor" placeholder="Direcci&#243;n o tel&#233;fono" autocomplete="off">
                 <button id="guardarDato" type="button">Guardar</button>
             </div>
             <div id="listaDatos"></div>
@@ -158,446 +153,451 @@
 
     <script>
     // --- SUPABASE (Ruta Segura) ---
-const SUPABASE_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const USER_ID = 'b42705d3-da0a-44a0-82c5-b06f5c42b33d';
-        const botonSOS = document.getElementById('botonSOS');
-        const progresoSOS = document.querySelector('.progreso-sos');
-        const botonVoz = document.getElementById('botonVoz');
-        const cajaMensaje = document.getElementById('cajaMensaje');
-        const btnCompartir = document.getElementById('btnCompartir');
-        const btnLlegueBien = document.getElementById('btnLlegueBien');
-        const botonAjustes = document.getElementById('botonAjustes');
-        const panelAjustes = document.getElementById('panelAjustes');
-        const cerrarAjustes = document.getElementById('cerrarAjustes');
-        const botonSalir = document.getElementById('botonSalir');
-        const btnRuta = document.getElementById('btnRuta');
-        const btnRutaRapida = document.getElementById('btnRutaRapida');
-        const btnSalud = document.getElementById('btnSalud');
-        const btnPolicia = document.getElementById('btnPolicia');
-        const btnHospital = document.getElementById('btnHospital');
-        const btnBanco = document.getElementById('btnBanco');
-        const btnSuper = document.getElementById('btnSuper');
-        const btnPlaza = document.getElementById('btnPlaza');
-        const btnLugares = document.getElementById('btnLugares');
-        const btnContactos = document.getElementById('btnContactos');
-        const btnLinterna = document.getElementById('btnLinterna');
-        const espacioConsejos = document.getElementById('espacioConsejos');
-        const inputDestino = document.getElementById('inputDestino');
-        const btnBuscarDestino = document.getElementById('btnBuscarDestino');
-        const panelDatos = document.getElementById('panelDatos');
-        const tituloDatos = document.getElementById('tituloDatos');
-        const cerrarDatos = document.getElementById('cerrarDatos');
-        const inputDatoNombre = document.getElementById('inputDatoNombre');
-        const inputDatoValor = document.getElementById('inputDatoValor');
-        const guardarDato = document.getElementById('guardarDato');
-        const listaDatos = document.getElementById('listaDatos');
-        
-        let miUbicacion = null, reconocimiento = null;
-        let temporizadorSOS = null, sosActivo = false;
-        let mapaLeaflet = null, marcadorUsuario = null;
-        let linternaActiva = false, linternaStream = null;
-        const CLAVE_LUGARES = 'rutaSegura_lugares_v1';
-        const CLAVE_CONTACTOS = 'rutaSegura_contactos_v1';
-        let tipoDatoActual = 'lugares';
+    const SUPABASE_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const USER_ID = 'b42705d3-da0a-44a0-82c5-b06f5c42b33d';
 
-        function claveDatosActual() {
-            return tipoDatoActual === 'lugares' ? CLAVE_LUGARES : CLAVE_CONTACTOS;
+    const botonSOS = document.getElementById('botonSOS');
+    const progresoSOS = document.querySelector('.progreso-sos');
+    const botonVoz = document.getElementById('botonVoz');
+    const cajaMensaje = document.getElementById('cajaMensaje');
+    const btnCompartir = document.getElementById('btnCompartir');
+    const btnLlegueBien = document.getElementById('btnLlegueBien');
+    const botonAjustes = document.getElementById('botonAjustes');
+    const panelAjustes = document.getElementById('panelAjustes');
+    const cerrarAjustes = document.getElementById('cerrarAjustes');
+    const botonSalir = document.getElementById('botonSalir');
+    const btnRuta = document.getElementById('btnRuta');
+    const btnRutaRapida = document.getElementById('btnRutaRapida');
+    const btnSalud = document.getElementById('btnSalud');
+    const btnPolicia = document.getElementById('btnPolicia');
+    const btnHospital = document.getElementById('btnHospital');
+    const btnBanco = document.getElementById('btnBanco');
+    const btnSuper = document.getElementById('btnSuper');
+    const btnPlaza = document.getElementById('btnPlaza');
+    const btnLugares = document.getElementById('btnLugares');
+    const btnContactos = document.getElementById('btnContactos');
+    const btnLinterna = document.getElementById('btnLinterna');
+    const espacioConsejos = document.getElementById('espacioConsejos');
+    const inputDestino = document.getElementById('inputDestino');
+    const btnBuscarDestino = document.getElementById('btnBuscarDestino');
+    const panelDatos = document.getElementById('panelDatos');
+    const tituloDatos = document.getElementById('tituloDatos');
+    const cerrarDatos = document.getElementById('cerrarDatos');
+    const inputDatoNombre = document.getElementById('inputDatoNombre');
+    const inputDatoValor = document.getElementById('inputDatoValor');
+    const guardarDato = document.getElementById('guardarDato');
+    const listaDatos = document.getElementById('listaDatos');
+
+    let miUbicacion = null, reconocimiento = null;
+    let temporizadorSOS = null, sosActivo = false;
+    let mapaLeaflet = null, marcadorUsuario = null;
+    let linternaActiva = false, linternaStream = null;
+    const CLAVE_LUGARES = 'rutaSegura_lugares_v1';
+    const CLAVE_CONTACTOS = 'rutaSegura_contactos_v1';
+    let tipoDatoActual = 'lugares';
+
+    function claveDatosActual() {
+        return tipoDatoActual === 'lugares' ? CLAVE_LUGARES : CLAVE_CONTACTOS;
+    }
+
+    function leerDatos(clave) {
+        try {
+            const datos = JSON.parse(localStorage.getItem(clave) || '[]');
+            return Array.isArray(datos) ? datos : [];
+        } catch (error) {
+            return [];
         }
+    }
 
-        function leerDatos(clave) {
-            try {
-                const datos = JSON.parse(localStorage.getItem(clave) || '[]');
-                return Array.isArray(datos) ? datos : [];
-            } catch (error) {
-                return [];
-            }
+    function guardarDatos(clave, datos) {
+        try {
+            localStorage.setItem(clave, JSON.stringify(datos));
+            return true;
+        } catch (error) {
+            alert('No se pudieron guardar los datos en este dispositivo.');
+            return false;
         }
+    }
 
-        function guardarDatos(clave, datos) {
-            try {
-                localStorage.setItem(clave, JSON.stringify(datos));
-                return true;
-            } catch (error) {
-                alert('No se pudieron guardar los datos en este dispositivo.');
-                return false;
-            }
+    function escaparHtml(valor) {
+        return String(valor).replace(/[&<>"']/g, caracter => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[caracter]));
+    }
+
+    function abrirPanelDatos(tipo) {
+        tipoDatoActual = tipo;
+        const esLugar = tipo === 'lugares';
+        tituloDatos.textContent = esLugar ? 'Mis Lugares guardados' : 'Contactos de confianza';
+        inputDatoNombre.placeholder = esLugar ? 'Nombre del lugar' : 'Nombre del contacto';
+        inputDatoValor.placeholder = esLugar ? 'Dirección o referencia' : 'Teléfono (ej.: 911)';
+        inputDatoValor.type = esLugar ? 'text' : 'tel';
+        inputDatoValor.inputMode = esLugar ? 'text' : 'tel';
+        guardarDato.textContent = esLugar ? 'Guardar lugar' : 'Guardar contacto';
+        panelDatos.classList.add('visible');
+        panelDatos.setAttribute('aria-hidden', 'false');
+        renderizarDatos();
+        setTimeout(() => inputDatoNombre.focus(), 0);
+    }
+
+    function cerrarPanelDatos() {
+        panelDatos.classList.remove('visible');
+        panelDatos.setAttribute('aria-hidden', 'true');
+        inputDatoNombre.value = '';
+        inputDatoValor.value = '';
+    }
+
+    function renderizarDatos() {
+        const datos = leerDatos(claveDatosActual());
+        const esLugar = tipoDatoActual === 'lugares';
+        if (!datos.length) {
+            listaDatos.innerHTML = esLugar
+                ? '<div class="dato-vacio">Todavía no guardaste ningún lugar.</div>'
+                : '<div class="dato-vacio">Todavía no guardaste ningún contacto.</div>';
+            return;
         }
+        listaDatos.innerHTML = datos.map((dato, indice) => `
+            <div class="dato-item">
+                <strong>${escaparHtml(dato.nombre)}</strong>
+                <small>${escaparHtml(dato.valor)}</small>
+                <div class="dato-acciones">
+                    <button type="button" class="btn-principal-dato" data-accion="usar" data-indice="${indice}">${esLugar ? 'Abrir ruta' : 'Llamar'}</button>
+                    <button type="button" class="btn-eliminar-dato" data-accion="eliminar" data-indice="${indice}">Eliminar</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function escaparHtml(valor) {
-            return String(valor).replace(/[&<>"']/g, caracter => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            }[caracter]));
+    function guardarDatoActual() {
+        const nombre = inputDatoNombre.value.trim();
+        const valor = inputDatoValor.value.trim();
+        if (!nombre || !valor) {
+            alert(tipoDatoActual === 'lugares' ? 'Completá el nombre y la dirección.' : 'Completá el nombre y el teléfono.');
+            return;
         }
-
-        function abrirPanelDatos(tipo) {
-            tipoDatoActual = tipo;
-            const esLugar = tipo === 'lugares';
-            tituloDatos.textContent = esLugar ? 'Mis Lugares guardados' : 'Contactos de confianza';
-            inputDatoNombre.placeholder = esLugar ? 'Nombre del lugar' : 'Nombre del contacto';
-            inputDatoValor.placeholder = esLugar ? 'DirecciÃ³n o referencia' : 'TelÃ©fono (ej.: 911)';
-            inputDatoValor.type = esLugar ? 'text' : 'tel';
-            inputDatoValor.inputMode = esLugar ? 'text' : 'tel';
-            guardarDato.textContent = esLugar ? 'Guardar lugar' : 'Guardar contacto';
-            panelDatos.classList.add('visible');
-            panelDatos.setAttribute('aria-hidden', 'false');
-            renderizarDatos();
-            setTimeout(() => inputDatoNombre.focus(), 0);
-        }
-
-        function cerrarPanelDatos() {
-            panelDatos.classList.remove('visible');
-            panelDatos.setAttribute('aria-hidden', 'true');
+        const datos = leerDatos(claveDatosActual());
+        datos.push({ nombre, valor });
+        if (guardarDatos(claveDatosActual(), datos)) {
             inputDatoNombre.value = '';
             inputDatoValor.value = '';
+            renderizarDatos();
+            cajaMensaje.textContent = tipoDatoActual === 'lugares' ? 'Lugar guardado.' : 'Contacto guardado.';
+            inputDatoNombre.focus();
         }
+    }
 
-        function renderizarDatos() {
-            const datos = leerDatos(claveDatosActual());
-            const esLugar = tipoDatoActual === 'lugares';
-            if (!datos.length) {
-                listaDatos.innerHTML = esLugar
-                    ? '<div class="dato-vacio">TodavÃ­a no guardaste ningÃºn lugar.</div>'
-                    : '<div class="dato-vacio">TodavÃ­a no guardaste ningÃºn contacto.</div>';
+    function usarDato(indice) {
+        const datos = leerDatos(claveDatosActual());
+        const dato = datos[indice];
+        if (!dato) return;
+        if (tipoDatoActual === 'lugares') {
+            window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dato.valor) + '&travelmode=walking', '_blank');
+            cajaMensaje.textContent = 'Abriendo ruta a ' + dato.nombre + '...';
+        } else {
+            const telefono = dato.valor.replace(/[^\d+]/g, '');
+            if (!telefono) {
+                alert('El teléfono guardado no es válido.');
                 return;
             }
-            listaDatos.innerHTML = datos.map((dato, indice) => `
-                <div class="dato-item">
-                    <strong>${escaparHtml(dato.nombre)}</strong>
-                    <small>${escaparHtml(dato.valor)}</small>
-                    <div class="dato-acciones">
-                        <button type="button" class="btn-principal-dato" data-accion="usar" data-indice="${indice}">${esLugar ? 'Abrir ruta' : 'Llamar'}</button>
-                        <button type="button" class="btn-eliminar-dato" data-accion="eliminar" data-indice="${indice}">Eliminar</button>
-                    </div>
-                </div>
-            `).join('');
+            window.location.href = 'tel:' + telefono;
         }
+    }
 
-        function guardarDatoActual() {
-            const nombre = inputDatoNombre.value.trim();
-            const valor = inputDatoValor.value.trim();
-            if (!nombre || !valor) {
-                alert(tipoDatoActual === 'lugares' ? 'CompletÃ¡ el nombre y la direcciÃ³n.' : 'CompletÃ¡ el nombre y el telÃ©fono.');
-                return;
-            }
-            const datos = leerDatos(claveDatosActual());
-            datos.push({ nombre, valor });
-            if (guardarDatos(claveDatosActual(), datos)) {
-                inputDatoNombre.value = '';
-                inputDatoValor.value = '';
-                renderizarDatos();
-                cajaMensaje.textContent = tipoDatoActual === 'lugares' ? 'Lugar guardado.' : 'Contacto guardado.';
-                inputDatoNombre.focus();
-            }
+    listaDatos.addEventListener('click', evento => {
+        const boton = evento.target.closest('button[data-accion]');
+        if (!boton) return;
+        const indice = Number(boton.dataset.indice);
+        if (boton.dataset.accion === 'usar') {
+            usarDato(indice);
+            return;
         }
-
-        function usarDato(indice) {
-            const datos = leerDatos(claveDatosActual());
-            const dato = datos[indice];
-            if (!dato) return;
-            if (tipoDatoActual === 'lugares') {
-                window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(dato.valor) + '&travelmode=walking', '_blank');
-                cajaMensaje.textContent = 'Abriendo ruta a ' + dato.nombre + '...';
-            } else {
-                const telefono = dato.valor.replace(/[^\d+]/g, '');
-                if (!telefono) {
-                    alert('El telÃ©fono guardado no es vÃ¡lido.');
-                    return;
-                }
-                window.location.href = 'tel:' + telefono;
-            }
+        const datos = leerDatos(claveDatosActual());
+        const dato = datos[indice];
+        if (dato && confirm('¿Eliminar "' + dato.nombre + '"?')) {
+            datos.splice(indice, 1);
+            guardarDatos(claveDatosActual(), datos);
+            renderizarDatos();
         }
-
-        listaDatos.addEventListener('click', evento => {
-            const boton = evento.target.closest('button[data-accion]');
-            if (!boton) return;
-            const indice = Number(boton.dataset.indice);
-            if (boton.dataset.accion === 'usar') {
-                usarDato(indice);
-                return;
-            }
-            const datos = leerDatos(claveDatosActual());
-            const dato = datos[indice];
-            if (dato && confirm('Â¿Eliminar "' + dato.nombre + '"?')) {
-                datos.splice(indice, 1);
-                guardarDatos(claveDatosActual(), datos);
-                renderizarDatos();
-            }
-        });
-
-document.getElementById('btnDebugInsert').addEventListener('click', async () => {
-    cajaMensaje.textContent = 'â³ Probando insert...';
-    const { data, error } = await sb.from('ubicaciones_ruta').insert({
-        user_id: USER_ID, lat: -37.34, lon: -57.03, precision: 10
-    }).select();
-    if (error) cajaMensaje.textContent = 'âŒ Insert error: ' + error.message;
-    else cajaMensaje.textContent = 'âœ… Insert OK, id=' + (data && data[0] ? data[0].id : '?');
-});
-        function inicializarMapa() {
-            mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(mapaLeaflet);
-        }
-
-        function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
-        function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
-        botonSOS.addEventListener('mousedown', iniciarSOS);
-        botonSOS.addEventListener('touchstart', e=>{e.preventDefault(); iniciarSOS();}, {passive:false});
-        botonSOS.addEventListener('mouseup', cancelarSOS);
-        botonSOS.addEventListener('touchend', cancelarSOS);
-        botonSOS.addEventListener('mouseleave', cancelarSOS);
-
-        function iniciarUbicacion() {
-            if (!navigator.geolocation) { cajaMensaje.textContent = "Navegador no compatible"; return; }
-            cajaMensaje.textContent = "Buscando tu ubicaciÃ³n...";
-            navigator.geolocation.getCurrentPosition(pos => {
-                miUbicacion = pos.coords;
-                mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-                marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; EstÃ¡s aquÃ­").openPopup();
-                cajaMensaje.textContent = "\u2705 Todo listo";
-            }, () => cajaMensaje.textContent = "Activa ubicaciÃ³n en tu telÃ©fono", {enableHighAccuracy: true, timeout:10000});
-        }
-
-        function iniciarVoz() {
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!window.SpeechRecognition) { cajaMensaje.textContent = "Usa Chrome/Android para voz"; return; }
-            if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); return; }
-            reconocimiento = new window.SpeechRecognition();
-            reconocimiento.lang = 'es-ES'; reconocimiento.continuous = false; reconocimiento.interimResults = false;
-            reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = "Te escucho... decÃ­ tu comando"; };
-            reconocimiento.onresult = e => {
-                cajaMensaje.innerHTML = '&#9989; Dijiste: <strong>"' + e.results[0][0].transcript.toLowerCase() + '"</strong>';
-                procesarComando(e.results[0][0].transcript.toLowerCase());
-                botonVoz.classList.remove('escuchando'); reconocimiento = null;
-            };
-            reconocimiento.onerror = () => { botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "No te escuchÃ© bien. IntentÃ¡ de nuevo."; reconocimiento = null; };
-            reconocimiento.onend = () => { botonVoz.classList.remove('escuchando'); reconocimiento = null; };
-            reconocimiento.start();
-            setTimeout(() => { if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "Se acabÃ³ el tiempo. TocÃ¡ el micrÃ³fono de nuevo."; reconocimiento = null; } }, 8000);
-        }
-
-        function procesarComando(texto) {
-            const lugares = { 'hospital': 'hospital cerca de mi', 'farmacia': 'farmacia cerca de mi', 'policia': 'comisaria cerca de mi', 'banco': 'banco cerca de mi', 'supermercado': 'supermercado cerca de mi', 'plaza': 'plaza cerca de mi', 'iglesia': 'iglesia cerca de mi', 'salud': 'centro de salud cerca de mi' };
-            let encontroLugar = false;
-            for (const [clave, busqueda] of Object.entries(lugares)) {
-                if (texto.includes(clave)) {
-                    window.open('https://www.google.com/maps/search/' + encodeURIComponent(busqueda), '_blank');
-                    encontroLugar = true; cajaMensaje.innerHTML = '&#128269; Buscando <strong>' + busqueda + '</strong> en el mapa...'; break;
-                }
-            }
-            if (!encontroLugar) {
-                if (texto.includes("camino") || texto.includes("llegar") || texto.includes("ruta") || texto.includes("ir a")) {
-                    panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
-                    cajaMensaje.innerHTML += '<br>EscribÃ­ o decÃ­ tu destino especÃ­fico';
-                } else if (texto.includes("compartir")) { compartirUbicacion(); }
-                else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) { activarSOS(); }
-                else if (texto.includes("llegue") || texto.includes("casa")) { llegueBien(); }
-                else if (texto.includes("llamar")) { if(confirm("QuerÃ©s hacer una llamada?")) window.location.href = "tel:"; }
-                else { window.open('https://www.google.com/maps/search/' + encodeURIComponent(texto), '_blank'); cajaMensaje.innerHTML = '&#128269; Buscando "<strong>' + texto + '</strong>" en el mapa...'; }
-            }
-        }
-
-        function compartirUbicacion() {
-            if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaciÃ³n aÃºn"; return; }
-            window.open('https://wa.me/?text=' + encodeURIComponent('Mi ubicaciÃ³n: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
-            cajaMensaje.textContent = "Abriendo WhatsApp...";
-        }
-
-        function llegueBien() {
-            if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaciÃ³n aÃºn"; return; }
-            window.open('https://wa.me/?text=' + encodeURIComponent('Hola! LleguÃ© bien a casa. Mi ubicaciÃ³n: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
-            cajaMensaje.textContent = "Abriendo WhatsApp...";
-        }
-
-        // Datos de tu contacto de confianza (Lili) - configuralos una vez
-const EMAIL_FAMILIAR = 'puertocolibri@gmail.com';
-const TEL_FAMILIAR = '5491150617831'; // nÃºmero de WhatsApp de Lili: 549 + nÃºmero sin 0 ni 15
-
-async function activarSOS() {
-    if (!confirm("Â¡ATENCIÃ“N! Â¿Activar emergencia? Se avisarÃ¡ a tu contacto de confianza con tu ubicaciÃ³n.")) return;
-    cajaMensaje.textContent = "ðŸš¨ SOS ACTIVADO - Avisando a tu contacto...";
-    let lat = null, lon = null;
-    if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-    const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaciÃ³n)';
-
-    // 1) Guardar el evento en la nube
-    try {
-        await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
-    } catch (e) { console.error('Error subiendo SOS:', e); }
-
-    // 2) Mandar email al familiar
-    try {
-        await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({
-                _subject: 'ðŸš¨ SOS Ruta Segura - ' + new Date().toLocaleString(),
-                mensaje: 'Se activÃ³ el botÃ³n de emergencia de Ruta Segura.',
-                ubicacion: mapaLink
-            })
-        });
-    } catch (e) { console.error('Error enviando email:', e); }
-
-    // 3) Abrir WhatsApp con el mensaje listo
-    window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('ðŸš¨ EMERGENCIA Ruta Segura: se activÃ³ el botÃ³n SOS. UbicaciÃ³n: ' + mapaLink), '_blank');
-
-    cajaMensaje.textContent = "âœ… SOS enviado. Avisamos a tu contacto con tu ubicaciÃ³n.";
-}
-
-        async function toggleLinterna() {
-            try {
-                if (!linternaActiva) {
-                    linternaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                    const track = linternaStream.getVideoTracks()[0];
-                    if (track.getCapabilities().torch) {
-                        await track.applyConstraints({ advanced: [{ torch: true }] });
-                        linternaActiva = true; cajaMensaje.textContent = "Linterna encendida"; btnLinterna.textContent = "Apagar linterna";
-                    } else { alert("Tu dispositivo no soporta linterna"); linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; }
-                } else {
-                    linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; linternaActiva = false;
-                    cajaMensaje.textContent = "Linterna apagada"; btnLinterna.textContent = "Linterna";
-                }
-            } catch (e) { alert("No se pudo activar la linterna. VerificÃ¡ los permisos de cÃ¡mara."); }
-        }
-
-        btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
-        btnPolicia.addEventListener('click', () => { if(confirm("QuerÃ©s llamar ahora al nÃºmero de emergencias?")) window.location.href = "tel:911"; });
-        btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
-        btnBanco.addEventListener('click', () => window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank'));
-        btnSuper.addEventListener('click', () => window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank'));
-        btnPlaza.addEventListener('click', () => window.open('https://www.google.com/maps/search/plaza+o+iglesia+cerca+de+mi', '_blank'));
-        btnLinterna.addEventListener('click', toggleLinterna);
-        btnLugares.addEventListener('click', () => abrirPanelDatos('lugares'));
-        btnContactos.addEventListener('click', () => abrirPanelDatos('contactos'));
-        cerrarDatos.addEventListener('click', cerrarPanelDatos);
-        guardarDato.addEventListener('click', guardarDatoActual);
-        inputDatoValor.addEventListener('keydown', evento => { if (evento.key === 'Enter') guardarDatoActual(); });
-        panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
-        
-        botonSalir.addEventListener('click', () => {
-            if(confirm("Seguro que querÃ©s salir de Ruta Segura?")) {
-                cajaMensaje.textContent = "Gracias por usar Ruta Segura. Â¡Cuidate!";
-                setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
-            }
-        });
-
-        botonAjustes.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; });
-        cerrarAjustes.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = ''; });
-        
-        btnRuta.addEventListener('click', () => {
-            inputDestino.style.display = 'block';
-            btnBuscarDestino.style.display = 'block';
-            inputDestino.focus();
-            inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
-            cajaMensaje.textContent = "\ud83e\udded EscribÃ­ tu destino y tocÃ¡ 'Buscar ruta'";
-            inputDestino.onkeypress = function(e) {
-                if(e.key === 'Enter') {
-                    btnBuscarDestino.click();
-                }
-            };
-        });
-        
-        btnBuscarDestino.addEventListener('click', () => {
-            const destino = inputDestino.value.trim();
-            if (destino) {
-                window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destino) + '&travelmode=walking', '_blank');
-                panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = '';
-            } else { alert("EscribÃ­ un destino primero"); }
-        });
-        
-        btnRutaRapida.addEventListener('click', () => {
-            panelAjustes.style.display = 'block';
-            inputDestino.style.display = 'block';
-            btnBuscarDestino.style.display = 'block';
-            inputDestino.focus();
-            inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San MartÃ­n...";
-            cajaMensaje.textContent = "\u270f\ufe0f EscribÃ­ el destino y tocÃ¡ 'Buscar ruta' o presionÃ¡ Enter";
-            inputDestino.onkeypress = function(e) {
-                if(e.key === 'Enter') {
-                    btnBuscarDestino.click();
-                }
-            };
-        });
-
-function subirUbicacionPeriodica() {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async pos => {
-        miUbicacion = pos.coords;
-        try {
-            await sb.from('ubicaciones_ruta').insert({
-                user_id: USER_ID,
-                lat: pos.coords.latitude,
-                lon: pos.coords.longitude,
-                precision: pos.coords.accuracy
-            });
-            console.log('UbicaciÃ³n subida a la nube');
- } catch (e) { cajaMensaje.textContent = 'âŒ Error insert: ' + e.message; }
-}, (err) => { cajaMensaje.textContent = 'âŒ Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
-}
-        window.addEventListener('load', () => {
-    inicializarMapa();
-    iniciarUbicacion();
-    subirUbicacionPeriodica();
-    setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
-    // Test de conexiÃ³n a Supabase (debug visible)
-    sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
-        if (res.error) cajaMensaje.textContent = 'âŒ Supabase error: ' + res.error.message;
-        else console.log('âœ… Supabase conectado');
     });
-});
-        botonVoz.addEventListener('click', iniciarVoz);
-        btnCompartir.addEventListener('click', compartirUbicacion);
-        btnLlegueBien.addEventListener('click', llegueBien);
 
-        let mensajes = [
-            "Consejo: Manten\u00e9 presionado el bot\u00f3n de emergencia por 2 segundos.",
-            "Toc\u00e1 el micr\u00f3fono y dec\u00ed 'Compartir' para enviar tu ubicaci\u00f3n.",
-            "Record\u00e1 cargar la bater\u00eda de tu celular antes de salir a caminar.",
-            "Conoc\u00e9 nuestras otras apps educativas en: Cursos IA para Mayores.",
-            "Caminar 20 minutos al d\u00eda mejora tu salud y tu \u00e1nimo. \u00a1Vos pod\u00e9s!",
-            "En el men\u00fa Ajustes ten\u00e9s acceso directo a hospitales y farmacias.",
-            "El modo avi\u00f3n gasta menos bater\u00eda. Usalo si necesit\u00e1s ahorrar."
-        ];
-        let indiceMensaje = 0;
-        setInterval(() => {
-            indiceMensaje = (indiceMensaje + 1) % mensajes.length;
-            espacioConsejos.style.opacity = 0;
-            setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
-        }, 17000);
+    function inicializarMapa() {
+        mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(mapaLeaflet);
+    }
 
-        // LÃ³gica para el botÃ³n de instalaciÃ³n manual
-        let deferredPrompt;
-        const btnInstalarManual = document.getElementById('btnInstalarManual');
+    function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
+    function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
+    botonSOS.addEventListener('mousedown', iniciarSOS);
+    botonSOS.addEventListener('touchstart', e=>{e.preventDefault(); iniciarSOS();}, {passive:false});
+    botonSOS.addEventListener('mouseup', cancelarSOS);
+    botonSOS.addEventListener('touchend', cancelarSOS);
+    botonSOS.addEventListener('mouseleave', cancelarSOS);
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if(btnInstalarManual) btnInstalarManual.style.display = 'block';
+    function iniciarUbicacion() {
+        if (!navigator.geolocation) { cajaMensaje.textContent = "Navegador no compatible"; return; }
+        cajaMensaje.textContent = "Buscando tu ubicación...";
+        navigator.geolocation.getCurrentPosition(pos => {
+            miUbicacion = pos.coords;
+            mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
+            if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+            marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Estás aquí").openPopup();
+            cajaMensaje.textContent = "\u2705 Todo listo";
+        }, () => cajaMensaje.textContent = "Activa ubicación en tu teléfono", {enableHighAccuracy: true, timeout:10000});
+    }
+
+    function iniciarVoz() {
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!window.SpeechRecognition) { cajaMensaje.textContent = "Usa Chrome/Android para voz"; return; }
+        if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); return; }
+        reconocimiento = new window.SpeechRecognition();
+        reconocimiento.lang = 'es-ES'; reconocimiento.continuous = false; reconocimiento.interimResults = false;
+        reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = "Te escucho... decí tu comando"; };
+        reconocimiento.onresult = e => {
+            cajaMensaje.innerHTML = '&#9989; Dijiste: <strong>"' + e.results[0][0].transcript.toLowerCase() + '"</strong>';
+            procesarComando(e.results[0][0].transcript.toLowerCase());
+            botonVoz.classList.remove('escuchando'); reconocimiento = null;
+        };
+        reconocimiento.onerror = () => { botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "No te escuché bien. Intentá de nuevo."; reconocimiento = null; };
+        reconocimiento.onend = () => { botonVoz.classList.remove('escuchando'); reconocimiento = null; };
+        reconocimiento.start();
+        setTimeout(() => { if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "Se acabó el tiempo. Tocá el micrófono de nuevo."; reconocimiento = null; } }, 8000);
+    }
+
+    function procesarComando(texto) {
+        const lugares = { 'hospital': 'hospital cerca de mi', 'farmacia': 'farmacia cerca de mi', 'policia': 'comisaria cerca de mi', 'banco': 'banco cerca de mi', 'supermercado': 'supermercado cerca de mi', 'plaza': 'plaza cerca de mi', 'iglesia': 'iglesia cerca de mi', 'salud': 'centro de salud cerca de mi' };
+        let encontroLugar = false;
+        for (const [clave, busqueda] of Object.entries(lugares)) {
+            if (texto.includes(clave)) {
+                window.open('https://www.google.com/maps/search/' + encodeURIComponent(busqueda), '_blank');
+                encontroLugar = true; cajaMensaje.innerHTML = '&#128269; Buscando <strong>' + busqueda + '</strong> en el mapa...'; break;
+            }
+        }
+        if (!encontroLugar) {
+            if (texto.includes("camino") || texto.includes("llegar") || texto.includes("ruta") || texto.includes("ir a")) {
+                panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
+                cajaMensaje.innerHTML += '<br>Escribí o decí tu destino específico';
+            } else if (texto.includes("compartir")) { compartirUbicacion(); }
+            else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) { activarSOS(); }
+            else if (texto.includes("llegue") || texto.includes("casa")) { llegueBien(); }
+            else if (texto.includes("llamar")) { if(confirm("Querés hacer una llamada?")) window.location.href = "tel:"; }
+            else { window.open('https://www.google.com/maps/search/' + encodeURIComponent(texto), '_blank'); cajaMensaje.innerHTML = '&#128269; Buscando "<strong>' + texto + '</strong>" en el mapa...'; }
+        }
+    }
+
+    function compartirUbicacion() {
+        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicación aún"; return; }
+        window.open('https://wa.me/?text=' + encodeURIComponent('Mi ubicación: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
+        cajaMensaje.textContent = "Abriendo WhatsApp...";
+    }
+
+    function llegueBien() {
+        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicación aún"; return; }
+        window.open('https://wa.me/?text=' + encodeURIComponent('Hola! Llegué bien a casa. Mi ubicación: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
+        cajaMensaje.textContent = "Abriendo WhatsApp...";
+    }
+
+    // Datos de tu contacto de confianza (Lili)
+    const EMAIL_FAMILIAR = 'puertocolibri@gmail.com';
+    const TEL_FAMILIAR = '5491150617831';
+
+    async function activarSOS() {
+        if (!confirm("¡ATENCIÓN! ¿Activar emergencia? Se avisará a tu contacto de confianza con tu ubicación.")) return;
+        cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
+        let lat = null, lon = null;
+        if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
+        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
+
+        // 1) Guardar el evento en la nube
+        try {
+            await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
+        } catch (e) { console.error('Error subiendo SOS:', e); }
+
+        // 2) Mandar email al familiar
+        try {
+            await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
+                    mensaje: 'Se activó el botón de emergencia de Ruta Segura.',
+                    ubicacion: mapaLink
+                })
+            });
+        } catch (e) { console.error('Error enviando email:', e); }
+
+        // 3) Abrir WhatsApp con el mensaje listo
+        window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('\ud83d\udea8 EMERGENCIA Ruta Segura: se activó el botón SOS. Ubicación: ' + mapaLink), '_blank');
+
+        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicación.";
+    }
+
+    async function toggleLinterna() {
+        try {
+            if (!linternaActiva) {
+                linternaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                const track = linternaStream.getVideoTracks()[0];
+                if (track.getCapabilities().torch) {
+                    await track.applyConstraints({ advanced: [{ torch: true }] });
+                    linternaActiva = true; cajaMensaje.textContent = "Linterna encendida"; btnLinterna.textContent = "Apagar linterna";
+                } else { alert("Tu dispositivo no soporta linterna"); linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; }
+            } else {
+                linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; linternaActiva = false;
+                cajaMensaje.textContent = "Linterna apagada"; btnLinterna.textContent = "Linterna";
+            }
+        } catch (e) { alert("No se pudo activar la linterna. Verificá los permisos de cámara."); }
+    }
+
+    function subirUbicacionPeriodica() {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(async pos => {
+            miUbicacion = pos.coords;
+            try {
+                await sb.from('ubicaciones_ruta').insert({
+                    user_id: USER_ID,
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude,
+                    precision: pos.coords.accuracy
+                });
+                console.log('Ubicación subida a la nube');
+            } catch (e) { cajaMensaje.textContent = '\u274c Error insert: ' + e.message; }
+        }, (err) => { cajaMensaje.textContent = '\u274c Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
+    }
+
+    // Botón de prueba: inserta coordenadas fijas sin depender del GPS
+    document.getElementById('btnDebugInsert').addEventListener('click', async () => {
+        cajaMensaje.textContent = '\u23f3 Probando insert...';
+        const { data, error } = await sb.from('ubicaciones_ruta').insert({
+            user_id: USER_ID, lat: -37.34, lon: -57.03, precision: 10
+        }).select();
+        if (error) cajaMensaje.textContent = '\u274c Insert error: ' + error.message;
+        else cajaMensaje.textContent = '\u2705 Insert OK, id=' + (data && data[0] ? data[0].id : '?');
+    });
+
+    btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
+    btnPolicia.addEventListener('click', () => { if(confirm("Querés llamar ahora al número de emergencias?")) window.location.href = "tel:911"; });
+    btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
+    btnBanco.addEventListener('click', () => window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank'));
+    btnSuper.addEventListener('click', () => window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank'));
+    btnPlaza.addEventListener('click', () => window.open('https://www.google.com/maps/search/plaza+o+iglesia+cerca+de+mi', '_blank'));
+    btnLinterna.addEventListener('click', toggleLinterna);
+    btnLugares.addEventListener('click', () => abrirPanelDatos('lugares'));
+    btnContactos.addEventListener('click', () => abrirPanelDatos('contactos'));
+    cerrarDatos.addEventListener('click', cerrarPanelDatos);
+    guardarDato.addEventListener('click', guardarDatoActual);
+    inputDatoValor.addEventListener('keydown', evento => { if (evento.key === 'Enter') guardarDatoActual(); });
+    panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
+
+    botonSalir.addEventListener('click', () => {
+        if(confirm("Seguro que querés salir de Ruta Segura?")) {
+            cajaMensaje.textContent = "Gracias por usar Ruta Segura. ¡Cuidate!";
+            setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
+        }
+    });
+
+    botonAjustes.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; });
+    cerrarAjustes.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = ''; });
+
+    btnRuta.addEventListener('click', () => {
+        inputDestino.style.display = 'block';
+        btnBuscarDestino.style.display = 'block';
+        inputDestino.focus();
+        inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
+        cajaMensaje.textContent = "\ud83e\udded Escribí tu destino y tocá 'Buscar ruta'";
+        inputDestino.onkeypress = function(e) {
+            if(e.key === 'Enter') {
+                btnBuscarDestino.click();
+            }
+        };
+    });
+
+    btnBuscarDestino.addEventListener('click', () => {
+        const destino = inputDestino.value.trim();
+        if (destino) {
+            window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destino) + '&travelmode=walking', '_blank');
+            panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = '';
+        } else { alert("Escribí un destino primero"); }
+    });
+
+    btnRutaRapida.addEventListener('click', () => {
+        panelAjustes.style.display = 'block';
+        inputDestino.style.display = 'block';
+        btnBuscarDestino.style.display = 'block';
+        inputDestino.focus();
+        inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
+        cajaMensaje.textContent = "\u270f\ufe0f Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
+        inputDestino.onkeypress = function(e) {
+            if(e.key === 'Enter') {
+                btnBuscarDestino.click();
+            }
+        };
+    });
+
+    window.addEventListener('load', () => {
+        inicializarMapa();
+        iniciarUbicacion();
+        subirUbicacionPeriodica();
+        setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
+        // Test de conexión a Supabase (debug visible)
+        sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
+            if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message;
+            else console.log('\u2705 Supabase conectado');
         });
+    });
 
-        if(btnInstalarManual) {
-            btnInstalarManual.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    btnInstalarManual.style.display = 'none';
-                } else {
-                    alert("La app ya estÃ¡ instalada o tu navegador no permite instalarla desde aquÃ­.");
-                }
-            });
-        }
+    botonVoz.addEventListener('click', iniciarVoz);
+    btnCompartir.addEventListener('click', compartirUbicacion);
+    btnLlegueBien.addEventListener('click', llegueBien);
 
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err));
-            });
-        }
+    let mensajes = [
+        "Consejo: Manten\u00e9 presionado el bot\u00f3n de emergencia por 2 segundos.",
+        "Toc\u00e1 el micr\u00f3fono y decí 'Compartir' para enviar tu ubicación.",
+        "Record\u00e1 cargar la bater\u00eda de tu celular antes de salir a caminar.",
+        "Conoc\u00e9 nuestras otras apps educativas en: Cursos IA para Mayores.",
+        "Caminar 20 minutos al d\u00eda mejora tu salud y tu \u00e1nimo. \u00a1Vos pod\u00e9s!",
+        "En el men\u00fa Ajustes ten\u00e9s acceso directo a hospitales y farmacias.",
+        "El modo avi\u00f3n gasta menos bater\u00eda. Usalo si necesit\u00e1s ahorrar."
+    ];
+    let indiceMensaje = 0;
+    setInterval(() => {
+        indiceMensaje = (indiceMensaje + 1) % mensajes.length;
+        espacioConsejos.style.opacity = 0;
+        setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
+    }, 17000);
+
+    // Lógica para el botón de instalación manual
+    let deferredPrompt;
+    const btnInstalarManual = document.getElementById('btnInstalarManual');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if(btnInstalarManual) btnInstalarManual.style.display = 'block';
+    });
+
+    if(btnInstalarManual) {
+        btnInstalarManual.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                btnInstalarManual.style.display = 'none';
+            } else {
+                alert("La app ya está instalada o tu navegador no permite instalarla desde aquí.");
+            }
+        });
+    }
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err));
+        });
+    }
     </script>
 </body>
 </html>
