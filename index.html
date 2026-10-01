@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#1976d2">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
         html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
@@ -155,6 +156,11 @@
     </div>
 
     <script>
+    // --- SUPABASE (Ruta Segura) ---
+const SUPABASE_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const USER_ID = 'b42705d3-da0a-44a0-82c5-b06f5c42b33d';
         const botonSOS = document.getElementById('botonSOS');
         const progresoSOS = document.querySelector('.progreso-sos');
         const botonVoz = document.getElementById('botonVoz');
@@ -399,11 +405,40 @@
             cajaMensaje.textContent = "Abriendo WhatsApp...";
         }
 
-        function activarSOS() {
-            if (confirm("¡ATENCIÓN! ¿Activar emergencia? Se avisará a tus contactos de confianza con tu ubicación.")) {
-                cajaMensaje.textContent = "SOS ACTIVADO - Avisando a contactos";
-            }
-        }
+        // Datos de tu contacto de confianza (Lili) - configuralos una vez
+const EMAIL_FAMILIAR = 'puertocolibri@gmail.com';
+const TEL_FAMILIAR = '5491150617831'; // número de WhatsApp de Lili: 549 + número sin 0 ni 15
+
+async function activarSOS() {
+    if (!confirm("¡ATENCIÓN! ¿Activar emergencia? Se avisará a tu contacto de confianza con tu ubicación.")) return;
+    cajaMensaje.textContent = "🚨 SOS ACTIVADO - Avisando a tu contacto...";
+    let lat = null, lon = null;
+    if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
+    const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
+
+    // 1) Guardar el evento en la nube
+    try {
+        await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
+    } catch (e) { console.error('Error subiendo SOS:', e); }
+
+    // 2) Mandar email al familiar
+    try {
+        await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                _subject: '🚨 SOS Ruta Segura - ' + new Date().toLocaleString(),
+                mensaje: 'Se activó el botón de emergencia de Ruta Segura.',
+                ubicacion: mapaLink
+            })
+        });
+    } catch (e) { console.error('Error enviando email:', e); }
+
+    // 3) Abrir WhatsApp con el mensaje listo
+    window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('🚨 EMERGENCIA Ruta Segura: se activó el botón SOS. Ubicación: ' + mapaLink), '_blank');
+
+    cajaMensaje.textContent = "✅ SOS enviado. Avisamos a tu contacto con tu ubicación.";
+}
 
         async function toggleLinterna() {
             try {
@@ -480,7 +515,27 @@
             };
         });
 
-        window.addEventListener('load', () => { inicializarMapa(); iniciarUbicacion(); });
+function subirUbicacionPeriodica() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(async pos => {
+        miUbicacion = pos.coords;
+        try {
+            await sb.from('ubicaciones_ruta').insert({
+                user_id: USER_ID,
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude,
+                precision: pos.coords.accuracy
+            });
+            console.log('Ubicación subida a la nube');
+        } catch (e) { console.error('Error subiendo ubicación:', e); }
+    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
+}
+        window.addEventListener('load', () => {
+    inicializarMapa();
+    iniciarUbicacion();
+    subirUbicacionPeriodica();
+    setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
+});
         botonVoz.addEventListener('click', iniciarVoz);
         btnCompartir.addEventListener('click', compartirUbicacion);
         btnLlegueBien.addEventListener('click', llegueBien);
