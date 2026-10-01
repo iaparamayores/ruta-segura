@@ -527,14 +527,19 @@ function subirUbicacionPeriodica() {
                 precision: pos.coords.accuracy
             });
             console.log('Ubicación subida a la nube');
-        } catch (e) { console.error('Error subiendo ubicación:', e); }
-    }, () => {}, { enableHighAccuracy: true, timeout: 10000 });
+ } catch (e) { cajaMensaje.textContent = '❌ Error insert: ' + e.message; }
+}, (err) => { cajaMensaje.textContent = '❌ Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
 }
         window.addEventListener('load', () => {
     inicializarMapa();
     iniciarUbicacion();
     subirUbicacionPeriodica();
     setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
+    // Test de conexión a Supabase (debug visible)
+    sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
+        if (res.error) cajaMensaje.textContent = '❌ Supabase error: ' + res.error.message;
+        else console.log('✅ Supabase conectado');
+    });
 });
         botonVoz.addEventListener('click', iniciarVoz);
         btnCompartir.addEventListener('click', compartirUbicacion);
