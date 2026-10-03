@@ -420,35 +420,39 @@
     const TEL_FAMILIAR = '5491150617831';
 
     async function activarSOS() {
-        if (!confirm("¡ATENCIÓN! ¿Activar emergencia? Se avisará a tu contacto de confianza con tu ubicación.")) return;
-        cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
-        let lat = null, lon = null;
-        if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
+            if (!confirm("\u00a1ATENCI\u00d3N! \u00bfActivar emergencia? Se avisar\u00e1 a tu contacto de confianza con tu ubicaci\u00f3n.")) return;
+            cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
+            let lat = null, lon = null;
+            if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
+            const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci\u00f3n)';
 
-        // 1) Guardar el evento en la nube
-        try {
-            await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
-        } catch (e) { console.error('Error subiendo SOS:', e); }
+            // 1) Guardar el evento en la nube
+            try {
+                await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
+            } catch (e) { console.error('Error subiendo SOS:', e); }
 
-        // 2) Mandar email al familiar
-        try {
-            await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({
-                    _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
-                    mensaje: 'Se activó el botón de emergencia de Ruta Segura.',
-                    ubicacion: mapaLink
-                })
-            });
-        } catch (e) { console.error('Error enviando email:', e); }
+            // 2) Mandar email al familiar (FormSubmit)
+            try {
+                await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
+                        mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.',
+                        ubicacion: mapaLink
+                    })
+                });
+            } catch (e) { console.error('Error enviando email:', e); }
 
-        // 3) Abrir WhatsApp con el mensaje listo
-        window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('\ud83d\udea8 EMERGENCIA Ruta Segura: se activó el botón SOS. Ubicación: ' + mapaLink), '_blank');
+            // 3) PUSH instant\u00e1neo al familiar v\u00eda rapid-responder (clave segura en Supabase)
+            try {
+                await sb.functions.invoke('rapid-responder', { body: { lat: lat, lon: lon } });
+            } catch (e) { console.error('Error enviando push:', e); }
 
-        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicación.";
-    }
+            // 4) Ya NO abrimos WhatsApp autom\u00e1tico: menos fricci\u00f3n en emergencia.
+
+            cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
+        }
 
     async function toggleLinterna() {
         try {
