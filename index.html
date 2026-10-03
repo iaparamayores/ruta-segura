@@ -9,6 +9,19 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- OneSignal Web Push -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(function(OneSignal) {
+        OneSignal.init({
+          appId: "10eb2bda-39cd-4d03-8a38-422f7313c3f9",
+          serviceWorkerPath: "/ruta-segura/OneSignalSDKWorker.js",
+          serviceWorkerUpdaterPath: "/ruta-segura/OneSignalSDKUpdaterWorker.js",
+          allowLocalhostAsSecureOrigin: false
+        });
+      });
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
         html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
@@ -236,7 +249,7 @@
         const esLugar = tipo === 'lugares';
         tituloDatos.textContent = esLugar ? 'Mis Lugares guardados' : 'Contactos de confianza';
         inputDatoNombre.placeholder = esLugar ? 'Nombre del lugar' : 'Nombre del contacto';
-        inputDatoValor.placeholder = esLugar ? 'DirecciÛn o referencia' : 'TelÈfono (ej.: 911)';
+        inputDatoValor.placeholder = esLugar ? 'Direcci√≥n o referencia' : 'Tel√©fono (ej.: 911)';
         inputDatoValor.type = esLugar ? 'text' : 'tel';
         inputDatoValor.inputMode = esLugar ? 'text' : 'tel';
         guardarDato.textContent = esLugar ? 'Guardar lugar' : 'Guardar contacto';
@@ -258,8 +271,8 @@
         const esLugar = tipoDatoActual === 'lugares';
         if (!datos.length) {
             listaDatos.innerHTML = esLugar
-                ? '<div class="dato-vacio">TodavÌa no guardaste ning˙n lugar.</div>'
-                : '<div class="dato-vacio">TodavÌa no guardaste ning˙n contacto.</div>';
+                ? '<div class="dato-vacio">Todav√≠a no guardaste ning√∫n lugar.</div>'
+                : '<div class="dato-vacio">Todav√≠a no guardaste ning√∫n contacto.</div>';
             return;
         }
         listaDatos.innerHTML = datos.map((dato, indice) => `
@@ -278,7 +291,7 @@
         const nombre = inputDatoNombre.value.trim();
         const valor = inputDatoValor.value.trim();
         if (!nombre || !valor) {
-            alert(tipoDatoActual === 'lugares' ? 'Complet· el nombre y la direcciÛn.' : 'Complet· el nombre y el telÈfono.');
+            alert(tipoDatoActual === 'lugares' ? 'Complet√° el nombre y la direcci√≥n.' : 'Complet√° el nombre y el tel√©fono.');
             return;
         }
         const datos = leerDatos(claveDatosActual());
@@ -302,7 +315,7 @@
         } else {
             const telefono = dato.valor.replace(/[^\d+]/g, '');
             if (!telefono) {
-                alert('El telÈfono guardado no es v·lido.');
+                alert('El tel√©fono guardado no es v√°lido.');
                 return;
             }
             window.location.href = 'tel:' + telefono;
@@ -319,7 +332,7 @@
         }
         const datos = leerDatos(claveDatosActual());
         const dato = datos[indice];
-        if (dato && confirm('øEliminar "' + dato.nombre + '"?')) {
+        if (dato && confirm('¬øEliminar "' + dato.nombre + '"?')) {
             datos.splice(indice, 1);
             guardarDatos(claveDatosActual(), datos);
             renderizarDatos();
@@ -341,14 +354,14 @@
 
     function iniciarUbicacion() {
         if (!navigator.geolocation) { cajaMensaje.textContent = "Navegador no compatible"; return; }
-        cajaMensaje.textContent = "Buscando tu ubicaciÛn...";
+        cajaMensaje.textContent = "Buscando tu ubicaci√≥n...";
         navigator.geolocation.getCurrentPosition(pos => {
             miUbicacion = pos.coords;
             mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
             if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-            marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Est·s aquÌ").openPopup();
+            marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Est√°s aqu√≠").openPopup();
             cajaMensaje.textContent = "\u2705 Todo listo";
-        }, () => cajaMensaje.textContent = "Activa ubicaciÛn en tu telÈfono", {enableHighAccuracy: true, timeout:10000});
+        }, () => cajaMensaje.textContent = "Activa ubicaci√≥n en tu tel√©fono", {enableHighAccuracy: true, timeout:10000});
     }
 
     function iniciarVoz() {
@@ -357,16 +370,16 @@
         if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); return; }
         reconocimiento = new window.SpeechRecognition();
         reconocimiento.lang = 'es-ES'; reconocimiento.continuous = false; reconocimiento.interimResults = false;
-        reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = "Te escucho... decÌ tu comando"; };
+        reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = "Te escucho... dec√≠ tu comando"; };
         reconocimiento.onresult = e => {
             cajaMensaje.innerHTML = '&#9989; Dijiste: <strong>"' + e.results[0][0].transcript.toLowerCase() + '"</strong>';
             procesarComando(e.results[0][0].transcript.toLowerCase());
             botonVoz.classList.remove('escuchando'); reconocimiento = null;
         };
-        reconocimiento.onerror = () => { botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "No te escuchÈ bien. Intent· de nuevo."; reconocimiento = null; };
+        reconocimiento.onerror = () => { botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "No te escuch√© bien. Intent√° de nuevo."; reconocimiento = null; };
         reconocimiento.onend = () => { botonVoz.classList.remove('escuchando'); reconocimiento = null; };
         reconocimiento.start();
-        setTimeout(() => { if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "Se acabÛ el tiempo. Toc· el micrÛfono de nuevo."; reconocimiento = null; } }, 8000);
+        setTimeout(() => { if (reconocimiento) { reconocimiento.stop(); botonVoz.classList.remove('escuchando'); cajaMensaje.textContent = "Se acab√≥ el tiempo. Toc√° el micr√≥fono de nuevo."; reconocimiento = null; } }, 8000);
     }
 
     function procesarComando(texto) {
@@ -381,24 +394,24 @@
         if (!encontroLugar) {
             if (texto.includes("camino") || texto.includes("llegar") || texto.includes("ruta") || texto.includes("ir a")) {
                 panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
-                cajaMensaje.innerHTML += '<br>EscribÌ o decÌ tu destino especÌfico';
+                cajaMensaje.innerHTML += '<br>Escrib√≠ o dec√≠ tu destino espec√≠fico';
             } else if (texto.includes("compartir")) { compartirUbicacion(); }
             else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) { activarSOS(); }
             else if (texto.includes("llegue") || texto.includes("casa")) { llegueBien(); }
-            else if (texto.includes("llamar")) { if(confirm("QuerÈs hacer una llamada?")) window.location.href = "tel:"; }
+            else if (texto.includes("llamar")) { if(confirm("Quer√©s hacer una llamada?")) window.location.href = "tel:"; }
             else { window.open('https://www.google.com/maps/search/' + encodeURIComponent(texto), '_blank'); cajaMensaje.innerHTML = '&#128269; Buscando "<strong>' + texto + '</strong>" en el mapa...'; }
         }
     }
 
     function compartirUbicacion() {
-        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaciÛn a˙n"; return; }
-        window.open('https://wa.me/?text=' + encodeURIComponent('Mi ubicaciÛn: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
+        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaci√≥n a√∫n"; return; }
+        window.open('https://wa.me/?text=' + encodeURIComponent('Mi ubicaci√≥n: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
         cajaMensaje.textContent = "Abriendo WhatsApp...";
     }
 
     function llegueBien() {
-        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaciÛn a˙n"; return; }
-        window.open('https://wa.me/?text=' + encodeURIComponent('Hola! LleguÈ bien a casa. Mi ubicaciÛn: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
+        if (!miUbicacion) { cajaMensaje.textContent = "No tengo ubicaci√≥n a√∫n"; return; }
+        window.open('https://wa.me/?text=' + encodeURIComponent('Hola! Llegu√© bien a casa. Mi ubicaci√≥n: https://maps.google.com/?q=' + miUbicacion.latitude + ',' + miUbicacion.longitude), '_blank');
         cajaMensaje.textContent = "Abriendo WhatsApp...";
     }
 
@@ -407,11 +420,11 @@
     const TEL_FAMILIAR = '5491150617831';
 
     async function activarSOS() {
-        if (!confirm("°ATENCI”N! øActivar emergencia? Se avisar· a tu contacto de confianza con tu ubicaciÛn.")) return;
+        if (!confirm("¬°ATENCI√ìN! ¬øActivar emergencia? Se avisar√° a tu contacto de confianza con tu ubicaci√≥n.")) return;
         cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
         let lat = null, lon = null;
         if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaciÛn)';
+        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci√≥n)';
 
         // 1) Guardar el evento en la nube
         try {
@@ -425,16 +438,16 @@
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({
                     _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
-                    mensaje: 'Se activÛ el botÛn de emergencia de Ruta Segura.',
+                    mensaje: 'Se activ√≥ el bot√≥n de emergencia de Ruta Segura.',
                     ubicacion: mapaLink
                 })
             });
         } catch (e) { console.error('Error enviando email:', e); }
 
         // 3) Abrir WhatsApp con el mensaje listo
-        window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('\ud83d\udea8 EMERGENCIA Ruta Segura: se activÛ el botÛn SOS. UbicaciÛn: ' + mapaLink), '_blank');
+        window.open('https://wa.me/' + TEL_FAMILIAR + '?text=' + encodeURIComponent('\ud83d\udea8 EMERGENCIA Ruta Segura: se activ√≥ el bot√≥n SOS. Ubicaci√≥n: ' + mapaLink), '_blank');
 
-        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaciÛn.";
+        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci√≥n.";
     }
 
     async function toggleLinterna() {
@@ -450,7 +463,7 @@
                 linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; linternaActiva = false;
                 cajaMensaje.textContent = "Linterna apagada"; btnLinterna.textContent = "Linterna";
             }
-        } catch (e) { alert("No se pudo activar la linterna. Verific· los permisos de c·mara."); }
+        } catch (e) { alert("No se pudo activar la linterna. Verific√° los permisos de c√°mara."); }
     }
 
     function subirUbicacionPeriodica() {
@@ -464,12 +477,12 @@
                     lon: pos.coords.longitude,
                     precision: pos.coords.accuracy
                 });
-                console.log('UbicaciÛn subida a la nube');
+                console.log('Ubicaci√≥n subida a la nube');
             } catch (e) { cajaMensaje.textContent = '\u274c Error insert: ' + e.message; }
         }, (err) => { cajaMensaje.textContent = '\u274c Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // BotÛn de prueba: inserta coordenadas fijas sin depender del GPS
+    // Bot√≥n de prueba: inserta coordenadas fijas sin depender del GPS
     document.getElementById('btnDebugInsert').addEventListener('click', async () => {
         cajaMensaje.textContent = '\u23f3 Probando insert...';
         const { data, error } = await sb.from('ubicaciones_ruta').insert({
@@ -480,7 +493,7 @@
     });
 
     btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
-    btnPolicia.addEventListener('click', () => { if(confirm("QuerÈs llamar ahora al n˙mero de emergencias?")) window.location.href = "tel:911"; });
+    btnPolicia.addEventListener('click', () => { if(confirm("Quer√©s llamar ahora al n√∫mero de emergencias?")) window.location.href = "tel:911"; });
     btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
     btnBanco.addEventListener('click', () => window.open('https://www.google.com/maps/search/banco+o+cajero+automatico+cerca+de+mi', '_blank'));
     btnSuper.addEventListener('click', () => window.open('https://www.google.com/maps/search/supermercado+cerca+de+mi', '_blank'));
@@ -494,8 +507,8 @@
     panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
 
     botonSalir.addEventListener('click', () => {
-        if(confirm("Seguro que querÈs salir de Ruta Segura?")) {
-            cajaMensaje.textContent = "Gracias por usar Ruta Segura. °Cuidate!";
+        if(confirm("Seguro que quer√©s salir de Ruta Segura?")) {
+            cajaMensaje.textContent = "Gracias por usar Ruta Segura. ¬°Cuidate!";
             setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
         }
     });
@@ -508,7 +521,7 @@
         btnBuscarDestino.style.display = 'block';
         inputDestino.focus();
         inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
-        cajaMensaje.textContent = "\ud83e\udded EscribÌ tu destino y toc· 'Buscar ruta'";
+        cajaMensaje.textContent = "\ud83e\udded Escrib√≠ tu destino y toc√° 'Buscar ruta'";
         inputDestino.onkeypress = function(e) {
             if(e.key === 'Enter') {
                 btnBuscarDestino.click();
@@ -521,7 +534,7 @@
         if (destino) {
             window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destino) + '&travelmode=walking', '_blank');
             panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = '';
-        } else { alert("EscribÌ un destino primero"); }
+        } else { alert("Escrib√≠ un destino primero"); }
     });
 
     btnRutaRapida.addEventListener('click', () => {
@@ -529,8 +542,8 @@
         inputDestino.style.display = 'block';
         btnBuscarDestino.style.display = 'block';
         inputDestino.focus();
-        inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San MartÌn...";
-        cajaMensaje.textContent = "\u270f\ufe0f EscribÌ el destino y toc· 'Buscar ruta' o presion· Enter";
+        inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Mart√≠n...";
+        cajaMensaje.textContent = "\u270f\ufe0f Escrib√≠ el destino y toc√° 'Buscar ruta' o presion√° Enter";
         inputDestino.onkeypress = function(e) {
             if(e.key === 'Enter') {
                 btnBuscarDestino.click();
@@ -543,7 +556,7 @@
         iniciarUbicacion();
         subirUbicacionPeriodica();
         setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
-        // Test de conexiÛn a Supabase (debug visible)
+        // Test de conexi√≥n a Supabase (debug visible)
         sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
             if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message;
             else console.log('\u2705 Supabase conectado');
@@ -556,7 +569,7 @@
 
     let mensajes = [
         "Consejo: Manten\u00e9 presionado el bot\u00f3n de emergencia por 2 segundos.",
-        "Toc\u00e1 el micr\u00f3fono y decÌ 'Compartir' para enviar tu ubicaciÛn.",
+        "Toc\u00e1 el micr\u00f3fono y dec√≠ 'Compartir' para enviar tu ubicaci√≥n.",
         "Record\u00e1 cargar la bater\u00eda de tu celular antes de salir a caminar.",
         "Conoc\u00e9 nuestras otras apps educativas en: Cursos IA para Mayores.",
         "Caminar 20 minutos al d\u00eda mejora tu salud y tu \u00e1nimo. \u00a1Vos pod\u00e9s!",
@@ -570,7 +583,7 @@
         setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
     }, 17000);
 
-    // LÛgica para el botÛn de instalaciÛn manual
+    // L√≥gica para el bot√≥n de instalaci√≥n manual
     let deferredPrompt;
     const btnInstalarManual = document.getElementById('btnInstalarManual');
 
@@ -588,7 +601,7 @@
                 deferredPrompt = null;
                 btnInstalarManual.style.display = 'none';
             } else {
-                alert("La app ya est· instalada o tu navegador no permite instalarla desde aquÌ.");
+                alert("La app ya est√° instalada o tu navegador no permite instalarla desde aqu√≠.");
             }
         });
     }
