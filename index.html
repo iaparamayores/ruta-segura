@@ -609,6 +609,19 @@
             }
         });
     }
+        // --- Pedido de permiso de push con gesto del usuario (Chrome lo exige) ---
+    document.addEventListener('click', async function pedirPushUnaVez() {
+        try {
+            if (!window.OneSignal) return;
+            const estado = await OneSignal.getNotificationPermission();
+            if (estado !== 'default') return; // ya permitido o denegado: no molestar mas
+            if (OneSignal.Slidedown && OneSignal.Slidedown.promptPush) {
+                await OneSignal.Slidedown.promptPush();
+            } else if (OneSignal.registerForPushNotifications) {
+                await OneSignal.registerForPushNotifications();
+            }
+        } catch (e) { console.error('Error pidiendo push:', e); }
+    }, true);
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
