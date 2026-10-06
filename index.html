@@ -648,8 +648,7 @@
             }
         } catch (e) { console.error('force subscribe:', e); }
     });
-
-    // --- Diagnostico visible (alert, no se sobrescribe) ---
+// --- Diagnostico silencioso (escribe en cajaMensaje, no bloquea) ---
     async function mostrarEstadoPush() {
         let swUrl = 'ninguno';
         try {
@@ -658,7 +657,7 @@
         } catch (e) { swUrl = 'error'; }
         let os = '?';
         try { if (window.OneSignal) { os = await OneSignal.isPushNotificationsEnabled(); } } catch (e) {}
-        alert('Permiso: ' + Notification.permission + '\nSW: ' + swUrl + '\nSuscripto: ' + os);
+        cajaMensaje.textContent = '[DEBUG] Permiso: ' + Notification.permission + ' | SW: ' + swUrl + ' | Suscripto: ' + os;
     }
     window.addEventListener('load', () => { setTimeout(mostrarEstadoPush, 6000); });
     </script>
