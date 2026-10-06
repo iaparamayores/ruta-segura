@@ -659,7 +659,47 @@
         try { if (window.OneSignal) { os = await OneSignal.isPushNotificationsEnabled(); } } catch (e) {}
         cajaMensaje.textContent = '[DEBUG] Permiso: ' + Notification.permission + ' | SW: ' + swUrl + ' | Suscripto: ' + os;
     }
-    window.addEventListener('load', () => { setTimeout(mostrarEstadoPush, 6000); });
+    // --- ALERTA EN VIVO por Supabase Realtime (canal principal del piloto) ---
+    function mostrarCartelSOS(mapa) {
+        let d = document.getElementById('cartelSOS');
+        if (!d) {
+            d = document.createElement('div');
+            d.id = 'cartelSOS';
+            d.style.cssText = 'position:fixed;inset:0;background:rgba(200,0,0,0.96);color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
+            document.body.appendChild(d);
+        }
+        d.innerHTML = '<div style="font-size:64px">\ud83d\udea8</div>' +
+            '<div style="font-size:26px;font-weight:bold;margin:12px 0">\u00a1EMERGENCIA DE TU CONTACTO!</div>' +
+            (mapa ? ('<a href="' + mapa + '" style="display:block;background:#fff;color:#c00;font-size:22px;font-weight:bold;padding:16px 24px;border-radius:12px;margin:14px 0;text-decoration:none">VER UBICACI\u00d3N EN EL MAPA</a>') : '') +
+            '<button onclick="this.parentNode.style.display=\'none\'" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px">Cerrar</button>';
+        d.style.display = 'flex';
+    }
+
+    function alertarEmergencia(sos) {
+        const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
+        try { if (navigator.vibrate) navigator.vibrate([600,200,600,200,600]); } catch (e) {}
+        cajaMensaje.textContent = '\ud83d\udea8 \u00a1EMERGENCIA! Tu contacto activ\u00f3 el SOS.';
+        mostrarCartelSOS(mapa);
+    }
+
+    function iniciarAlertaEnVivo() {
+        sb.channel('sos-vivo')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sos_ruta' },
+              (payload) => {
+                  const nuevo = payload.new;
+                  if (!nuevo || nuevo.user_id === USER_ID) return;
+                  alertarEmergencia(nuevo);
+              })
+          .subscribe();
+    }
+
+    window.addEventListener('load', () => {
+        setTimeout(mostrarEstadoPush, 6000);
+        iniciarAlertaEnVivo();
+    });
+ </script>
+</body>
+</html>
  </script>
 </body>
 </html>
