@@ -637,6 +637,30 @@
             navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err));
         });
     }
+        // --- FORZAR suscripcion si el permiso ya esta dado ---
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function (OneSignal) {
+        try {
+            const perm = await OneSignal.getNotificationPermission();
+            const enabled = await OneSignal.isPushNotificationsEnabled();
+            if (perm === 'granted' && !enabled) {
+                await OneSignal.registerForPushNotifications();
+            }
+        } catch (e) { console.error('force subscribe:', e); }
+    });
+
+    // --- Diagnostico visible (alert, no se sobrescribe) ---
+    async function mostrarEstadoPush() {
+        let swUrl = 'ninguno';
+        try {
+            const r = await navigator.serviceWorker.getRegistration();
+            swUrl = (r && r.active) ? r.active.scriptURL.split('/').pop() : (r ? 'sin-active' : 'ninguno');
+        } catch (e) { swUrl = 'error'; }
+        let os = '?';
+        try { if (window.OneSignal) { os = await OneSignal.isPushNotificationsEnabled(); } } catch (e) {}
+        alert('Permiso: ' + Notification.permission + '\nSW: ' + swUrl + '\nSuscripto: ' + os);
+    }
+    window.addEventListener('load', () => { setTimeout(mostrarEstadoPush, 6000); });
     </script>
 </body>
 </html>
