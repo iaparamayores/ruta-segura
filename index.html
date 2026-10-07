@@ -682,15 +682,23 @@
         mostrarCartelSOS(mapa);
     }
 
+    let ultimoSosVisto = null;
     function iniciarAlertaEnVivo() {
-        sb.channel('sos-vivo')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sos_ruta' },
-              (payload) => {
-                  const nuevo = payload.new;
-                  if (!nuevo || nuevo.user_id === USER_ID) return;
-                  alertarEmergencia(nuevo);
-              })
-          .subscribe();
+        // Punto de partida: anoto el ultimo SOS que ya existia al abrir
+        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => {
+            if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id;
+        });
+        // Cada 6 segundos pregunto si entro un SOS nuevo
+        setInterval(async () => {
+            const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
+            if (r.error || !r.data || !r.data[0]) return;
+            const top = r.data[0];
+            if (ultimoSosVisto === null) { ultimoSosVisto = top.id; return; }
+            if (top.id <= ultimoSosVisto) return;      // no hay nada nuevo
+            ultimoSosVisto = top.id;                    // hay uno nuevo
+            if (top.user_id && top.user_id === USER_ID) return;  // fui yo, no me alerto
+            alertarEmergencia(top);                     // es de mi contacto: ALERTA
+        }, 6000);
     }
 
     window.addEventListener('load', () => {
@@ -700,6 +708,4 @@
  </script>
 </body>
 </html>
- </script>
-</body>
-</html>
+ 
