@@ -695,7 +695,7 @@ let ultimoSosVisto = null;
             if (!r.data || !r.data[0]) { cajaMensaje.textContent = '\ud83d\udce1 Tabla sin SOS todav\u00eda'; return; }
             const top = r.data[0];
             if (ultimoSosVisto === null) { ultimoSosVisto = top.id; return; }
-            if (top.id <= ultimoSosVisto) return;
+            if (top.id <= ultimoSosVisto) { cajaMensaje.textContent = '\ud83d\udce1 #' + top.id + ' | yo: ' + USER_ID; return; }
             ultimoSosVisto = top.id;
             cajaMensaje.textContent = '\ud83d\udd0d SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
             if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
