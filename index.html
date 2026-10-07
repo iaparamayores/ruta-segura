@@ -682,22 +682,23 @@
         mostrarCartelSOS(mapa);
     }
 
-    let ultimoSosVisto = null;
+let ultimoSosVisto = null;
     function iniciarAlertaEnVivo() {
-        // Punto de partida: anoto el ultimo SOS que ya existia al abrir
         sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => {
             if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id;
+            cajaMensaje.textContent = '\ud83d\udce1 Vigilo SOS desde #' + (ultimoSosVisto || 0) + ' (yo soy ' + USER_ID + ')';
         });
-        // Cada 6 segundos pregunto si entro un SOS nuevo
         setInterval(async () => {
             const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
-            if (r.error || !r.data || !r.data[0]) return;
+            if (r.error) { cajaMensaje.textContent = '\u274c Sondeo error: ' + r.error.message; return; }
+            if (!r.data || !r.data[0]) { cajaMensaje.textContent = '\ud83d\udce1 Tabla sin SOS todav\u00eda'; return; }
             const top = r.data[0];
             if (ultimoSosVisto === null) { ultimoSosVisto = top.id; return; }
-            if (top.id <= ultimoSosVisto) return;      // no hay nada nuevo
-            ultimoSosVisto = top.id;                    // hay uno nuevo
-            if (top.user_id && top.user_id === USER_ID) return;  // fui yo, no me alerto
-            alertarEmergencia(top);                     // es de mi contacto: ALERTA
+            if (top.id <= ultimoSosVisto) return;
+            ultimoSosVisto = top.id;
+            cajaMensaje.textContent = '\ud83d\udd0d SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
+            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
+            alertarEmergencia(top);
         }, 6000);
     }
 
