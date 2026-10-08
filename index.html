@@ -695,7 +695,7 @@
         d.innerHTML = '<div class="sirena" style="font-size:64px">\ud83d\udea8</div>' +
             '<div style="font-size:26px;font-weight:bold;margin:12px 0">\u00a1EMERGENCIA DE TU CONTACTO!</div>' +
             (mapa ? ('<a href="' + mapa + '" style="display:block;background:#fff;color:#c00;font-size:22px;font-weight:bold;padding:16px 24px;border-radius:12px;margin:14px 0;text-decoration:none">VER UBICACI\u00d3N EN EL MAPA</a>') : '') +
-            '<button onclick="this.parentNode.style.display=\'none\'" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px">Cerrar</button>';
+            '<button onclick="detenerAlarma(); this.parentNode.style.display=\'none\'" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px">Cerrar</button>';
         d.style.display = 'flex';
     }
 let audioCtx = null;
