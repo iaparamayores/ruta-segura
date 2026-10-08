@@ -532,6 +532,7 @@
     guardarDato.addEventListener('click', guardarDatoActual);
     inputDatoValor.addEventListener('keydown', evento => { if (evento.key === 'Enter') guardarDatoActual(); });
     panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
+  <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
 
     botonSalir.addEventListener('click', () => {
         if(confirm("Seguro que querés salir de Ruta Segura?")) {
