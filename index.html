@@ -684,9 +684,52 @@
         d.style.display = 'flex';
     }
 
+    let audioCtx = null;
+    function desbloquearAudio() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {}
+    }
+    ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
+
+    function sonarAlarma() {
+        try {
+            desbloquearAudio();
+            if (!audioCtx) return;
+            let t = audioCtx.currentTime;
+            for (let i = 0; i < 8; i++) {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = (i % 2 === 0) ? 988 : 740;
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.exponentialRampToValueAtTime(0.6, t + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.start(t); osc.stop(t + 0.35);
+                t += 0.35;
+            }
+        } catch (e) { console.log('audio:', e); }
+    }
+
+    function vibrarAlarma() {
+        try {
+            if (!navigator.vibrate) return;
+            navigator.vibrate([700, 250, 700, 250, 700]);
+            clearInterval(window.__vibLoop);
+            window.__vibLoop = setInterval(() => {
+                const c = document.getElementById('cartelSOS');
+                if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]);
+                else clearInterval(window.__vibLoop);
+            }, 3000);
+        } catch (e) {}
+    }
+
     function alertarEmergencia(sos) {
         const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
-        try { if (navigator.vibrate) navigator.vibrate([600,200,600,200,600]); } catch (e) {}
+        vibrarAlarma();
+        sonarAlarma();
         cajaMensaje.textContent = '\ud83d\udea8 \u00a1EMERGENCIA! Tu contacto activ\u00f3 el SOS.';
         mostrarCartelSOS(mapa);
     }
