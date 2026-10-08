@@ -78,6 +78,21 @@
         .dato-acciones button { flex: 1; padding: 8px; border: none; border-radius: 7px; font-size: 15px; cursor: pointer; }
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
+
+        <style>
+  @keyframes latidoFondo {
+    0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); }
+    50%      { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); }
+  }
+  @keyframes sirenaViva {
+    0%, 100% { transform: rotate(-10deg) scale(1); }
+    25%      { transform: rotate(10deg) scale(1.2); }
+    50%      { transform: rotate(-10deg) scale(1.05); }
+    75%      { transform: rotate(10deg) scale(1.2); }
+  }
+  #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
+  #cartelSOS .sirena { display: inline-block; animation: sirenaViva 0.7s ease-in-out infinite; }
+</style>
     </style>
 </head>
 <body>
