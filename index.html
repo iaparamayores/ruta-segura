@@ -169,8 +169,16 @@
     const SUPABASE_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function esUuid(v) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v || ''); }
+    function nuevoUuid() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
     let USER_ID = localStorage.getItem('rs_uid');
-    if (!USER_ID) { USER_ID = 'u-' + Math.random().toString(36).slice(2, 10); localStorage.setItem('rs_uid', USER_ID); }
+    if (!esUuid(USER_ID)) { USER_ID = nuevoUuid(); localStorage.setItem('rs_uid', USER_ID); }
 
     const botonSOS = document.getElementById('botonSOS');
     const progresoSOS = document.querySelector('.progreso-sos');
