@@ -162,6 +162,7 @@
         <button id="botonSalir" style="background:#424242; color:white;">&#128682; SALIR DE LA APP</button>
         <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicaci&#243;n en el celular</button>
         <button id="cerrarAjustes" style="background:#d32f2f; color:white;">&#10060; Cerrar</button>
+        <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
     </div>
 
     <div id="panelDatos" class="panel-datos" aria-hidden="true">
@@ -532,7 +533,6 @@
     guardarDato.addEventListener('click', guardarDatoActual);
     inputDatoValor.addEventListener('keydown', evento => { if (evento.key === 'Enter') guardarDatoActual(); });
     panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
-  <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
 
     botonSalir.addEventListener('click', () => {
         if(confirm("Seguro que querés salir de Ruta Segura?")) {
