@@ -795,17 +795,18 @@ let ultimoSosVisto = null;
         iniciarAlertaEnVivo();
     });
         document.getElementById('btnAvisos').addEventListener('click', async () => {
-        cajaMensaje.textContent = '⏳ Activando avisos...';
         try {
-            if (!window.OneSignal) { cajaMensaje.textContent = '❌ El SDK de OneSignal no cargó'; return; }
-            const perm = await OneSignal.getNotificationPermission();
-            if (perm !== 'granted') await OneSignal.Slidedown.promptPush();
+            if (!window.OneSignal) { alert('\u274c El SDK de OneSignal no carg\u00f3'); return; }
             await OneSignal.registerForPushNotifications();
+            await new Promise(r => setTimeout(r, 2500));
             const ok = await OneSignal.isPushNotificationsEnabled();
-            cajaMensaje.textContent = ok 
-                ? '✅ Avisos activados: te va a sonar aunque la app esté cerrada' 
-                : '❌ No quedó suscripto. Permiso: ' + perm;
-        } catch (e) { cajaMensaje.textContent = '❌ Error avisos: ' + e.message; }
+            const perm = await OneSignal.getNotificationPermission();
+            alert(ok
+                ? '\u2705 AVISOS ACTIVADOS\nTe va a sonar con la app cerrada.'
+                : '\u274c No qued\u00f3 suscripto.\nPermiso: ' + perm);
+        } catch (e) {
+            alert('\u274c Error: ' + e.message);
+        }
     });
  </script>
 </body>
