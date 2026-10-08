@@ -698,8 +698,7 @@
             '<button onclick="this.parentNode.style.display=\'none\'" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px">Cerrar</button>';
         d.style.display = 'flex';
     }
-
-    let audioCtx = null;
+let audioCtx = null;
     function desbloquearAudio() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -708,24 +707,46 @@
     }
     ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
 
+    let sirenaLoop = null;
+
+    function unCicloSirena() {
+        if (!audioCtx) return;
+        let t = audioCtx.currentTime;
+        for (let i = 0; i < 4; i++) {
+            const freq = (i % 2 === 0) ? 1046 : 784;
+            [0, 4].forEach(det => {
+                const osc = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = freq + det;
+                g.gain.setValueAtTime(0.0001, t);
+                g.gain.exponentialRampToValueAtTime(1.0, t + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+                osc.connect(g); g.connect(audioCtx.destination);
+                osc.start(t); osc.stop(t + 0.3);
+            });
+            t += 0.3;
+        }
+    }
+
     function sonarAlarma() {
         try {
             desbloquearAudio();
             if (!audioCtx) return;
-            let t = audioCtx.currentTime;
-            for (let i = 0; i < 8; i++) {
-                const osc = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.value = (i % 2 === 0) ? 988 : 740;
-                g.gain.setValueAtTime(0.0001, t);
-                g.gain.exponentialRampToValueAtTime(0.6, t + 0.02);
-                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
-                osc.connect(g); g.connect(audioCtx.destination);
-                osc.start(t); osc.stop(t + 0.35);
-                t += 0.35;
-            }
+            unCicloSirena();
+            clearInterval(sirenaLoop);
+            sirenaLoop = setInterval(() => {
+                const c = document.getElementById('cartelSOS');
+                if (c && c.style.display !== 'none') unCicloSirena();
+                else clearInterval(sirenaLoop);
+            }, 1500);
         } catch (e) { console.log('audio:', e); }
+    }
+
+    function detenerAlarma() {
+        clearInterval(sirenaLoop);
+        clearInterval(window.__vibLoop);
+        try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {}
     }
 
     function vibrarAlarma() {
