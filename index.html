@@ -796,17 +796,33 @@ let ultimoSosVisto = null;
     });
         document.getElementById('btnAvisos').addEventListener('click', async () => {
         try {
-            if (!window.OneSignal) { alert('\u274c El SDK de OneSignal no carg\u00f3'); return; }
-            await OneSignal.registerForPushNotifications();
-            await new Promise(r => setTimeout(r, 2500));
-            const ok = await OneSignal.isPushNotificationsEnabled();
-            const perm = await OneSignal.getNotificationPermission();
+            if (!window.OneSignal) { alert('\u274c El SDK no carg\u00f3'); return; }
+            const OS = window.OneSignal;
+            // 1) Pedir permiso (API v16)
+            if (OS.Notifications && OS.Notifications.requestPermission) {
+                await OS.Notifications.requestPermission();
+            } else if (OS.Slidedown && OS.Slidedown.promptPush) {
+                await OS.Slidedown.promptPush();
+            }
+            // 2) Suscribirse al push
+            if (OS.User && OS.User.pushSubscription && OS.User.pushSubscription.optIn) {
+                OS.User.pushSubscription.optIn();
+            }
+            await new Promise(r => setTimeout(r, 3000));
+            // 3) Verificar
+            let ok = false;
+            if (OS.User && OS.User.pushSubscription) {
+                ok = !!OS.User.pushSubscription.optedIn;
+            } else if (OS.isPushNotificationsEnabled) {
+                ok = await OS.isPushNotificationsEnabled();
+            }
+            let perm = '?';
+            if (OS.Notifications && OS.Notifications.permission) perm = OS.Notifications.permission;
+            else if (OS.getNotificationPermission) perm = await OS.getNotificationPermission();
             alert(ok
                 ? '\u2705 AVISOS ACTIVADOS\nTe va a sonar con la app cerrada.'
                 : '\u274c No qued\u00f3 suscripto.\nPermiso: ' + perm);
-        } catch (e) {
-            alert('\u274c Error: ' + e.message);
-        }
+        } catch (e) { alert('\u274c Error: ' + e.message); }
     });
  </script>
 </body>
