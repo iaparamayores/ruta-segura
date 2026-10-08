@@ -444,7 +444,6 @@
     const TEL_FAMILIAR = '5491150617831';
 
     async function activarSOS() {
-            if (!confirm("\u00a1ATENCI\u00d3N! \u00bfActivar emergencia? Se avisar\u00e1 a tu contacto de confianza con tu ubicaci\u00f3n.")) return;
             cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
             let lat = null, lon = null;
             if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
