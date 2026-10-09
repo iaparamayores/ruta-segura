@@ -9,19 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- OneSignal Web Push -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(function(OneSignal) {
-        OneSignal.init({
-          appId: "10eb2bda-39cd-4d03-8a38-422f7313c3f9",
-          serviceWorkerPath: "/ruta-segura/service-worker.js",
-          serviceWorkerUpdaterPath: "/ruta-segura/service-worker.js",
-          allowLocalhostAsSecureOrigin: false
-        });
-      });
-    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
         html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
@@ -795,34 +783,44 @@ let ultimoSosVisto = null;
         iniciarAlertaEnVivo();
     });
         document.getElementById('btnAvisos').addEventListener('click', async () => {
+        function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+        return outputArray;
+    }
+
         try {
-            if (!window.OneSignal) { alert('\u274c El SDK no carg\u00f3'); return; }
-            const OS = window.OneSignal;
-            // 1) Pedir permiso (API v16)
-            if (OS.Notifications && OS.Notifications.requestPermission) {
-                await OS.Notifications.requestPermission();
-            } else if (OS.Slidedown && OS.Slidedown.promptPush) {
-                await OS.Slidedown.promptPush();
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                alert('\u274c Este navegador no soporta push'); return;
             }
-            // 2) Suscribirse al push
-            if (OS.User && OS.User.pushSubscription && OS.User.pushSubscription.optIn) {
-                OS.User.pushSubscription.optIn();
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') { alert('\u274c Permiso de notificaciones: ' + perm); return; }
+            const reg = await navigator.serviceWorker.ready;
+            const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
+            const j = await r.json();
+            if (!j.publicKey) { alert('\u274c No se pudo obtener la clave p\u00fablica'); return; }
+            let sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(j.publicKey)
+                });
             }
-            await new Promise(r => setTimeout(r, 3000));
-            // 3) Verificar
-            let ok = false;
-            if (OS.User && OS.User.pushSubscription) {
-                ok = !!OS.User.pushSubscription.optedIn;
-            } else if (OS.isPushNotificationsEnabled) {
-                ok = await OS.isPushNotificationsEnabled();
-            }
-            let perm = '?';
-            if (OS.Notifications && OS.Notifications.permission) perm = OS.Notifications.permission;
-            else if (OS.getNotificationPermission) perm = await OS.getNotificationPermission();
-            alert(ok
-                ? '\u2705 AVISOS ACTIVADOS\nTe va a sonar con la app cerrada.'
-                : '\u274c No qued\u00f3 suscripto.\nPermiso: ' + perm);
-        } catch (e) { alert('\u274c Error: ' + e.message); }
+            const json = sub.toJSON();
+            const { error } = await sb.from('push_subs').upsert({
+                endpoint: json.endpoint,
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+                user_id: USER_ID
+            }, { onConflict: 'endpoint' });
+            if (error) throw error;
+            alert('\u2705 AVISOS ACTIVADOS (push propio)\nTe va a sonar con el celu cerrado.');
+        } catch (e) {
+            alert('\u274c Error push: ' + e.message);
+        }
     });
         // ===== NUBE RUTA SEGURA =====
     const SUPA_URL_RS = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
