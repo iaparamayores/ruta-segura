@@ -824,6 +824,126 @@ let ultimoSosVisto = null;
                 : '\u274c No qued\u00f3 suscripto.\nPermiso: ' + perm);
         } catch (e) { alert('\u274c Error: ' + e.message); }
     });
+        // ===== NUBE RUTA SEGURA =====
+    const SUPA_URL_RS = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
+    const SUPA_KEY_RS = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
+    let supaRS = null, uidRS = null, nubeOK_RS = false, nubeModo_RS = 'off';
+
+    function nubeToastRS(msg) {
+        let t = document.getElementById('nube-toast-rs');
+        if (!t) { t = document.createElement('div'); t.id = 'nube-toast-rs'; document.body.appendChild(t); }
+        t.textContent = msg; t.classList.add('ver');
+        setTimeout(() => t.classList.remove('ver'), 3500);
+    }
+
+    (function () {
+        const st = document.createElement('style');
+        st.textContent = '#nube-rs{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube-rs.tocable{cursor:pointer;text-decoration:underline;} #nube-form-rs{display:none;text-align:center;margin:.4rem 0;} #nube-toast-rs{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast-rs.ver{opacity:1;}';
+        document.head.appendChild(st);
+    })();
+
+    const nubeElRS = document.createElement('p'); nubeElRS.id = 'nube-rs';
+    const nubeFormRS = document.createElement('div'); nubeFormRS.id = 'nube-form-rs';
+    nubeFormRS.innerHTML = '<input id="nube-mail-rs" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass-rs" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"><br><button id="nube-ok-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button> <button id="nube-new-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#27ae60;color:#fff;font-weight:700;font-size:1rem;">Crear cuenta</button>';
+
+    const anclaRS = document.querySelector('h1');
+    if (anclaRS) { anclaRS.after(nubeElRS); nubeElRS.after(nubeFormRS); }
+    else { document.body.prepend(nubeFormRS); document.body.prepend(nubeElRS); }
+
+    function nubeEstadoRS(txt, tocable) {
+        nubeElRS.textContent = txt;
+        if (tocable) nubeElRS.classList.add('tocable');
+        else nubeElRS.classList.remove('tocable');
+    }
+
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            supaRS = window.supabase.createClient(SUPA_URL_RS, SUPA_KEY_RS, {
+                auth: { persistSession: true, autoRefreshToken: true, flowType: 'implicit', detectSessionInUrl: true }
+            });
+        }
+    } catch (e) {}
+
+    async function nubeRescatarTokenRS() {
+        if (!supaRS) return;
+        try {
+            const h = window.location.hash || '';
+            if (h.includes('access_token=')) {
+                const p = new URLSearchParams(h.substring(1));
+                const at = p.get('access_token'); const rt = p.get('refresh_token');
+                if (at) await supaRS.auth.setSession({ access_token: at, refresh_token: rt || at });
+            }
+            const q = new URLSearchParams(window.location.search);
+            const code = q.get('code');
+            if (code) await supaRS.auth.exchangeCodeForSession(code);
+            if (h.includes('access_token=') || code) history.replaceState(null, '', window.location.pathname);
+        } catch (e) { console.log('[nube rs] rescate', e); }
+    }
+
+    async function nubeConectarRS() {
+        if (!supaRS) { nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); return; }
+        try {
+            const { data: ses } = await supaRS.auth.getSession();
+            if (ses && ses.session) {
+                uidRS = ses.session.user.id;
+                nubeOK_RS = true; nubeModo_RS = 'ok';
+                nubeEstadoRS('☁️ Conectado con tu familia — alerta familiar activa');
+                // TODO: migrar contactos y lugares del localStorage a la nube cuando corresponda
+            } else {
+                uidRS = null; nubeOK_RS = false; nubeModo_RS = 'off';
+                nubeEstadoRS('☁️ Nube apagada — tocá acá para activarla', true);
+            }
+        } catch (e) { nubeOK_RS = false; nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); }
+    }
+
+    nubeElRS.addEventListener('click', () => {
+        if (nubeOK_RS) { nubeToastRS('☁️ La nube ya está conectada'); return; }
+        if (!supaRS) { nubeToastRS('Nube no disponible en este navegador'); return; }
+        nubeFormRS.style.display = (nubeFormRS.style.display === 'none') ? 'block' : 'none';
+    });
+
+    document.getElementById('nube-ok-rs').addEventListener('click', async () => {
+        const mail = (document.getElementById('nube-mail-rs').value || '').trim();
+        const pass = (document.getElementById('nube-pass-rs').value || '');
+        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; }
+        if (!pass) { nubeToastRS('Escribí tu contraseña'); return; }
+        try {
+            const { error } = await supaRS.auth.signInWithPassword({ email: mail, password: pass });
+            if (error) throw error;
+            nubeToastRS('☁️ Conectado a la nube');
+            nubeFormRS.style.display = 'none';
+            await nubeConectarRS();
+        } catch (e) { nubeToastRS('⚠️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
+    });
+
+    document.getElementById('nube-new-rs').addEventListener('click', async () => {
+        const mail = (document.getElementById('nube-mail-rs').value || '').trim();
+        const pass = (document.getElementById('nube-pass-rs').value || '');
+        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; }
+        if (pass.length < 6) { nubeToastRS('La contraseña necesita 6 caracteres o más'); return; }
+        try {
+            const { data, error } = await supaRS.auth.signUp({ email: mail, password: pass });
+            if (error) throw error;
+            if (data && data.session) {
+                uidRS = data.session.user.id; nubeOK_RS = true;
+                nubeToastRS('☁️ Cuenta creada y conectada');
+                nubeFormRS.style.display = 'none';
+                await nubeConectarRS();
+            } else {
+                nubeToastRS('Cuenta creada: ahora tocá Entrar');
+            }
+        } catch (e) {
+            const m = (e && e.message) || '';
+            if (/already registered/i.test(m)) nubeToastRS('Ese mail ya tiene cuenta: tocá Entrar');
+            else nubeToastRS('⚠️ ' + (m || 'No se pudo crear'));
+        }
+    });
+
+    // Arranque: rescatar token (si venís de un mail de confirmación) y conectar
+    window.addEventListener('load', async () => {
+        await nubeRescatarTokenRS();
+        await nubeConectarRS();
+    });
  </script>
 </body>
 </html>
