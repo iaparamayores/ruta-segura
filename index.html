@@ -792,6 +792,7 @@ let ultimoSosVisto = null;
         return outputArray;
     }
 
+    document.getElementById('btnAvisos').addEventListener('click', async () => {
         try {
             if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
                 alert('\u274c Este navegador no soporta push'); return;
@@ -802,22 +803,26 @@ let ultimoSosVisto = null;
             const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
             const j = await r.json();
             if (!j.publicKey) { alert('\u274c No se pudo obtener la clave p\u00fablica'); return; }
-            let sub = await reg.pushManager.getSubscription();
-            if (!sub) {
-                sub = await reg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(j.publicKey)
-                });
-            }
+
+            // Forzar suscripción NUEVA con NUESTRA clave (descarta la vieja de OneSignal)
+            const vieja = await reg.pushManager.getSubscription();
+            if (vieja) { await vieja.unsubscribe(); }
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(j.publicKey)
+            });
+
             const json = sub.toJSON();
-            const { error } = await sb.from('push_subs').upsert({
+            // Limpiar suscripciones viejas de este usuario y guardar la nueva
+            await sb.from('push_subs').delete().eq('user_id', USER_ID);
+            const { error } = await sb.from('push_subs').insert({
                 endpoint: json.endpoint,
                 p256dh: json.keys.p256dh,
                 auth: json.keys.auth,
                 user_id: USER_ID
-            }, { onConflict: 'endpoint' });
+            });
             if (error) throw error;
-            alert('\u2705 AVISOS ACTIVADOS (push propio)\nTe va a sonar con el celu cerrado.');
+            alert('\u2705 AVISOS ACTIVADOS (push propio, suscripción nueva)\nEndpoint: ' + json.endpoint.slice(0, 40));
         } catch (e) {
             alert('\u274c Error push: ' + e.message);
         }
