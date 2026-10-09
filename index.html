@@ -67,20 +67,18 @@
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
 
-        <style>
-  @keyframes latidoFondo {
-    0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); }
-    50%      { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); }
-  }
-  @keyframes sirenaViva {
-    0%, 100% { transform: rotate(-10deg) scale(1); }
-    25%      { transform: rotate(10deg) scale(1.2); }
-    50%      { transform: rotate(-10deg) scale(1.05); }
-    75%      { transform: rotate(10deg) scale(1.2); }
-  }
-  #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
-  #cartelSOS .sirena { display: inline-block; animation: sirenaViva 0.7s ease-in-out infinite; }
-</style>
+        @keyframes latidoFondo {
+            0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); }
+            50%      { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); }
+        }
+        @keyframes sirenaViva {
+            0%, 100% { transform: rotate(-10deg) scale(1); }
+            25%      { transform: rotate(10deg) scale(1.2); }
+            50%      { transform: rotate(-10deg) scale(1.05); }
+            75%      { transform: rotate(10deg) scale(1.2); }
+        }
+        #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
+        #cartelSOS .sirena { display: inline-block; animation: sirenaViva 0.7s ease-in-out infinite; }
     </style>
 </head>
 <body>
@@ -433,38 +431,40 @@
     const TEL_FAMILIAR = '5491150617831';
 
     async function activarSOS() {
-            cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
-            let lat = null, lon = null;
-            if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-            const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci\u00f3n)';
+        cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
+        let lat = null, lon = null;
+        if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
+        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci\u00f3n)';
 
-            // 1) Guardar el evento en la nube
-            try {
-                await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
-            } catch (e) { console.error('Error subiendo SOS:', e); }
+        // 1) Guardar el evento en la nube
+        try {
+            await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
+        } catch (e) { console.error('Error subiendo SOS:', e); }
 
-            // 2) Mandar email al familiar (FormSubmit)
-            try {
-                await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({
-                        _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
-                        mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.',
-                        ubicacion: mapaLink
-                    })
-                });
-            } catch (e) { console.error('Error enviando email:', e); }
+        // 2) Mandar email al familiar (FormSubmit)
+        try {
+            await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({
+                    _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
+                    mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.',
+                    ubicacion: mapaLink
+                })
+            });
+        } catch (e) { console.error('Error enviando email:', e); }
 
-            // 3) PUSH instant\u00e1neo al familiar v\u00eda rapid-responder (clave segura en Supabase)
-            try {
-                await sb.functions.invoke('rapid-responder', { body: { lat: lat, lon: lon } });
-            } catch (e) { console.error('Error enviando push:', e); }
+        // 3) PUSH instantáneo vía push-send propio (VAPID)
+        try {
+            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ from: USER_ID })
+            });
+        } catch (e) { console.error('Error enviando push:', e); }
 
-            // 4) Ya NO abrimos WhatsApp autom\u00e1tico: menos fricci\u00f3n en emergencia.
-
-            cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
-        }
+        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
+    }
 
     async function toggleLinterna() {
         try {
@@ -498,7 +498,6 @@
         }, (err) => { cajaMensaje.textContent = '\u274c Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
-    // Botón de prueba: inserta coordenadas fijas sin depender del GPS
     document.getElementById('btnDebugInsert').addEventListener('click', async () => {
         cajaMensaje.textContent = '\u23f3 Probando insert...';
         const { data, error } = await sb.from('ubicaciones_ruta').insert({
@@ -571,8 +570,7 @@
         inicializarMapa();
         iniciarUbicacion();
         subirUbicacionPeriodica();
-        setInterval(subirUbicacionPeriodica, 300000); // cada 5 minutos
-        // Test de conexión a Supabase (debug visible)
+        setInterval(subirUbicacionPeriodica, 300000);
         sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
             if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message;
             else console.log('\u2705 Supabase conectado');
@@ -599,16 +597,13 @@
         setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
     }, 17000);
 
-    // Lógica para el botón de instalación manual
     let deferredPrompt;
     const btnInstalarManual = document.getElementById('btnInstalarManual');
-
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         if(btnInstalarManual) btnInstalarManual.style.display = 'block';
     });
-
     if(btnInstalarManual) {
         btnInstalarManual.addEventListener('click', async () => {
             if (deferredPrompt) {
@@ -621,57 +616,13 @@
             }
         });
     }
-        // --- Pedido de permiso de push con gesto del usuario (Chrome lo exige) ---
-    document.addEventListener('click', async function pedirPushUnaVez() {
-        try {
-            if (!window.OneSignal) return;
-            const estado = await OneSignal.getNotificationPermission();
-            if (estado !== 'default') return; // ya permitido o denegado: no molestar mas
-            if (OneSignal.Slidedown && OneSignal.Slidedown.promptPush) {
-                await OneSignal.Slidedown.promptPush();
-            } else if (OneSignal.registerForPushNotifications) {
-                await OneSignal.registerForPushNotifications();
-            }
-        } catch (e) { console.error('Error pidiendo push:', e); }
-    }, true);
-        // --- DEBUG: estado del push en pantalla ---
-    async function mostrarEstadoPush() {
-        let sw = 'no';
-        try { const r = await navigator.serviceWorker.getRegistration(); sw = r ? 'si' : 'no'; } catch (e) {}
-        let os = '?';
-        try { if (window.OneSignal) { os = await OneSignal.isPushNotificationsEnabled(); } } catch (e) {}
-        cajaMensaje.textContent = 'Permiso: ' + Notification.permission + ' | SW: ' + sw + ' | Suscripto: ' + os;
-    }
-    window.addEventListener('load', () => { setTimeout(mostrarEstadoPush, 3000); });
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err));
         });
     }
-        // --- FORZAR suscripcion si el permiso ya esta dado ---
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function (OneSignal) {
-        try {
-            const perm = await OneSignal.getNotificationPermission();
-            const enabled = await OneSignal.isPushNotificationsEnabled();
-            if (perm === 'granted' && !enabled) {
-                await OneSignal.registerForPushNotifications();
-            }
-        } catch (e) { console.error('force subscribe:', e); }
-    });
-// --- Diagnostico silencioso (escribe en cajaMensaje, no bloquea) ---
-    async function mostrarEstadoPush() {
-        let swUrl = 'ninguno';
-        try {
-            const r = await navigator.serviceWorker.getRegistration();
-            swUrl = (r && r.active) ? r.active.scriptURL.split('/').pop() : (r ? 'sin-active' : 'ninguno');
-        } catch (e) { swUrl = 'error'; }
-        let os = '?';
-        try { if (window.OneSignal) { os = await OneSignal.isPushNotificationsEnabled(); } } catch (e) {}
-        cajaMensaje.textContent = '[DEBUG] Permiso: ' + Notification.permission + ' | SW: ' + swUrl + ' | Suscripto: ' + os;
-    }
-    // --- ALERTA EN VIVO por Supabase Realtime (canal principal del piloto) ---
+
     function mostrarCartelSOS(mapa) {
         let d = document.getElementById('cartelSOS');
         if (!d) {
@@ -686,7 +637,8 @@
             '<button onclick="detenerAlarma(); this.parentNode.style.display=\'none\'" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px">Cerrar</button>';
         d.style.display = 'flex';
     }
-let audioCtx = null;
+
+    let audioCtx = null;
     function desbloquearAudio() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -696,7 +648,6 @@ let audioCtx = null;
     ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
 
     let sirenaLoop = null;
-
     function unCicloSirena() {
         if (!audioCtx) return;
         let t = audioCtx.currentTime;
@@ -758,7 +709,7 @@ let audioCtx = null;
         mostrarCartelSOS(mapa);
     }
 
-let ultimoSosVisto = null;
+    let ultimoSosVisto = null;
     function iniciarAlertaEnVivo() {
         sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => {
             if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id;
@@ -779,55 +730,10 @@ let ultimoSosVisto = null;
     }
 
     window.addEventListener('load', () => {
-        setTimeout(mostrarEstadoPush, 6000);
         iniciarAlertaEnVivo();
     });
-        document.getElementById('btnAvisos').addEventListener('click', async () => {
-        function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-        const rawData = atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-        for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-        return outputArray;
-    }
 
-    document.getElementById('btnAvisos').addEventListener('click', async () => {
-        try {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-                alert('\u274c Este navegador no soporta push'); return;
-            }
-            const perm = await Notification.requestPermission();
-            if (perm !== 'granted') { alert('\u274c Permiso de notificaciones: ' + perm); return; }
-            const reg = await navigator.serviceWorker.ready;
-            const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
-            const j = await r.json();
-            if (!j.publicKey) { alert('\u274c No se pudo obtener la clave p\u00fablica'); return; }
-
-            // Forzar suscripción NUEVA con NUESTRA clave (descarta la vieja de OneSignal)
-            const vieja = await reg.pushManager.getSubscription();
-            if (vieja) { await vieja.unsubscribe(); }
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(j.publicKey)
-            });
-
-            const json = sub.toJSON();
-            // Limpiar suscripciones viejas de este usuario y guardar la nueva
-            await sb.from('push_subs').delete().eq('user_id', USER_ID);
-            const { error } = await sb.from('push_subs').insert({
-                endpoint: json.endpoint,
-                p256dh: json.keys.p256dh,
-                auth: json.keys.auth,
-                user_id: USER_ID
-            });
-            if (error) throw error;
-            alert('\u2705 AVISOS ACTIVADOS (push propio, suscripción nueva)\nEndpoint: ' + json.endpoint.slice(0, 40));
-        } catch (e) {
-            alert('\u274c Error push: ' + e.message);
-        }
-    });
-        // ===== NUBE RUTA SEGURA =====
+    // ===== NUBE RUTA SEGURA =====
     const SUPA_URL_RS = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
     const SUPA_KEY_RS = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
     let supaRS = null, uidRS = null, nubeOK_RS = false, nubeModo_RS = 'off';
@@ -891,7 +797,6 @@ let ultimoSosVisto = null;
                 uidRS = ses.session.user.id;
                 nubeOK_RS = true; nubeModo_RS = 'ok';
                 nubeEstadoRS('☁️ Conectado con tu familia — alerta familiar activa');
-                // TODO: migrar contactos y lugares del localStorage a la nube cuando corresponda
             } else {
                 uidRS = null; nubeOK_RS = false; nubeModo_RS = 'off';
                 nubeEstadoRS('☁️ Nube apagada — tocá acá para activarla', true);
@@ -942,12 +847,47 @@ let ultimoSosVisto = null;
         }
     });
 
-    // Arranque: rescatar token (si venís de un mail de confirmación) y conectar
     window.addEventListener('load', async () => {
         await nubeRescatarTokenRS();
         await nubeConectarRS();
     });
- </script>
+    </script>
+
+    <script>
+    // --- Push VAPID propio (aislado: si falla, no rompe el resto de la app) ---
+    (function(){
+      function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+        return outputArray;
+      }
+      document.addEventListener('DOMContentLoaded', function(){
+        var btn = document.getElementById('btnAvisos');
+        if (!btn) return;
+        btn.addEventListener('click', async function(){
+          try {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) { alert('❌ Este navegador no soporta push'); return; }
+            var perm = await Notification.requestPermission();
+            if (perm !== 'granted') { alert('❌ Permiso: ' + perm); return; }
+            var reg = await navigator.serviceWorker.ready;
+            var r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
+            var j = await r.json();
+            if (!j.publicKey) { alert('❌ No se pudo obtener la clave pública'); return; }
+            var vieja = await reg.pushManager.getSubscription();
+            if (vieja) { await vieja.unsubscribe(); }
+            var sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(j.publicKey) });
+            var json = sub.toJSON();
+            await sb.from('push_subs').delete().eq('user_id', USER_ID);
+            var ins = await sb.from('push_subs').insert({ endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, user_id: USER_ID });
+            if (ins.error) throw ins.error;
+            alert('✅ AVISOS ACTIVADOS (suscripción nueva)\nEndpoint: ' + json.endpoint.slice(0,40));
+          } catch(e) { alert('❌ Error push: ' + e.message); }
+        });
+      });
+    })();
+    </script>
 </body>
 </html>
- 
