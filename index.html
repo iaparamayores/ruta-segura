@@ -887,6 +887,24 @@
           } catch(e) { alert('❌ Error push: ' + e.message); }
         });
       });
+        // Alarma completa al tocar la notificación (app viva en segundo plano)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', function (evento) {
+        var d = evento.data || {};
+        if (d.tipo === 'sos-push') {
+          alertarEmergencia({ lat: d.lat, lon: d.lon });
+        }
+      });
+    }
+    // Si la app se abre desde la notificación (?sos=1), alarma completa al cargar
+    window.addEventListener('load', function () {
+      var q = new URLSearchParams(window.location.search);
+      if (q.get('sos') === '1') {
+        var lat = q.get('lat') ? parseFloat(q.get('lat')) : null;
+        var lon = q.get('lon') ? parseFloat(q.get('lon')) : null;
+        setTimeout(function () { alertarEmergencia({ lat: lat, lon: lon }); }, 500);
+      }
+    });
     })();
     </script>
 </body>
