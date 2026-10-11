@@ -913,45 +913,54 @@
       }
     });
     })();
-// --- Generar código de vinculación (con debug) ---
+// --- Generar código de vinculación (código único y permanente) ---
 window.addEventListener('DOMContentLoaded', function() {
   const btnGenerar = document.getElementById('btnGenerarCodigo');
   const btnCerrar = document.getElementById('btnCerrarCodigo');
   const codigoGenerado = document.getElementById('codigoGenerado');
   const codigoTexto = document.getElementById('codigoTexto');
   
-  console.log('[DEBUG] btnGenerar:', btnGenerar);
-  console.log('[DEBUG] sb:', typeof sb);
-  console.log('[DEBUG] USER_ID:', USER_ID);
-  
   if (btnGenerar) {
     btnGenerar.addEventListener('click', async function() {
-      console.log('[DEBUG] Botón clickeado');
       try {
-        const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log('[DEBUG] Código generado:', codigo);
+        // Buscar si ya tiene un código activo
+        const { data: codigosExistentes, error: errorBusqueda } = await sb
+          .from('codigos_vinculacion')
+          .select('codigo')
+          .eq('adulto_id', USER_ID)
+          .eq('usada', false)
+          .limit(1);
         
-        const { data, error } = await sb.from('codigos_vinculacion').insert({
-          codigo: codigo,
-          adulto_id: USER_ID,
-          nombre_adulto: 'Usuario' 
-        }).select();
+        if (errorBusqueda) throw errorBusqueda;
         
-        console.log('[DEBUG] Respuesta Supabase:', { data, error });
+        let codigo;
         
-        if (error) throw error;
+        if (codigosExistentes && codigosExistentes.length > 0) {
+          // Ya tiene un código, mostrarlo
+          codigo = codigosExistentes[0].codigo;
+        } else {
+          // Generar código nuevo de 6 dígitos
+          codigo = Math.floor(100000 + Math.random() * 900000).toString();
+          
+          // Guardar en Supabase
+          const { data, error } = await sb.from('codigos_vinculacion').insert({
+            codigo: codigo,
+            adulto_id: USER_ID,
+            nombre_adulto: 'Usuario'
+          }).select();
+          
+          if (error) throw error;
+        }
         
+        // Mostrar el código
         codigoTexto.textContent = codigo;
         codigoGenerado.style.display = 'block';
-        console.log('[DEBUG] Código mostrado');
         
       } catch (e) {
         console.error('[DEBUG] Error:', e);
         alert('❌ Error al generar código: ' + e.message);
       }
     });
-  } else {
-    console.error('[DEBUG] NO se encontró el botón btnGenerarCodigo');
   }
   
   if (btnCerrar) {
