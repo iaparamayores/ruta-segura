@@ -919,11 +919,11 @@ document.getElementById('btnGenerarCodigo').addEventListener('click', async func
     // Generar código de 6 dígitos aleatorio
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // Guardar en Supabase
+    // Guardar en Supabase (usamos 'Usuario' por defecto para evitar errores en Ruta Segura)
     const { data, error } = await sb.from('codigos_vinculacion').insert({
       codigo: codigo,
       adulto_id: USER_ID,
-      nombre_adulto: (datosFicha.nombre || 'Usuario').split(' ')[0]
+      nombre_adulto: 'Usuario' 
     }).select();
     
     if (error) throw error;
