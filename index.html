@@ -913,6 +913,33 @@
       }
     });
     })();
+        // --- Generar código de vinculación ---
+document.getElementById('btnGenerarCodigo').addEventListener('click', async function() {
+  try {
+    // Generar código de 6 dígitos aleatorio
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Guardar en Supabase
+    const { data, error } = await sb.from('codigos_vinculacion').insert({
+      codigo: codigo,
+      adulto_id: USER_ID,
+      nombre_adulto: (datosFicha.nombre || 'Usuario').split(' ')[0]
+    }).select();
+    
+    if (error) throw error;
+    
+    // Mostrar el código
+    document.getElementById('codigoTexto').textContent = codigo;
+    document.getElementById('codigoGenerado').style.display = 'block';
+    
+  } catch (e) {
+    alert('❌ Error al generar código: ' + e.message);
+  }
+});
+
+document.getElementById('btnCerrarCodigo').addEventListener('click', function() {
+  document.getElementById('codigoGenerado').style.display = 'none';
+});
     </script>
 </body>
 </html>
