@@ -913,32 +913,52 @@
       }
     });
     })();
-        // --- Generar código de vinculación ---
-document.getElementById('btnGenerarCodigo').addEventListener('click', async function() {
-  try {
-    // Generar código de 6 dígitos aleatorio
-    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Guardar en Supabase (usamos 'Usuario' por defecto para evitar errores en Ruta Segura)
-    const { data, error } = await sb.from('codigos_vinculacion').insert({
-      codigo: codigo,
-      adulto_id: USER_ID,
-      nombre_adulto: 'Usuario' 
-    }).select();
-    
-    if (error) throw error;
-    
-    // Mostrar el código
-    document.getElementById('codigoTexto').textContent = codigo;
-    document.getElementById('codigoGenerado').style.display = 'block';
-    
-  } catch (e) {
-    alert('❌ Error al generar código: ' + e.message);
+// --- Generar código de vinculación (con debug) ---
+window.addEventListener('DOMContentLoaded', function() {
+  const btnGenerar = document.getElementById('btnGenerarCodigo');
+  const btnCerrar = document.getElementById('btnCerrarCodigo');
+  const codigoGenerado = document.getElementById('codigoGenerado');
+  const codigoTexto = document.getElementById('codigoTexto');
+  
+  console.log('[DEBUG] btnGenerar:', btnGenerar);
+  console.log('[DEBUG] sb:', typeof sb);
+  console.log('[DEBUG] USER_ID:', USER_ID);
+  
+  if (btnGenerar) {
+    btnGenerar.addEventListener('click', async function() {
+      console.log('[DEBUG] Botón clickeado');
+      try {
+        const codigo = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log('[DEBUG] Código generado:', codigo);
+        
+        const { data, error } = await sb.from('codigos_vinculacion').insert({
+          codigo: codigo,
+          adulto_id: USER_ID,
+          nombre_adulto: 'Usuario' 
+        }).select();
+        
+        console.log('[DEBUG] Respuesta Supabase:', { data, error });
+        
+        if (error) throw error;
+        
+        codigoTexto.textContent = codigo;
+        codigoGenerado.style.display = 'block';
+        console.log('[DEBUG] Código mostrado');
+        
+      } catch (e) {
+        console.error('[DEBUG] Error:', e);
+        alert('❌ Error al generar código: ' + e.message);
+      }
+    });
+  } else {
+    console.error('[DEBUG] NO se encontró el botón btnGenerarCodigo');
   }
-});
-
-document.getElementById('btnCerrarCodigo').addEventListener('click', function() {
-  document.getElementById('codigoGenerado').style.display = 'none';
+  
+  if (btnCerrar) {
+    btnCerrar.addEventListener('click', function() {
+      codigoGenerado.style.display = 'none';
+    });
+  }
 });
     </script>
 </body>
