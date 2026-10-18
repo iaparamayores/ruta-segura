@@ -126,37 +126,52 @@
     </div>
 
     <div id="panelAjustes">
-        <h3>&#128203; Mis Datos y Ayuda</h3>
-        <input type="text" id="inputDestino" placeholder="Escrib&#237; tu destino (ej: Plaza San Mart&#237;n)">
-        <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
-        <button id="btnRuta">&#129517; &#191;C&#211;MO LLEGO A...?</button>
-        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
-        <button id="btnLugares">&#128204; Mis Lugares guardados</button>
-        <button id="btnContactos">&#128101; Contactos de confianza</button>
-        <hr style="margin:15px 0; border: 1px solid #eee;">
-        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
-        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
-        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Polic&#237;a / Emergencias</button>
-        <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
-        <hr style="margin:15px 0; border: 1px solid #eee;">
-        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos &#250;tiles:</p>
-        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
-        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
-        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
-        <hr style="margin:15px 0; border: 1px solid #eee;">
-        <button id="btnDebugInsert" style="background:#00695c; color:white;">&#129514; Probar insert Supabase</button>
-        <button id="botonSalir" style="background:#424242; color:white;">&#128682; SALIR DE LA APP</button>
-        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicaci&#243;n en el celular</button>
-        <button id="cerrarAjustes" style="background:#d32f2f; color:white;">&#10060; Cerrar</button>
-        <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
-        <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
-<div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
-  <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
-  <p id="codigoTexto" style="font-size:48px;font-weight:bold;color:#059669;letter-spacing:8px;margin:10px 0;"></p>
-  <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu familiar (es permanente)</p>
-  <button id="btnCerrarCodigo" style="margin-top:15px;padding:10px 20px;background:#6c757d;color:white;border:none;border-radius:8px;">Cerrar</button>
-</div>
+    <h3>&#128203; Mis Datos y Ayuda</h3>
+    
+    <!-- Buscador de rutas -->
+    <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
+    <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
+    <button id="btnRuta">&#129517; ¿CÓMO LLEGO A...?</button>
+    
+    <!-- Herramientas útiles -->
+    <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
+    <button id="btnLugares">&#128204; Mis Lugares guardados</button>
+    <button id="btnContactos">&#128101; Contactos de confianza</button>
+    
+    <hr style="margin:15px 0; border: 1px solid #eee;">
+    
+    <!-- Ayuda inmediata -->
+    <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
+    <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
+    <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Policía / Emergencias</button>
+    <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
+    
+    <hr style="margin:15px 0; border: 1px solid #eee;">
+    
+    <!-- Destinos útiles -->
+    <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos útiles:</p>
+    <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
+    <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
+    <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
+    
+    <hr style="margin:15px 0; border: 1px solid #eee;">
+    
+    <!-- Configuración y vinculación -->
+    <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
+    <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
+    <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
+    
+    <!-- Panel del código generado -->
+    <div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
+        <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
+        <p id="codigoTexto" style="font-size:48px;font-weight:bold;color:#059669;letter-spacing:8px;margin:10px 0;"></p>
+        <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu familiar (es permanente)</p>
+        <button id="btnCerrarCodigo" style="margin-top:15px;padding:10px 20px;background:#6c757d;color:white;border:none;border-radius:8px;">Cerrar</button>
     </div>
+    
+    <!-- Botón cerrar (siempre al final) -->
+    <button id="cerrarAjustes" style="background:#d32f2f; color:white; width:100%; padding:12px; font-size:16px; margin-top:15px; border:none; border-radius:12px; font-weight:bold;"> Cerrar</button>
+</div>
 
     <div id="panelDatos" class="panel-datos" aria-hidden="true">
         <div class="panel-datos-contenido" role="dialog" aria-modal="true" aria-labelledby="tituloDatos">
