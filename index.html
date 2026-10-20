@@ -716,58 +716,55 @@
     let bleConectado = false;
 
     async function conectarMokoW6() {
-        if (!navigator.bluetooth) {
-            document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-            return;
-        }
-
-        try {
-            document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg para despertarlo.<br>2. Seleccioná 'BeaconX Pro' o 'Moko' en la lista.";
-            document.getElementById('estadoBLE').style.color = "#f59e0b";
-
-            // acceptAllDevices es clave para tags que no anuncian el servicio en el escaneo inicial
-            mokoDevice = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801', '0x1800', '0x180f']
-            });
-
-            document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
-            
-            // Intentamos conectar con un límite de tiempo para que no se cuelgue infinito
-            const server = await Promise.race([
-                mokoDevice.gatt.connect(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-            ]);
-
-            // Buscamos el servicio del botón
-            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
-            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
-            
-            // Nos suscribimos a los cambios del botón
-            await mokoCharacteristic.startNotifications();
-            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
-            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
-
-            bleConectado = true;
-            document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
-            document.getElementById('estadoBLE').style.color = "#059669";
-            console.log('[BLE] ✅ Conectado exitosamente al tag');
-            
-        } catch (error) {
-            console.error('[BLE] Error:', error);
-            let mensaje = "❌ No se pudo conectar.";
-            if (error.name === 'NotFoundError') {
-                mensaje = "❌ No se seleccionó ningún dispositivo. Intentá de nuevo.";
-            } else if (error.message.includes('Timeout')) {
-                mensaje = "⏳ Se agotó el tiempo. El tag puede estar dormido. Reinicialo (apretá 5 seg) y probá de nuevo.";
-            } else {
-                mensaje += " " + error.message;
-            }
-            document.getElementById('estadoBLE').innerHTML = mensaje;
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-        }
+    async function conectarMokoW6() {
+    if (!navigator.bluetooth) {
+        document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
+        document.getElementById('estadoBLE').style.color = "#dc2626";
+        return;
     }
+
+    try {
+        document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg para despertarlo.<br>2. Seleccioná 'BeaconX Pro' o 'Moko' en la lista.";
+        document.getElementById('estadoBLE').style.color = "#f59e0b";
+
+        mokoDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
+        });
+
+        document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
+        
+        const server = await Promise.race([
+            mokoDevice.gatt.connect(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+        ]);
+
+        const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+        mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+        
+        await mokoCharacteristic.startNotifications();
+        mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+        mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+
+        bleConectado = true;
+        document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
+        document.getElementById('estadoBLE').style.color = "#059669";
+        console.log('[BLE] ✅ Conectado exitosamente al tag');
+        
+    } catch (error) {
+        console.error('[BLE] Error:', error);
+        let mensaje = "❌ No se pudo conectar.";
+        if (error.name === 'NotFoundError') {
+            mensaje = "❌ No se seleccionó ningún dispositivo. Intentá de nuevo.";
+        } else if (error.message.includes('Timeout')) {
+            mensaje = "⏳ Se agotó el tiempo. El tag puede estar dormido. Reinicialo (apretá 5 seg) y probá de nuevo.";
+        } else {
+            mensaje += " " + error.message;
+        }
+        document.getElementById('estadoBLE').innerHTML = mensaje;
+        document.getElementById('estadoBLE').style.color = "#dc2626";
+    }
+}
 
     function manejarCambioBotonMoko(event) {
         try {
