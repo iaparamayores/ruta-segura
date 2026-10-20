@@ -124,7 +124,7 @@
         <!-- INICIO: Conexión BLE Moko W6 -->
         <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
             <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Conectá tu anillo/pulsera Moko para usar el botón SOS físico</p>
-            <button id="btnConectarBLE" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:bold;">⌚ Conectar Anillo Moko (BLE)</button>
+            <button id="btnConectarBLE" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:bold;"> Conectar Anillo Moko (BLE)</button>
             <p id="estadoBLE" style="font-size:14px; color:#6b7280; margin-top:8px; text-align:center;">Estado: Desconectado</p>
         </div>
         <!-- FIN: Conexión BLE Moko W6 -->
@@ -619,7 +619,7 @@
         const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
         if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; } if (!pass) { nubeToastRS('Escribí tu contraseña'); return; }
         try { const { error } = await supaRS.auth.signInWithPassword({ email: mail, password: pass }); if (error) throw error; nubeToastRS('☁️ Conectado a la nube'); nubeFormRS.style.display = 'none'; await nubeConectarRS(); } 
-        catch (e) { nubeToastRS('⚠️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
+        catch (e) { nubeToastRS('️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
     });
     document.getElementById('nube-new-rs').addEventListener('click', async () => {
         const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
@@ -705,76 +705,69 @@
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
     });
-// ============================================
+
+    // ============================================
     // INTEGRACIÓN BLE - MOKO W6 / BEACONX PRO
     // ============================================
-    // NOTA ARQUITECTÓNICA: Esta función maneja la fuente BLE. 
-    // En el futuro, podemos agregar aquí fuentes GPS o LoRaWAN sin tocar el resto de la app.
-    
     let mokoDevice = null;
     let mokoCharacteristic = null;
     let bleConectado = false;
 
     async function conectarMokoW6() {
-    async function conectarMokoW6() {
-    if (!navigator.bluetooth) {
-        document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
-        document.getElementById('estadoBLE').style.color = "#dc2626";
-        return;
-    }
-
-    try {
-        document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg para despertarlo.<br>2. Seleccioná 'BeaconX Pro' o 'Moko' en la lista.";
-        document.getElementById('estadoBLE').style.color = "#f59e0b";
-
-        mokoDevice = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
-        });
-
-        document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
-        
-        const server = await Promise.race([
-            mokoDevice.gatt.connect(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-        ]);
-
-        const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
-        mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
-        
-        await mokoCharacteristic.startNotifications();
-        mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
-        mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
-
-        bleConectado = true;
-        document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
-        document.getElementById('estadoBLE').style.color = "#059669";
-        console.log('[BLE] ✅ Conectado exitosamente al tag');
-        
-    } catch (error) {
-        console.error('[BLE] Error:', error);
-        let mensaje = "❌ No se pudo conectar.";
-        if (error.name === 'NotFoundError') {
-            mensaje = "❌ No se seleccionó ningún dispositivo. Intentá de nuevo.";
-        } else if (error.message.includes('Timeout')) {
-            mensaje = "⏳ Se agotó el tiempo. El tag puede estar dormido. Reinicialo (apretá 5 seg) y probá de nuevo.";
-        } else {
-            mensaje += " " + error.message;
+        if (!navigator.bluetooth) {
+            document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+            return;
         }
-        document.getElementById('estadoBLE').innerHTML = mensaje;
-        document.getElementById('estadoBLE').style.color = "#dc2626";
+        try {
+            document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg para despertarlo.<br>2. Seleccioná 'BeaconX Pro' o 'Moko' en la lista.";
+            document.getElementById('estadoBLE').style.color = "#f59e0b";
+
+            mokoDevice = await navigator.bluetooth.requestDevice({
+                acceptAllDevices: true,
+                optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
+            });
+
+            document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
+            
+            const server = await Promise.race([
+                mokoDevice.gatt.connect(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
+            ]);
+
+            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+            
+            await mokoCharacteristic.startNotifications();
+            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+
+            bleConectado = true;
+            document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
+            document.getElementById('estadoBLE').style.color = "#059669";
+            console.log('[BLE] ✅ Conectado exitosamente al tag');
+            
+        } catch (error) {
+            console.error('[BLE] Error:', error);
+            let mensaje = "❌ No se pudo conectar.";
+            if (error.name === 'NotFoundError') {
+                mensaje = "❌ No se seleccionó ningún dispositivo. Intentá de nuevo.";
+            } else if (error.message.includes('Timeout')) {
+                mensaje = "⏳ Se agotó el tiempo. El tag puede estar dormido. Reinicialo (apretá 5 seg) y probá de nuevo.";
+            } else {
+                mensaje += " " + error.message;
+            }
+            document.getElementById('estadoBLE').innerHTML = mensaje;
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+        }
     }
-}
 
     function manejarCambioBotonMoko(event) {
         try {
             const valor = event.target.value.getUint8(0);
             console.log('[BLE] Valor recibido del botón:', valor);
-            
-            // Recordemos: 01 = suelto, 00 = presionado
             if (valor === 0x00) {
                 console.log('[BLE] 🚨 ¡BOTÓN PRESIONADO! Disparando SOS...');
-                // Disparamos la misma función que usa el botón en pantalla
                 if (typeof activarSOS === 'function') {
                     activarSOS();
                 }
@@ -791,7 +784,6 @@
         document.getElementById('estadoBLE').style.color = "#f59e0b";
     }
 
-    // Vinculamos el botón del HTML a esta función
     document.addEventListener('DOMContentLoaded', function() {
         const btnBLE = document.getElementById('btnConectarBLE');
         if (btnBLE) {
