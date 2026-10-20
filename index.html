@@ -21,13 +21,7 @@
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
-        #mapa {
-            flex: 1;
-            min-height: 280px;
-            border-radius: 12px;
-            border: 3px solid #999;
-            z-index: 1;
-        }
+        #mapa { flex: 1; min-height: 280px; border-radius: 12px; border: 3px solid #999; z-index: 1; }
         #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
         .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
         .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
@@ -41,13 +35,14 @@
         #espacioConsejos { height: 70px; background-color: #fff3e0; border: 2px dashed #ffb74d; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: 15px; color: #e65100; font-weight: bold; flex-shrink: 0; transition: opacity 0.3s ease-in-out; }
         footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
         .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
+        
         #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
         #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
         #cerrarAjustes { background: #d32f2f !important; color: white !important; margin-top: 15px; }
-        #botonSalir { background-color: #424242 !important; color: white !important; }
         #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
         #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
+        
         .panel-datos { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 16px; z-index: 200; }
         .panel-datos.visible { display: flex; }
         .panel-datos-contenido { width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 5px 18px rgba(0,0,0,0.35); }
@@ -67,16 +62,8 @@
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
 
-        @keyframes latidoFondo {
-            0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); }
-            50%      { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); }
-        }
-        @keyframes sirenaViva {
-            0%, 100% { transform: rotate(-10deg) scale(1); }
-            25%      { transform: rotate(10deg) scale(1.2); }
-            50%      { transform: rotate(-10deg) scale(1.05); }
-            75%      { transform: rotate(10deg) scale(1.2); }
-        }
+        @keyframes latidoFondo { 0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); } 50% { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); } }
+        @keyframes sirenaViva { 0%, 100% { transform: rotate(-10deg) scale(1); } 25% { transform: rotate(10deg) scale(1.2); } 50% { transform: rotate(-10deg) scale(1.05); } 75% { transform: rotate(10deg) scale(1.2); } }
         #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
         #cartelSOS .sirena { display: inline-block; animation: sirenaViva 0.7s ease-in-out infinite; }
     </style>
@@ -97,95 +84,59 @@
         </div>
 
         <div id="mapa"></div>
-
         <div id="cajaMensaje">&#9989; Todo listo</div>
 
         <div class="fila-botones-accion">
-            <button id="btnCompartir" class="boton-accion-cuadrado">
-                <span class="icono">&#128205;</span>
-                <span>Compartir</span>
-            </button>
-            <button id="btnLlegueBien" class="boton-accion-cuadrado">
-                <span class="icono">&#127968;</span>
-                <span>Llegu&#233; bien</span>
-            </button>
-            <button id="botonVoz" class="boton-accion-cuadrado">
-                <span class="icono">&#127908;</span>
-                <span>Hablar</span>
-            </button>
-            <button id="btnRutaRapida" class="boton-accion-cuadrado">
-                <span class="icono">&#129517;</span>
-                <span>Ir a...</span>
-            </button>
+            <button id="btnCompartir" class="boton-accion-cuadrado"><span class="icono">&#128205;</span><span>Compartir</span></button>
+            <button id="btnLlegueBien" class="boton-accion-cuadrado"><span class="icono">&#127968;</span><span>Llegu&#233; bien</span></button>
+            <button id="botonVoz" class="boton-accion-cuadrado"><span class="icono">&#127908;</span><span>Hablar</span></button>
+            <button id="btnRutaRapida" class="boton-accion-cuadrado"><span class="icono">&#129517;</span><span>Ir a...</span></button>
         </div>
 
-        <div id="espacioConsejos">
-            &#128161; Consejo: Manten&#233; presionado el bot&#243;n &#128681; por 2 segundos en caso de emergencia.
-        </div>
+        <div id="espacioConsejos">&#128161; Consejo: Manten&#233; presionado el bot&#243;n &#128681; por 2 segundos en caso de emergencia.</div>
         <footer>Sugerencias a: iaparamayoresapp@gmail.com</footer>
     </div>
 
     <div id="panelAjustes">
-    <h3>&#128203; Mis Datos y Ayuda</h3>
-    
-    <!-- Buscador de rutas -->
-    <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
-    <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
-    <button id="btnRuta">&#129517; ¿CÓMO LLEGO A...?</button>
-    
-    <!-- Herramientas útiles -->
-    <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
-    <button id="btnLugares">&#128204; Mis Lugares guardados</button>
-    <button id="btnContactos">&#128101; Contactos de confianza</button>
-    
-    <hr style="margin:15px 0; border: 1px solid #eee;">
-    
-    <!-- Ayuda inmediata -->
-    <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
-    <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
-    <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Policía / Emergencias</button>
-    <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
-    
-    <hr style="margin:15px 0; border: 1px solid #eee;">
-    
-    <!-- Destinos útiles -->
-    <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos útiles:</p>
-    <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
-    <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
-    <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
-    
-    <hr style="margin:15px 0; border: 1px solid #eee;">
-    
-    <!-- Configuración y vinculación -->
-    <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
-    <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
-    <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
-    
+        <h3>&#128203; Mis Datos y Ayuda</h3>
+        <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
+        <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
+        <button id="btnRuta">&#129517; ¿CÓMO LLEGO A...?</button>
+        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
+        <button id="btnLugares">&#128204; Mis Lugares guardados</button>
+        <button id="btnContactos">&#128101; Contactos de confianza</button>
+        <hr style="margin:15px 0; border: 1px solid #eee;">
+        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
+        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
+        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Policía / Emergencias</button>
+        <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
+        <hr style="margin:15px 0; border: 1px solid #eee;">
+        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos útiles:</p>
+        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
+        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
+        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
+        <hr style="margin:15px 0; border: 1px solid #eee;">
+        
+        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
+        <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
+        <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
+        
         <!-- INICIO: Conexión BLE Moko W6 -->
-<div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
-    <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">
-         Conectá tu anillo/pulsera Moko para usar el botón SOS físico
-    </p>
-    <button id="btnConectarBLE" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:bold;">
-        ⌚ Conectar Anillo Moko (BLE)
-    </button>
-    <p id="estadoBLE" style="font-size:14px; color:#6b7280; margin-top:8px; text-align:center;">
-        Estado: Desconectado
-    </p>
-</div>
-<!-- FIN: Conexión BLE Moko W6 -->
-    
-    <!-- Panel del código generado -->
-    <div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
-        <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
-        <p id="codigoTexto" style="font-size:48px;font-weight:bold;color:#059669;letter-spacing:8px;margin:10px 0;"></p>
-        <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu familiar (es permanente)</p>
-        <button id="btnCerrarCodigo" style="margin-top:15px;padding:10px 20px;background:#6c757d;color:white;border:none;border-radius:8px;">Cerrar</button>
+        <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
+            <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Conectá tu anillo/pulsera Moko para usar el botón SOS físico</p>
+            <button id="btnConectarBLE" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:bold;">⌚ Conectar Anillo Moko (BLE)</button>
+            <p id="estadoBLE" style="font-size:14px; color:#6b7280; margin-top:8px; text-align:center;">Estado: Desconectado</p>
+        </div>
+        <!-- FIN: Conexión BLE Moko W6 -->
+        
+        <div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
+            <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
+            <p id="codigoTexto" style="font-size:48px;font-weight:bold;color:#059669;letter-spacing:8px;margin:10px 0;"></p>
+            <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu familiar (es permanente)</p>
+            <button id="btnCerrarCodigo" style="margin-top:15px;padding:10px 20px;background:#6c757d;color:white;border:none;border-radius:8px;">Cerrar</button>
+        </div>
+        <button id="cerrarAjustes" style="background:#d32f2f; color:white; width:100%; padding:12px; font-size:16px; margin-top:15px; border:none; border-radius:12px; font-weight:bold;">❌ Cerrar</button>
     </div>
-    
-    <!-- Botón cerrar (siempre al final) -->
-    <button id="cerrarAjustes" style="background:#d32f2f; color:white; width:100%; padding:12px; font-size:16px; margin-top:15px; border:none; border-radius:12px; font-weight:bold;"> Cerrar</button>
-</div>
 
     <div id="panelDatos" class="panel-datos" aria-hidden="true">
         <div class="panel-datos-contenido" role="dialog" aria-modal="true" aria-labelledby="tituloDatos">
@@ -227,7 +178,6 @@
     const botonAjustes = document.getElementById('botonAjustes');
     const panelAjustes = document.getElementById('panelAjustes');
     const cerrarAjustes = document.getElementById('cerrarAjustes');
-    const botonSalir = document.getElementById('botonSalir');
     const btnRuta = document.getElementById('btnRuta');
     const btnRutaRapida = document.getElementById('btnRutaRapida');
     const btnSalud = document.getElementById('btnSalud');
@@ -258,38 +208,10 @@
     const CLAVE_CONTACTOS = 'rutaSegura_contactos_v1';
     let tipoDatoActual = 'lugares';
 
-    function claveDatosActual() {
-        return tipoDatoActual === 'lugares' ? CLAVE_LUGARES : CLAVE_CONTACTOS;
-    }
-
-    function leerDatos(clave) {
-        try {
-            const datos = JSON.parse(localStorage.getItem(clave) || '[]');
-            return Array.isArray(datos) ? datos : [];
-        } catch (error) {
-            return [];
-        }
-    }
-
-    function guardarDatos(clave, datos) {
-        try {
-            localStorage.setItem(clave, JSON.stringify(datos));
-            return true;
-        } catch (error) {
-            alert('No se pudieron guardar los datos en este dispositivo.');
-            return false;
-        }
-    }
-
-    function escaparHtml(valor) {
-        return String(valor).replace(/[&<>"']/g, caracter => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        }[caracter]));
-    }
+    function claveDatosActual() { return tipoDatoActual === 'lugares' ? CLAVE_LUGARES : CLAVE_CONTACTOS; }
+    function leerDatos(clave) { try { const datos = JSON.parse(localStorage.getItem(clave) || '[]'); return Array.isArray(datos) ? datos : []; } catch (error) { return []; } }
+    function guardarDatos(clave, datos) { try { localStorage.setItem(clave, JSON.stringify(datos)); return true; } catch (error) { alert('No se pudieron guardar los datos en este dispositivo.'); return false; } }
+    function escaparHtml(valor) { return String(valor).replace(/[&<>"']/g, caracter => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[caracter])); }
 
     function abrirPanelDatos(tipo) {
         tipoDatoActual = tipo;
@@ -317,9 +239,7 @@
         const datos = leerDatos(claveDatosActual());
         const esLugar = tipoDatoActual === 'lugares';
         if (!datos.length) {
-            listaDatos.innerHTML = esLugar
-                ? '<div class="dato-vacio">Todavía no guardaste ningún lugar.</div>'
-                : '<div class="dato-vacio">Todavía no guardaste ningún contacto.</div>';
+            listaDatos.innerHTML = esLugar ? '<div class="dato-vacio">Todavía no guardaste ningún lugar.</div>' : '<div class="dato-vacio">Todavía no guardaste ningún contacto.</div>';
             return;
         }
         listaDatos.innerHTML = datos.map((dato, indice) => `
@@ -337,15 +257,11 @@
     function guardarDatoActual() {
         const nombre = inputDatoNombre.value.trim();
         const valor = inputDatoValor.value.trim();
-        if (!nombre || !valor) {
-            alert(tipoDatoActual === 'lugares' ? 'Completá el nombre y la dirección.' : 'Completá el nombre y el teléfono.');
-            return;
-        }
+        if (!nombre || !valor) { alert(tipoDatoActual === 'lugares' ? 'Completá el nombre y la dirección.' : 'Completá el nombre y el teléfono.'); return; }
         const datos = leerDatos(claveDatosActual());
         datos.push({ nombre, valor });
         if (guardarDatos(claveDatosActual(), datos)) {
-            inputDatoNombre.value = '';
-            inputDatoValor.value = '';
+            inputDatoNombre.value = ''; inputDatoValor.value = '';
             renderizarDatos();
             cajaMensaje.textContent = tipoDatoActual === 'lugares' ? 'Lugar guardado.' : 'Contacto guardado.';
             inputDatoNombre.focus();
@@ -361,10 +277,7 @@
             cajaMensaje.textContent = 'Abriendo ruta a ' + dato.nombre + '...';
         } else {
             const telefono = dato.valor.replace(/[^\d+]/g, '');
-            if (!telefono) {
-                alert('El teléfono guardado no es válido.');
-                return;
-            }
+            if (!telefono) { alert('El teléfono guardado no es válido.'); return; }
             window.location.href = 'tel:' + telefono;
         }
     }
@@ -373,10 +286,7 @@
         const boton = evento.target.closest('button[data-accion]');
         if (!boton) return;
         const indice = Number(boton.dataset.indice);
-        if (boton.dataset.accion === 'usar') {
-            usarDato(indice);
-            return;
-        }
+        if (boton.dataset.accion === 'usar') { usarDato(indice); return; }
         const datos = leerDatos(claveDatosActual());
         const dato = datos[indice];
         if (dato && confirm('¿Eliminar "' + dato.nombre + '"?')) {
@@ -462,7 +372,6 @@
         cajaMensaje.textContent = "Abriendo WhatsApp...";
     }
 
-    // Datos de tu contacto de confianza (Lili)
     const EMAIL_FAMILIAR = 'puertocolibri@gmail.com';
     const TEL_FAMILIAR = '5491150617831';
 
@@ -472,33 +381,19 @@
         if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
         const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci\u00f3n)';
 
-        // 1) Guardar el evento en la nube
-        try {
-            await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' });
-        } catch (e) { console.error('Error subiendo SOS:', e); }
-
-        // 2) Mandar email al familiar (FormSubmit)
+        try { await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' }); } catch (e) { console.error('Error subiendo SOS:', e); }
         try {
             await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({
-                    _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(),
-                    mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.',
-                    ubicacion: mapaLink
-                })
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(), mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.', ubicacion: mapaLink })
             });
         } catch (e) { console.error('Error enviando email:', e); }
-
-        // 3) PUSH instantáneo vía push-send propio (VAPID)
         try {
             await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ from: USER_ID })
             });
         } catch (e) { console.error('Error enviando push:', e); }
-
         cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
     }
 
@@ -523,25 +418,11 @@
         navigator.geolocation.getCurrentPosition(async pos => {
             miUbicacion = pos.coords;
             try {
-                await sb.from('ubicaciones_ruta').insert({
-                    user_id: USER_ID,
-                    lat: pos.coords.latitude,
-                    lon: pos.coords.longitude,
-                    precision: pos.coords.accuracy
-                });
+                await sb.from('ubicaciones_ruta').insert({ user_id: USER_ID, lat: pos.coords.latitude, lon: pos.coords.longitude, precision: pos.coords.accuracy });
                 console.log('Ubicación subida a la nube');
             } catch (e) { cajaMensaje.textContent = '\u274c Error insert: ' + e.message; }
         }, (err) => { cajaMensaje.textContent = '\u274c Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
     }
-
-    document.getElementById('btnDebugInsert').addEventListener('click', async () => {
-        cajaMensaje.textContent = '\u23f3 Probando insert...';
-        const { data, error } = await sb.from('ubicaciones_ruta').insert({
-            user_id: USER_ID, lat: -37.34, lon: -57.03, precision: 10
-        }).select();
-        if (error) cajaMensaje.textContent = '\u274c Insert error: ' + error.message;
-        else cajaMensaje.textContent = '\u2705 Insert OK, id=' + (data && data[0] ? data[0].id : '?');
-    });
 
     btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
     btnPolicia.addEventListener('click', () => { if(confirm("Querés llamar ahora al número de emergencias?")) window.location.href = "tel:911"; });
@@ -557,27 +438,14 @@
     inputDatoValor.addEventListener('keydown', evento => { if (evento.key === 'Enter') guardarDatoActual(); });
     panelDatos.addEventListener('click', evento => { if (evento.target === panelDatos) cerrarPanelDatos(); });
 
-    botonSalir.addEventListener('click', () => {
-        if(confirm("Seguro que querés salir de Ruta Segura?")) {
-            cajaMensaje.textContent = "Gracias por usar Ruta Segura. ¡Cuidate!";
-            setTimeout(() => { window.location.replace("https://www.google.com"); }, 1000);
-        }
-    });
-
     botonAjustes.addEventListener('click', () => { panelAjustes.style.display = 'block'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; });
     cerrarAjustes.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = ''; });
 
     btnRuta.addEventListener('click', () => {
-        inputDestino.style.display = 'block';
-        btnBuscarDestino.style.display = 'block';
-        inputDestino.focus();
+        inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
         inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
         cajaMensaje.textContent = "\ud83e\udded Escribí tu destino y tocá 'Buscar ruta'";
-        inputDestino.onkeypress = function(e) {
-            if(e.key === 'Enter') {
-                btnBuscarDestino.click();
-            }
-        };
+        inputDestino.onkeypress = function(e) { if(e.key === 'Enter') btnBuscarDestino.click(); };
     });
 
     btnBuscarDestino.addEventListener('click', () => {
@@ -589,28 +457,15 @@
     });
 
     btnRutaRapida.addEventListener('click', () => {
-        panelAjustes.style.display = 'block';
-        inputDestino.style.display = 'block';
-        btnBuscarDestino.style.display = 'block';
-        inputDestino.focus();
+        panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
         inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
         cajaMensaje.textContent = "\u270f\ufe0f Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
-        inputDestino.onkeypress = function(e) {
-            if(e.key === 'Enter') {
-                btnBuscarDestino.click();
-            }
-        };
+        inputDestino.onkeypress = function(e) { if(e.key === 'Enter') btnBuscarDestino.click(); };
     });
 
     window.addEventListener('load', () => {
-        inicializarMapa();
-        iniciarUbicacion();
-        subirUbicacionPeriodica();
-        setInterval(subirUbicacionPeriodica, 300000);
-        sb.from('ubicaciones_ruta').select('id').limit(1).then(res => {
-            if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message;
-            else console.log('\u2705 Supabase conectado');
-        });
+        inicializarMapa(); iniciarUbicacion(); subirUbicacionPeriodica(); setInterval(subirUbicacionPeriodica, 300000);
+        sb.from('ubicaciones_ruta').select('id').limit(1).then(res => { if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message; else console.log('\u2705 Supabase conectado'); });
     });
 
     botonVoz.addEventListener('click', iniciarVoz);
@@ -635,35 +490,22 @@
 
     let deferredPrompt;
     const btnInstalarManual = document.getElementById('btnInstalarManual');
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if(btnInstalarManual) btnInstalarManual.style.display = 'block';
-    });
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; if(btnInstalarManual) btnInstalarManual.style.display = 'block'; });
     if(btnInstalarManual) {
         btnInstalarManual.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                btnInstalarManual.style.display = 'none';
-            } else {
-                alert("La app ya está instalada o tu navegador no permite instalarla desde aquí.");
-            }
+            if (deferredPrompt) { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; btnInstalarManual.style.display = 'none'; } 
+            else { alert("La app ya está instalada o tu navegador no permite instalarla desde aquí."); }
         });
     }
 
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err));
-        });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err)); });
     }
 
     function mostrarCartelSOS(mapa) {
         let d = document.getElementById('cartelSOS');
         if (!d) {
-            d = document.createElement('div');
-            d.id = 'cartelSOS';
+            d = document.createElement('div'); d.id = 'cartelSOS';
             d.style.cssText = 'position:fixed;inset:0;background:rgba(200,0,0,0.96);color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
             document.body.appendChild(d);
         }
@@ -675,12 +517,7 @@
     }
 
     let audioCtx = null;
-    function desbloquearAudio() {
-        try {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        } catch (e) {}
-    }
+    function desbloquearAudio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
     ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
 
     let sirenaLoop = null;
@@ -690,15 +527,10 @@
         for (let i = 0; i < 4; i++) {
             const freq = (i % 2 === 0) ? 1046 : 784;
             [0, 4].forEach(det => {
-                const osc = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                osc.type = 'square';
-                osc.frequency.value = freq + det;
-                g.gain.setValueAtTime(0.0001, t);
-                g.gain.exponentialRampToValueAtTime(1.0, t + 0.02);
-                g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
-                osc.connect(g); g.connect(audioCtx.destination);
-                osc.start(t); osc.stop(t + 0.3);
+                const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.value = freq + det;
+                g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(1.0, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+                osc.connect(g); g.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.3);
             });
             t += 0.3;
         }
@@ -706,51 +538,29 @@
 
     function sonarAlarma() {
         try {
-            desbloquearAudio();
-            if (!audioCtx) return;
-            unCicloSirena();
-            clearInterval(sirenaLoop);
-            sirenaLoop = setInterval(() => {
-                const c = document.getElementById('cartelSOS');
-                if (c && c.style.display !== 'none') unCicloSirena();
-                else clearInterval(sirenaLoop);
-            }, 1500);
+            desbloquearAudio(); if (!audioCtx) return; unCicloSirena(); clearInterval(sirenaLoop);
+            sirenaLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') unCicloSirena(); else clearInterval(sirenaLoop); }, 1500);
         } catch (e) { console.log('audio:', e); }
     }
 
-    function detenerAlarma() {
-        clearInterval(sirenaLoop);
-        clearInterval(window.__vibLoop);
-        try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {}
-    }
-
+    function detenerAlarma() { clearInterval(sirenaLoop); clearInterval(window.__vibLoop); try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {} }
     function vibrarAlarma() {
         try {
-            if (!navigator.vibrate) return;
-            navigator.vibrate([700, 250, 700, 250, 700]);
-            clearInterval(window.__vibLoop);
-            window.__vibLoop = setInterval(() => {
-                const c = document.getElementById('cartelSOS');
-                if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]);
-                else clearInterval(window.__vibLoop);
-            }, 3000);
+            if (!navigator.vibrate) return; navigator.vibrate([700, 250, 700, 250, 700]); clearInterval(window.__vibLoop);
+            window.__vibLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]); else clearInterval(window.__vibLoop); }, 3000);
         } catch (e) {}
     }
 
     function alertarEmergencia(sos) {
         const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
-        vibrarAlarma();
-        sonarAlarma();
+        vibrarAlarma(); sonarAlarma();
         cajaMensaje.textContent = '\ud83d\udea8 \u00a1EMERGENCIA! Tu contacto activ\u00f3 el SOS.';
         mostrarCartelSOS(mapa);
     }
 
     let ultimoSosVisto = null;
     function iniciarAlertaEnVivo() {
-        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => {
-            if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id;
-            cajaMensaje.textContent = '\ud83d\udce1 Vigilo SOS desde #' + (ultimoSosVisto || 0) + ' (yo soy ' + USER_ID + ')';
-        });
+        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; cajaMensaje.textContent = '\ud83d\udce1 Vigilo SOS desde #' + (ultimoSosVisto || 0) + ' (yo soy ' + USER_ID + ')'; });
         setInterval(async () => {
             const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
             if (r.error) { cajaMensaje.textContent = '\u274c Sondeo error: ' + r.error.message; return; }
@@ -764,133 +574,65 @@
             alertarEmergencia(top);
         }, 6000);
     }
-
-    window.addEventListener('load', () => {
-        iniciarAlertaEnVivo();
-    });
+    window.addEventListener('load', () => { iniciarAlertaEnVivo(); });
 
     // ===== NUBE RUTA SEGURA =====
     const SUPA_URL_RS = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
     const SUPA_KEY_RS = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
     let supaRS = null, uidRS = null, nubeOK_RS = false, nubeModo_RS = 'off';
-
     function nubeToastRS(msg) {
         let t = document.getElementById('nube-toast-rs');
         if (!t) { t = document.createElement('div'); t.id = 'nube-toast-rs'; document.body.appendChild(t); }
-        t.textContent = msg; t.classList.add('ver');
-        setTimeout(() => t.classList.remove('ver'), 3500);
+        t.textContent = msg; t.classList.add('ver'); setTimeout(() => t.classList.remove('ver'), 3500);
     }
-
     (function () {
         const st = document.createElement('style');
         st.textContent = '#nube-rs{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube-rs.tocable{cursor:pointer;text-decoration:underline;} #nube-form-rs{display:none;text-align:center;margin:.4rem 0;} #nube-toast-rs{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast-rs.ver{opacity:1;}';
         document.head.appendChild(st);
     })();
-
     const nubeElRS = document.createElement('p'); nubeElRS.id = 'nube-rs';
     const nubeFormRS = document.createElement('div'); nubeFormRS.id = 'nube-form-rs';
     nubeFormRS.innerHTML = '<input id="nube-mail-rs" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass-rs" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"><br><button id="nube-ok-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button> <button id="nube-new-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#27ae60;color:#fff;font-weight:700;font-size:1rem;">Crear cuenta</button>';
-
     const anclaRS = document.querySelector('h1');
-    if (anclaRS) { anclaRS.after(nubeElRS); nubeElRS.after(nubeFormRS); }
-    else { document.body.prepend(nubeFormRS); document.body.prepend(nubeElRS); }
-
-    function nubeEstadoRS(txt, tocable) {
-        nubeElRS.textContent = txt;
-        if (tocable) nubeElRS.classList.add('tocable');
-        else nubeElRS.classList.remove('tocable');
-    }
-
-    try {
-        if (window.supabase && window.supabase.createClient) {
-            supaRS = window.supabase.createClient(SUPA_URL_RS, SUPA_KEY_RS, {
-                auth: { persistSession: true, autoRefreshToken: true, flowType: 'implicit', detectSessionInUrl: true }
-            });
-        }
-    } catch (e) {}
-
+    if (anclaRS) { anclaRS.after(nubeElRS); nubeElRS.after(nubeFormRS); } else { document.body.prepend(nubeFormRS); document.body.prepend(nubeElRS); }
+    function nubeEstadoRS(txt, tocable) { nubeElRS.textContent = txt; if (tocable) nubeElRS.classList.add('tocable'); else nubeElRS.classList.remove('tocable'); }
+    try { if (window.supabase && window.supabase.createClient) { supaRS = window.supabase.createClient(SUPA_URL_RS, SUPA_KEY_RS, { auth: { persistSession: true, autoRefreshToken: true, flowType: 'implicit', detectSessionInUrl: true } }); } } catch (e) {}
     async function nubeRescatarTokenRS() {
         if (!supaRS) return;
         try {
             const h = window.location.hash || '';
-            if (h.includes('access_token=')) {
-                const p = new URLSearchParams(h.substring(1));
-                const at = p.get('access_token'); const rt = p.get('refresh_token');
-                if (at) await supaRS.auth.setSession({ access_token: at, refresh_token: rt || at });
-            }
-            const q = new URLSearchParams(window.location.search);
-            const code = q.get('code');
-            if (code) await supaRS.auth.exchangeCodeForSession(code);
+            if (h.includes('access_token=')) { const p = new URLSearchParams(h.substring(1)); const at = p.get('access_token'); const rt = p.get('refresh_token'); if (at) await supaRS.auth.setSession({ access_token: at, refresh_token: rt || at }); }
+            const q = new URLSearchParams(window.location.search); const code = q.get('code'); if (code) await supaRS.auth.exchangeCodeForSession(code);
             if (h.includes('access_token=') || code) history.replaceState(null, '', window.location.pathname);
         } catch (e) { console.log('[nube rs] rescate', e); }
     }
-
     async function nubeConectarRS() {
         if (!supaRS) { nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); return; }
         try {
             const { data: ses } = await supaRS.auth.getSession();
-            if (ses && ses.session) {
-                uidRS = ses.session.user.id;
-                nubeOK_RS = true; nubeModo_RS = 'ok';
-                nubeEstadoRS('☁️ Conectado con tu familia — alerta familiar activa');
-            } else {
-                uidRS = null; nubeOK_RS = false; nubeModo_RS = 'off';
-                nubeEstadoRS('☁️ Nube apagada — tocá acá para activarla', true);
-            }
+            if (ses && ses.session) { uidRS = ses.session.user.id; nubeOK_RS = true; nubeModo_RS = 'ok'; nubeEstadoRS('☁️ Conectado con tu familia — alerta familiar activa'); } 
+            else { uidRS = null; nubeOK_RS = false; nubeModo_RS = 'off'; nubeEstadoRS('☁️ Nube apagada — tocá acá para activarla', true); }
         } catch (e) { nubeOK_RS = false; nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); }
     }
-
-    nubeElRS.addEventListener('click', () => {
-        if (nubeOK_RS) { nubeToastRS('☁️ La nube ya está conectada'); return; }
-        if (!supaRS) { nubeToastRS('Nube no disponible en este navegador'); return; }
-        nubeFormRS.style.display = (nubeFormRS.style.display === 'none') ? 'block' : 'none';
-    });
-
+    nubeElRS.addEventListener('click', () => { if (nubeOK_RS) { nubeToastRS('☁️ La nube ya está conectada'); return; } if (!supaRS) { nubeToastRS('Nube no disponible en este navegador'); return; } nubeFormRS.style.display = (nubeFormRS.style.display === 'none') ? 'block' : 'none'; });
     document.getElementById('nube-ok-rs').addEventListener('click', async () => {
-        const mail = (document.getElementById('nube-mail-rs').value || '').trim();
-        const pass = (document.getElementById('nube-pass-rs').value || '');
-        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; }
-        if (!pass) { nubeToastRS('Escribí tu contraseña'); return; }
-        try {
-            const { error } = await supaRS.auth.signInWithPassword({ email: mail, password: pass });
-            if (error) throw error;
-            nubeToastRS('☁️ Conectado a la nube');
-            nubeFormRS.style.display = 'none';
-            await nubeConectarRS();
-        } catch (e) { nubeToastRS('⚠️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
+        const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
+        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; } if (!pass) { nubeToastRS('Escribí tu contraseña'); return; }
+        try { const { error } = await supaRS.auth.signInWithPassword({ email: mail, password: pass }); if (error) throw error; nubeToastRS('☁️ Conectado a la nube'); nubeFormRS.style.display = 'none'; await nubeConectarRS(); } 
+        catch (e) { nubeToastRS('⚠️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
     });
-
     document.getElementById('nube-new-rs').addEventListener('click', async () => {
-        const mail = (document.getElementById('nube-mail-rs').value || '').trim();
-        const pass = (document.getElementById('nube-pass-rs').value || '');
-        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; }
-        if (pass.length < 6) { nubeToastRS('La contraseña necesita 6 caracteres o más'); return; }
+        const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
+        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; } if (pass.length < 6) { nubeToastRS('La contraseña necesita 6 caracteres o más'); return; }
         try {
-            const { data, error } = await supaRS.auth.signUp({ email: mail, password: pass });
-            if (error) throw error;
-            if (data && data.session) {
-                uidRS = data.session.user.id; nubeOK_RS = true;
-                nubeToastRS('☁️ Cuenta creada y conectada');
-                nubeFormRS.style.display = 'none';
-                await nubeConectarRS();
-            } else {
-                nubeToastRS('Cuenta creada: ahora tocá Entrar');
-            }
-        } catch (e) {
-            const m = (e && e.message) || '';
-            if (/already registered/i.test(m)) nubeToastRS('Ese mail ya tiene cuenta: tocá Entrar');
-            else nubeToastRS('⚠️ ' + (m || 'No se pudo crear'));
-        }
+            const { data, error } = await supaRS.auth.signUp({ email: mail, password: pass }); if (error) throw error;
+            if (data && data.session) { uidRS = data.session.user.id; nubeOK_RS = true; nubeToastRS('☁️ Cuenta creada y conectada'); nubeFormRS.style.display = 'none'; await nubeConectarRS(); } 
+            else { nubeToastRS('Cuenta creada: ahora tocá Entrar'); }
+        } catch (e) { const m = (e && e.message) || ''; if (/already registered/i.test(m)) nubeToastRS('Ese mail ya tiene cuenta: tocá Entrar'); else nubeToastRS('⚠️ ' + (m || 'No se pudo crear')); }
     });
+    window.addEventListener('load', async () => { await nubeRescatarTokenRS(); await nubeConectarRS(); });
 
-    window.addEventListener('load', async () => {
-        await nubeRescatarTokenRS();
-        await nubeConectarRS();
-    });
-    </script>
-
-    <script>
-    // --- Push VAPID propio (aislado: si falla, no rompe el resto de la app) ---
+    // --- Push VAPID propio ---
     (function(){
       function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -923,81 +665,122 @@
           } catch(e) { alert('❌ Error push: ' + e.message); }
         });
       });
-        // Alarma completa al tocar la notificación (app viva en segundo plano)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', function (evento) {
-        var d = evento.data || {};
-        if (d.tipo === 'sos-push') {
-          alertarEmergencia({ lat: d.lat, lon: d.lon });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', function (evento) {
+          var d = evento.data || {};
+          if (d.tipo === 'sos-push') { alertarEmergencia({ lat: d.lat, lon: d.lon }); }
+        });
+      }
+      window.addEventListener('load', function () {
+        var q = new URLSearchParams(window.location.search);
+        if (q.get('sos') === '1') {
+          var lat = q.get('lat') ? parseFloat(q.get('lat')) : null;
+          var lon = q.get('lon') ? parseFloat(q.get('lon')) : null;
+          setTimeout(function () { alertarEmergencia({ lat: lat, lon: lon }); }, 500);
         }
       });
-    }
-    // Si la app se abre desde la notificación (?sos=1), alarma completa al cargar
-    window.addEventListener('load', function () {
-      var q = new URLSearchParams(window.location.search);
-      if (q.get('sos') === '1') {
-        var lat = q.get('lat') ? parseFloat(q.get('lat')) : null;
-        var lon = q.get('lon') ? parseFloat(q.get('lon')) : null;
-        setTimeout(function () { alertarEmergencia({ lat: lat, lon: lon }); }, 500);
-      }
-    });
     })();
-// --- Generar código de vinculación (código único y permanente) ---
-window.addEventListener('DOMContentLoaded', function() {
-  const btnGenerar = document.getElementById('btnGenerarCodigo');
-  const btnCerrar = document.getElementById('btnCerrarCodigo');
-  const codigoGenerado = document.getElementById('codigoGenerado');
-  const codigoTexto = document.getElementById('codigoTexto');
-  
-  if (btnGenerar) {
-    btnGenerar.addEventListener('click', async function() {
-      try {
-        // Buscar si ya tiene un código activo
-        const { data: codigosExistentes, error: errorBusqueda } = await sb
-          .from('codigos_vinculacion')
-          .select('codigo')
-          .eq('adulto_id', USER_ID)
-          .eq('usada', false)
-          .limit(1);
-        
-        if (errorBusqueda) throw errorBusqueda;
-        
-        let codigo;
-        
-        if (codigosExistentes && codigosExistentes.length > 0) {
-          // Ya tiene un código, mostrarlo
-          codigo = codigosExistentes[0].codigo;
-        } else {
-          // Generar código nuevo de 6 dígitos
-          codigo = Math.floor(100000 + Math.random() * 900000).toString();
-          
-          // Guardar en Supabase
-          const { data, error } = await sb.from('codigos_vinculacion').insert({
-            codigo: codigo,
-            adulto_id: USER_ID,
-            nombre_adulto: 'Usuario'
-          }).select();
-          
-          if (error) throw error;
-        }
-        
-        // Mostrar el código
-        codigoTexto.textContent = codigo;
-        codigoGenerado.style.display = 'block';
-        
-      } catch (e) {
-        console.error('[DEBUG] Error:', e);
-        alert('❌ Error al generar código: ' + e.message);
+
+    // --- Generar código de vinculación ---
+    window.addEventListener('DOMContentLoaded', function() {
+      const btnGenerar = document.getElementById('btnGenerarCodigo');
+      const btnCerrar = document.getElementById('btnCerrarCodigo');
+      const codigoGenerado = document.getElementById('codigoGenerado');
+      const codigoTexto = document.getElementById('codigoTexto');
+      if (btnGenerar) {
+        btnGenerar.addEventListener('click', async function() {
+          try {
+            const { data: codigosExistentes, error: errorBusqueda } = await sb.from('codigos_vinculacion').select('codigo').eq('adulto_id', USER_ID).eq('usada', false).limit(1);
+            if (errorBusqueda) throw errorBusqueda;
+            let codigo;
+            if (codigosExistentes && codigosExistentes.length > 0) { codigo = codigosExistentes[0].codigo; } 
+            else {
+              codigo = Math.floor(100000 + Math.random() * 900000).toString();
+              const { data, error } = await sb.from('codigos_vinculacion').insert({ codigo: codigo, adulto_id: USER_ID, nombre_adulto: 'Usuario', usada: false }).select();
+              if (error) throw error;
+            }
+            codigoTexto.textContent = codigo; codigoGenerado.style.display = 'block';
+          } catch (e) { console.error('[DEBUG] Error:', e); alert('❌ Error al generar código: ' + e.message); }
+        });
       }
+      if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
     });
-  }
-  
-  if (btnCerrar) {
-    btnCerrar.addEventListener('click', function() {
-      codigoGenerado.style.display = 'none';
+
+    // ============================================
+    // INTEGRACIÓN BLE - MOKO W6
+    // ============================================
+    let mokoDevice = null;
+    let mokoCharacteristic = null;
+    let bleConectado = false;
+
+    async function conectarMokoW6() {
+        if (!navigator.bluetooth) {
+            document.getElementById('estadoBLE').textContent = "❌ Tu navegador no soporta Bluetooth Web. Usá Chrome en Android.";
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+            return;
+        }
+        try {
+            document.getElementById('estadoBLE').textContent = "🔍 Buscando dispositivo Moko...";
+            document.getElementById('estadoBLE').style.color = "#f59e0b";
+
+            mokoDevice = await navigator.bluetooth.requestDevice({
+                filters: [{ services: ['e62a0001-1362-4f28-9327-f5b74e970801'] }],
+                optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
+            });
+
+            document.getElementById('estadoBLE').textContent = "📡 Conectando...";
+            const server = await mokoDevice.gatt.connect();
+            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+            await mokoCharacteristic.startNotifications();
+            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+
+            bleConectado = true;
+            document.getElementById('estadoBLE').textContent = "✅ Conectado y escuchando el botón";
+            document.getElementById('estadoBLE').style.color = "#059669";
+            console.log('[BLE] ✅ Conectado al Moko W6');
+        } catch (error) {
+            console.error('[BLE] Error:', error);
+            let mensaje = "❌ Error: ";
+            if (error.name === 'NotFoundError') mensaje += "No se encontró el dispositivo. Asegurate de que el Moko esté encendido y cerca.";
+            else if (error.name === 'SecurityError') mensaje += "Permiso de Bluetooth denegado.";
+            else mensaje += error.message;
+            document.getElementById('estadoBLE').textContent = mensaje;
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+        }
+    }
+
+    function manejarCambioBotonMoko(event) {
+        try {
+            const valor = event.target.value.getUint8(0);
+            console.log('[BLE] Valor recibido del botón:', valor);
+            if (valor === 0x00) {
+                console.log('[BLE] 🚨 ¡BOTÓN PRESIONADO! Disparando SOS...');
+                if (typeof activarSOS === 'function') {
+                    activarSOS();
+                } else {
+                    alert('🚨 ¡SOS! Botón del anillo presionado');
+                }
+            }
+        } catch (error) {
+            console.error('[BLE] Error al leer valor:', error);
+        }
+    }
+
+    function onMokoDesconectado() {
+        console.log('[BLE] Dispositivo desconectado');
+        bleConectado = false;
+        document.getElementById('estadoBLE').textContent = "⚠️ Desconectado. Tocá el botón para reconectar.";
+        document.getElementById('estadoBLE').style.color = "#f59e0b";
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnBLE = document.getElementById('btnConectarBLE');
+        if (btnBLE) {
+            btnBLE.addEventListener('click', conectarMokoW6);
+        }
     });
-  }
-});
     </script>
 </body>
 </html>
