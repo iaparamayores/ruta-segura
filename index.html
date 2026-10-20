@@ -720,34 +720,46 @@
         return;
     }
     try {
-        document.getElementById('estadoBLE').textContent = "🔍 Buscando TODOS los dispositivos BLE...";
+        document.getElementById('estadoBLE').textContent = "🔍 Buscando dispositivos... (Reiniciá el tag si no aparece)";
         document.getElementById('estadoBLE').style.color = "#f59e0b";
 
-        // CAMBIO CLAVE: acceptAllDevices muestra todo, y optionalServices nos deja usar el del Moko
         mokoDevice = await navigator.bluetooth.requestDevice({
             acceptAllDevices: true,
             optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
         });
 
-        document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo sin nombre") + "...";
+        document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "TY") + "...";
         
-        const server = await mokoDevice.gatt.connect();
-        const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
-        mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+        // Intentar conectar con timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos
         
-        await mokoCharacteristic.startNotifications();
-        mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
-        mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+        try {
+            const server = await mokoDevice.gatt.connect();
+            clearTimeout(timeoutId);
+            
+            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+            
+            await mokoCharacteristic.startNotifications();
+            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
 
-        bleConectado = true;
-        document.getElementById('estadoBLE').textContent = "✅ Conectado y escuchando el botón";
-        document.getElementById('estadoBLE').style.color = "#059669";
-        console.log('[BLE] ✅ Conectado exitosamente');
+            bleConectado = true;
+            document.getElementById('estadoBLE').textContent = "✅ Conectado y escuchando el botón";
+            document.getElementById('estadoBLE').style.color = "#059669";
+            console.log('[BLE] ✅ Conectado exitosamente');
+            
+        } catch (e) {
+            clearTimeout(timeoutId);
+            throw new Error("Timeout: El tag no responde. Reinicialo y probá de nuevo.");
+        }
         
     } catch (error) {
         console.error('[BLE] Error:', error);
-        let mensaje = "❌ Error: " + error.message;
-        if (error.name === 'NotFoundError') mensaje = "❌ No se eligió ningún dispositivo o no se encontró. Intentá de nuevo.";
+        let mensaje = "❌ " + error.message;
+        if (error.name === 'NotFoundError') mensaje = "❌ No seleccionaste ningún dispositivo. Intentá de nuevo.";
+        if (error.message.includes('Timeout')) mensaje = "❌ El tag no responde. Sacale la pila 10 seg y volvé a probar.";
         document.getElementById('estadoBLE').textContent = mensaje;
         document.getElementById('estadoBLE').style.color = "#dc2626";
     }
