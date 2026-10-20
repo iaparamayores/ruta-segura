@@ -714,42 +714,44 @@
     let bleConectado = false;
 
     async function conectarMokoW6() {
-        if (!navigator.bluetooth) {
-            document.getElementById('estadoBLE').textContent = "❌ Tu navegador no soporta Bluetooth Web. Usá Chrome en Android.";
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-            return;
-        }
-        try {
-            document.getElementById('estadoBLE').textContent = "🔍 Buscando dispositivo Moko...";
-            document.getElementById('estadoBLE').style.color = "#f59e0b";
-
-            mokoDevice = await navigator.bluetooth.requestDevice({
-                filters: [{ services: ['e62a0001-1362-4f28-9327-f5b74e970801'] }],
-                optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
-            });
-
-            document.getElementById('estadoBLE').textContent = "📡 Conectando...";
-            const server = await mokoDevice.gatt.connect();
-            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
-            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
-            await mokoCharacteristic.startNotifications();
-            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
-            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
-
-            bleConectado = true;
-            document.getElementById('estadoBLE').textContent = "✅ Conectado y escuchando el botón";
-            document.getElementById('estadoBLE').style.color = "#059669";
-            console.log('[BLE] ✅ Conectado al Moko W6');
-        } catch (error) {
-            console.error('[BLE] Error:', error);
-            let mensaje = "❌ Error: ";
-            if (error.name === 'NotFoundError') mensaje += "No se encontró el dispositivo. Asegurate de que el Moko esté encendido y cerca.";
-            else if (error.name === 'SecurityError') mensaje += "Permiso de Bluetooth denegado.";
-            else mensaje += error.message;
-            document.getElementById('estadoBLE').textContent = mensaje;
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-        }
+    if (!navigator.bluetooth) {
+        document.getElementById('estadoBLE').textContent = "❌ Usá Chrome en Android.";
+        document.getElementById('estadoBLE').style.color = "#dc2626";
+        return;
     }
+    try {
+        document.getElementById('estadoBLE').textContent = "🔍 Buscando TODOS los dispositivos BLE...";
+        document.getElementById('estadoBLE').style.color = "#f59e0b";
+
+        // CAMBIO CLAVE: acceptAllDevices muestra todo, y optionalServices nos deja usar el del Moko
+        mokoDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
+        });
+
+        document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo sin nombre") + "...";
+        
+        const server = await mokoDevice.gatt.connect();
+        const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+        mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+        
+        await mokoCharacteristic.startNotifications();
+        mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+        mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+
+        bleConectado = true;
+        document.getElementById('estadoBLE').textContent = "✅ Conectado y escuchando el botón";
+        document.getElementById('estadoBLE').style.color = "#059669";
+        console.log('[BLE] ✅ Conectado exitosamente');
+        
+    } catch (error) {
+        console.error('[BLE] Error:', error);
+        let mensaje = "❌ Error: " + error.message;
+        if (error.name === 'NotFoundError') mensaje = "❌ No se eligió ningún dispositivo o no se encontró. Intentá de nuevo.";
+        document.getElementById('estadoBLE').textContent = mensaje;
+        document.getElementById('estadoBLE').style.color = "#dc2626";
+    }
+}
 
     function manejarCambioBotonMoko(event) {
         try {
