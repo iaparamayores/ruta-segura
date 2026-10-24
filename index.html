@@ -620,6 +620,9 @@ function cerrarAlertaCompleta() {
             ultimoSosVisto = top.id;
             cajaMensaje.textContent = '\ud83d\udd0d SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
             if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
+            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
+            
+            notificacionLocalRespaldo(top); // <--- AGREGAR ESTA LÍNEA NUEVA
             alertarEmergencia(top);
         }, 6000);
     }
