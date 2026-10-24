@@ -77,3 +77,45 @@ self.addEventListener('notificationclick', (e) => {
     await clients.openWindow(url);
   })());
 });
+// Escuchar mensajes de la app principal
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.tipo === 'sos-push') {
+    const data = event.data;
+    
+    // Mostrar notificación nativa del sistema
+    self.registration.showNotification('🚨 EMERGENCIA Ruta Segura', {
+      body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
+      icon: './icon-192.png', // O el ícono que uses
+      badge: './icon-192.png',
+      tag: 'sos-emergencia',
+      requireInteraction: true,
+      data: { lat: data.lat, lon: data.lon }
+    });
+  }
+});
+
+// Cuando el usuario toca la notificación
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  
+  // Abrir la app y enviar el mensaje para que dispare la alarma
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then(function(clientList) {
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if ('focus' in client) {
+          client.postMessage({
+            tipo: 'sos-push',
+            lat: event.notification.data.lat,
+            lon: event.notification.data.lon
+          });
+          return client.focus();
+        }
+      }
+      // Si no hay ventana abierta, abrir una nueva
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
+});
