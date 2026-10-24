@@ -575,6 +575,30 @@ function cerrarAlertaCompleta() {
             window.__vibLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]); else clearInterval(window.__vibLoop); }, 3000);
         } catch (e) {}
     }
+        function notificacionLocalRespaldo(sos) {
+        // Solo funciona si el usuario dio permiso y la pestaña está abierta (aunque en background)
+        if (!('Notification' in window)) return;
+        if (Notification.permission !== 'granted') return;
+        
+        try {
+            const notif = new Notification('🚨 EMERGENCIA Ruta Segura', {
+                body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
+                icon: './icon-192.png', // O el ícono que uses en tu manifest
+                badge: './icon-192.png',
+                tag: 'sos-emergencia', // Evita que se acumulen notificaciones
+                requireInteraction: true, // La notificación no se cierra sola
+                data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
+            });
+            
+            notif.onclick = function() {
+                window.focus();
+                alertarEmergencia(sos);
+                notif.close();
+            };
+        } catch(e) {
+            console.log('Notificación local no disponible:', e);
+        }
+    }
 
     function alertarEmergencia(sos) {
         const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
