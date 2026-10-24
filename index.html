@@ -617,30 +617,27 @@ function cerrarAlertaCompleta() {
     }
 
     let ultimoSosVisto = null;
-    function iniciarAlertaEnVivo() {
-        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; cajaMensaje.textContent = '\ud83d\udce1 Vigilo SOS desde #' + (ultimoSosVisto || 0) + ' (yo soy ' + USER_ID + ')'; });
-        function iniciarAlertaEnVivo() {
-    console.log(' Mi USER_ID es: ' + USER_ID); // NUEVO: muestra el ID en consola
-    cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '...'; // NUEVO: muestra en pantalla
-    
-    sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
-        if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; 
-        cajaMensaje.textContent += ' | Vigilo SOS desde #' + (ultimoSosVisto || 0); 
-    });
-    
+ function iniciarAlertaEnVivo() {
+        console.log('🆔 Mi USER_ID es: ' + USER_ID);
+        cajaMensaje.textContent = ' Mi ID: ' + USER_ID.substring(0, 8) + '...';
+        
+        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
+            if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; 
+            cajaMensaje.textContent += ' | Vigilo SOS desde #' + (ultimoSosVisto || 0); 
+        });
+        
         setInterval(async () => {
             const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
-            if (r.error) { cajaMensaje.textContent = '\u274c Sondeo error: ' + r.error.message; return; }
-            if (!r.data || !r.data[0]) { cajaMensaje.textContent = '\ud83d\udce1 Tabla sin SOS todav\u00eda'; return; }
+            if (r.error) { cajaMensaje.textContent = '❌ Sondeo error: ' + r.error.message; return; }
+            if (!r.data || !r.data[0]) { cajaMensaje.textContent = ' Tabla sin SOS todavía'; return; }
             const top = r.data[0];
             if (ultimoSosVisto === null) { ultimoSosVisto = top.id; return; }
-            if (top.id <= ultimoSosVisto) { cajaMensaje.textContent = '\ud83d\udce1 #' + top.id + ' | yo: ' + USER_ID; return; }
+            if (top.id <= ultimoSosVisto) { cajaMensaje.textContent = '📡 #' + top.id + ' | yo: ' + USER_ID; return; }
             ultimoSosVisto = top.id;
-            cajaMensaje.textContent = '\ud83d\udd0d SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
-            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
-            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' \u2192 ME FILTRO (\u00a1mismo user_id!)'; return; }
+            cajaMensaje.textContent = '🔍 SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
+            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' → ME FILTRO (¡mismo user_id!)'; return; }
             
-            notificacionLocalRespaldo(top); // <--- AGREGAR ESTA LÍNEA NUEVA
+            notificacionLocalRespaldo(top);
             alertarEmergencia(top);
         }, 6000);
     }
