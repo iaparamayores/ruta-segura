@@ -520,6 +520,27 @@
         '<button onclick="cerrarAlertaCompleta()" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px;cursor:pointer;margin-top:10px;">✖ Cerrar alerta</button>';
     d.style.display = 'flex';
 }
+        function silenciarYMostrarMapaInterno() {
+    // 1. Detener sonido y vibración inmediatamente
+    detenerAlarma();
+    // 2. Ocultar el cartel rojo para revelar el mapa que está debajo
+    const cartel = document.getElementById('cartelSOS');
+    if (cartel) cartel.style.display = 'none';
+    // 3. Centrar el mapa de Leaflet en la ubicación actual
+    iniciarUbicacion();
+    // 4. Feedback visual
+    cajaMensaje.textContent = "📍 Ubicación mostrada. Sirena apagada.";
+}
+
+function cerrarAlertaCompleta() {
+    // 1. Detener sonido y vibración
+    detenerAlarma();
+    // 2. Ocultar el cartel rojo
+    const cartel = document.getElementById('cartelSOS');
+    if (cartel) cartel.style.display = 'none';
+    // 3. Resetear estado visual
+    cajaMensaje.textContent = "✅ Alerta cerrada. Todo listo.";
+}
     let audioCtx = null;
     function desbloquearAudio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
     ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
