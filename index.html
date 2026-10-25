@@ -177,6 +177,8 @@
     }
     let USER_ID = localStorage.getItem('rs_uid');
     if (!esUuid(USER_ID)) { USER_ID = nuevoUuid(); localStorage.setItem('rs_uid', USER_ID); }
+        // --- ROL DEL DISPOSITIVO (paciente o familiar) ---
+let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
 
     const botonSOS = document.getElementById('botonSOS');
     const progresoSOS = document.querySelector('.progreso-sos');
