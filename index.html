@@ -761,19 +761,21 @@ function cerrarAlertaCompleta() {
         });
       });
         if ('serviceWorker' in navigator) {
-        // 1. Escuchar mensajes del Service Worker (lo que ya tenías)
+        // COMENTADO: El push llega a todos los suscriptores (incluido el propio usuario)
+        // y dispara la alarma sin filtrar. El polling ya maneja la lógica correctamente.
+        /*
         navigator.serviceWorker.addEventListener('message', function (evento) {
           var d = evento.data || {};
           if (d.tipo === 'sos-push') { alertarEmergencia({ lat: d.lat, lon: d.lon }); }
         });
+        */
 
-        // 2. NUEVO: Qué hacer cuando el usuario TOCA la notificación
+        // Este sí lo dejamos: cuando el usuario TOCA la notificación en la barra
         navigator.serviceWorker.ready.then(function(registration) {
           registration.addEventListener('notificationclick', function(event) {
-            event.notification.close(); // Cierra la notificación de la barra
-            window.focus(); // Trae la app al frente
+            event.notification.close();
+            window.focus();
             
-            // Si la notificación era de SOS, disparar la alarma y el mapa
             if (event.notification.data && event.notification.data.tipo === 'sos-push') {
               alertarEmergencia({ lat: event.notification.data.lat, lon: event.notification.data.lon });
             }
