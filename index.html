@@ -119,6 +119,7 @@
         
         <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
         <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
+        <button id="btnMatarSW" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#dc2626;color:#fff;border:none;border-radius:12px;font-weight:bold;">☠️ MATAR Service Worker viejo</button>
         <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
         
         <!-- INICIO: Conexión BLE Moko W6 -->
@@ -907,6 +908,29 @@ function cerrarAlertaCompleta() {
             btnBLE.addEventListener('click', conectarMokoW6);
         }
     });
+        document.addEventListener('DOMContentLoaded', function() {
+    const btnMatar = document.getElementById('btnMatarSW');
+    if (btnMatar) {
+        btnMatar.addEventListener('click', async function() {
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                for (let reg of regs) {
+                    await reg.unregister();
+                    console.log('SW desregistrado:', reg.scope);
+                }
+            }
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                for (let key of keys) {
+                    await caches.delete(key);
+                    console.log('Caché borrada:', key);
+                }
+            }
+            alert('✅ Service Worker y caché eliminados.\nRecargá la página ahora.');
+            location.reload();
+        });
+    }
+});
     </script>
 </body>
 </html>
