@@ -389,11 +389,16 @@
             });
         } catch (e) { console.error('Error enviando email:', e); }
         try {
-            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ from: USER_ID })
-            });
-        } catch (e) { console.error('Error enviando push:', e); }
+            try {
+    await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            from: USER_ID,
+            lat: lat,
+            lon: lon
+        })
+    });
+} catch (e) { console.error('Error enviando push:', e); }
         cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
     }
 
