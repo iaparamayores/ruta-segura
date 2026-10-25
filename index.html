@@ -376,32 +376,33 @@
     const TEL_FAMILIAR = '5491150617831';
 
     async function activarSOS() {
-        cajaMensaje.textContent = "\ud83d\udea8 SOS ACTIVADO - Avisando a tu contacto...";
+        cajaMensaje.textContent = "🚨 SOS ACTIVADO - Avisando a tu contacto...";
         let lat = null, lon = null;
         if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicaci\u00f3n)';
+        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
 
         try { await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' }); } catch (e) { console.error('Error subiendo SOS:', e); }
+        
         try {
             await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ _subject: '\ud83d\udea8 SOS Ruta Segura - ' + new Date().toLocaleString(), mensaje: 'Se activ\u00f3 el bot\u00f3n de emergencia de Ruta Segura.', ubicacion: mapaLink })
+                body: JSON.stringify({ _subject: '🚨 SOS Ruta Segura - ' + new Date().toLocaleString(), mensaje: 'Se activó el botón de emergencia de Ruta Segura.', ubicacion: mapaLink })
             });
         } catch (e) { console.error('Error enviando email:', e); }
+        
         try {
-            try {
-    await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            from: USER_ID,
-            lat: lat,
-            lon: lon
-        })
-    });
-} catch (e) { console.error('Error enviando push:', e); }
-        cajaMensaje.textContent = "\u2705 SOS enviado. Avisamos a tu contacto con tu ubicaci\u00f3n.";
+            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    from: USER_ID,
+                    lat: lat,
+                    lon: lon
+                })
+            });
+        } catch (e) { console.error('Error enviando push:', e); }
+        
+        cajaMensaje.textContent = "✅ SOS enviado. Avisamos a tu contacto con tu ubicación.";
     }
-
     async function toggleLinterna() {
         try {
             if (!linternaActiva) {
