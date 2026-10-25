@@ -618,24 +618,52 @@ function cerrarAlertaCompleta() {
 
     let ultimoSosVisto = null;
  function iniciarAlertaEnVivo() {
-        console.log('🆔 Mi USER_ID es: ' + USER_ID);
-        cajaMensaje.textContent = ' Mi ID: ' + USER_ID.substring(0, 8) + '...';
+        console.log('🆔 Mi USER_ID local es: ' + USER_ID);
+        cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '...';
         
         sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
             if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; 
-            cajaMensaje.textContent += ' | Vigilo SOS desde #' + (ultimoSosVisto || 0); 
+            cajaMensaje.textContent += ' | Vigilo desde #' + (ultimoSosVisto || 0); 
         });
         
         setInterval(async () => {
+            // Pedimos explícitamente el user_id a la base de datos
             const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
-            if (r.error) { cajaMensaje.textContent = '❌ Sondeo error: ' + r.error.message; return; }
-            if (!r.data || !r.data[0]) { cajaMensaje.textContent = ' Tabla sin SOS todavía'; return; }
+            
+            if (r.error) { cajaMensaje.textContent = '❌ Error: ' + r.error.message; return; }
+            if (!r.data || !r.data[0]) { cajaMensaje.textContent = '📡 Esperando SOS...'; return; }
+            
             const top = r.data[0];
-            if (ultimoSosVisto === null) { ultimoSosVisto = top.id; return; }
-            if (top.id <= ultimoSosVisto) { cajaMensaje.textContent = '📡 #' + top.id + ' | yo: ' + USER_ID; return; }
+            
+            // --- DIAGNÓSTICO EN PANTALLA ---
+            console.log('--- EVALUANDO SOS ---');
+            console.log('ID del SOS:', top.id);
+            console.log('user_id en la Base de Datos:', top.user_id);
+            console.log('Mi USER_ID local:', USER_ID);
+            
+            if (ultimoSosVisto === null) { 
+                ultimoSosVisto = top.id; 
+                cajaMensaje.textContent = '📡 Vigilo desde #' + ultimoSosVisto;
+                return; 
+            }
+            
+            if (top.id <= ultimoSosVisto) { 
+                cajaMensaje.textContent = '📡 Esperando nuevo SOS... (último: #' + ultimoSosVisto + ')';
+                return; 
+            }
+            
             ultimoSosVisto = top.id;
-            cajaMensaje.textContent = '🔍 SOS nuevo #' + top.id + ' de ' + top.user_id + ' | yo soy ' + USER_ID;
-            if (top.user_id && top.user_id === USER_ID) { cajaMensaje.textContent += ' → ME FILTRO (¡mismo user_id!)'; return; }
+            
+            // AQUÍ ESTÁ LA CLAVE DEL FILTRO
+            if (top.user_id === USER_ID) { 
+                cajaMensaje.textContent = '✅ SOS detectado, pero SOY YO. Me filtro.';
+                console.log('ME FILTRO: Los ID son iguales');
+                return; // <--- ACÁ DEBERÍA FRENAR Y NO SONAR
+            }
+            
+            // Si llega acá, es porque los ID son diferentes (o el de la BD es null)
+            cajaMensaje.textContent = '🚨 ¡SOS DE OTRO USUARIO! Activando alarma...';
+            console.log('DISPARO ALARMA: Los ID son diferentes');
             
             notificacionLocalRespaldo(top);
             alertarEmergencia(top);
