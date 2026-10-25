@@ -941,6 +941,22 @@ function cerrarAlertaCompleta() {
         });
     }
 });
+        // --- Lógica del interruptor de rol ---
+(function() {
+    const chk = document.getElementById('chkEsPaciente');
+    const aviso = document.getElementById('avisoRol');
+    if (!chk) return;
+    
+    chk.checked = ES_PACIENTE;
+    aviso.textContent = ES_PACIENTE ? '✅ Rol: Paciente (adulto mayor)' : '️ Rol: Familiar / Contacto';
+    
+    chk.addEventListener('change', function() {
+        ES_PACIENTE = chk.checked;
+        localStorage.setItem('rs_es_paciente', ES_PACIENTE ? 'true' : 'false');
+        aviso.textContent = ES_PACIENTE ? '✅ Rol: Paciente (adulto mayor)' : 'ℹ️ Rol: Familiar / Contacto';
+        cajaMensaje.textContent = ES_PACIENTE ? '✅ Configurado como paciente' : '✅ Configurado como familiar';
+    });
+})();
     </script>
 </body>
 </html>
