@@ -635,13 +635,24 @@ function cerrarAlertaCompleta() {
 
     let ultimoSosVisto = null;
  function iniciarAlertaEnVivo() {
-        console.log('🆔 Mi USER_ID local es: ' + USER_ID);
-        cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '...';
-        
-        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
-            if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id; 
-            cajaMensaje.textContent += ' | Vigilo desde #' + (ultimoSosVisto || 0); 
-        });
+        // AQUÍ ESTÁ LA CLAVE DEL FILTRO
+            if (top.user_id === USER_ID) { 
+                cajaMensaje.textContent = '✅ SOS detectado, pero SOY YO. Me filtro.';
+                return;
+            }
+            
+            // --- NUEVO: Lógica asimétrica según el rol ---
+            if (ES_PACIENTE) {
+                // Si YO soy el paciente y el SOS lo mandó un familiar → aviso suave
+                cajaMensaje.textContent = '🔔 Tu familiar está preocupado por vos.';
+                mostrarAvisoSuave(top);
+                return;
+            } else {
+                // Si YO soy el familiar y el SOS lo mandó el paciente → alarma completa
+                cajaMensaje.textContent = '🚨 ¡SOS del paciente! Activando alarma...';
+                notificacionLocalRespaldo(top);
+                alertarEmergencia(top);
+            }
         
         setInterval(async () => {
             // Pedimos explícitamente el user_id a la base de datos
