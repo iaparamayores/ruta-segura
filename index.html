@@ -971,20 +971,53 @@ function cerrarAlertaCompleta() {
         });
     }
 });
-        // --- Lógica del interruptor de rol ---
-(function() {
+        // --- Lógica del interruptor de rol (INTELIGENTE Y SINCRONIZADO) ---
+(async function() {
     const chk = document.getElementById('chkEsPaciente');
     const aviso = document.getElementById('avisoRol');
     if (!chk) return;
-    
-    chk.checked = ES_PACIENTE;
-    aviso.textContent = ES_PACIENTE ? '✅ Rol: Paciente (adulto mayor)' : '️ Rol: Familiar / Contacto';
-    
-    chk.addEventListener('change', function() {
-        ES_PACIENTE = chk.checked;
-        localStorage.setItem('rs_es_paciente', ES_PACIENTE ? 'true' : 'false');
-        aviso.textContent = ES_PACIENTE ? '✅ Rol: Paciente (adulto mayor)' : 'ℹ️ Rol: Familiar / Contacto';
-        cajaMensaje.textContent = ES_PACIENTE ? '✅ Configurado como paciente' : '✅ Configurado como familiar';
+
+    // 1. Consultar a la base de datos si YA hay un paciente registrado
+    // (Buscamos en push_subs si hay alguien con rol 'paciente' que NO sea yo)
+    const { data: otrosPacientes } = await sb
+        .from('push_subs')
+        .select('user_id')
+        .eq('rol', 'paciente')
+        .neq('user_id', USER_ID)
+        .limit(1);
+
+    if (otrosPacientes && otrosPacientes.length > 0) {
+        // ¡YA EXISTE UN PACIENTE! Este celular se bloquea automáticamente como Familiar
+        ES_PACIENTE = false;
+        localStorage.setItem('rs_es_paciente', 'false');
+        chk.style.display = 'none'; // Ocultar checkbox
+        aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong><br><small>(Ya hay un paciente vinculado)</small>';
+    } 
+    else if (ES_PACIENTE) {
+        // Este celular ya se había marcado como paciente antes
+        chk.style.display = 'none';
+        aviso.innerHTML = '🔒 <strong>Rol de Paciente bloqueado.</strong>';
+    } 
+    else {
+        // Nadie se marcó todavía, mostrar el checkbox disponible
+        chk.checked = false;
+        aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+    }
+
+    // 2. Qué pasa cuando el usuario tilda la casilla
+    chk.addEventListener('change', async function() {
+        if (chk.checked) {
+            ES_PACIENTE = true;
+            localStorage.setItem('rs_es_paciente', 'true');
+            
+            // Avisar a la base de datos: "¡Yo soy el paciente!"
+            await sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID);
+
+            // Ocultar y bloquear
+            chk.style.display = 'none';
+            aviso.innerHTML = '🔒 <strong>Rol de Paciente bloqueado.</strong>';
+            cajaMensaje.textContent = '✅ Configurado como paciente';
+        }
     });
 })();
     </script>
