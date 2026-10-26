@@ -625,6 +625,25 @@ function cerrarAlertaCompleta() {
         });
     }
 }
+        function mostrarAvisoSuave(sos) {
+    // Aviso tranquilizador para el paciente (sin sirena, sin pantalla roja)
+    let d = document.getElementById('cartelAvisoSuave');
+    if (!d) {
+        d = document.createElement('div');
+        d.id = 'cartelAvisoSuave';
+        d.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);color:#1f2937;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
+        document.body.appendChild(d);
+    }
+    
+    d.innerHTML = '<div style="font-size:64px">💙</div>' +
+        '<div style="font-size:24px;font-weight:bold;margin:12px 0;color:#1976d2">Tu familiar está pendiente de vos</div>' +
+        '<div style="font-size:18px;margin:10px 0;color:#4b5563">Recibió tu señal y está al tanto.</div>' +
+        '<button onclick="document.getElementById(\'cartelAvisoSuave\').style.display=\'none\'" style="background:#1976d2;color:#fff;border:none;font-size:18px;padding:14px 28px;border-radius:10px;cursor:pointer;margin-top:20px;">Entendido, gracias</button>';
+    d.style.display = 'flex';
+    
+    // Vibración suave (una sola vez, corta)
+    if (navigator.vibrate) navigator.vibrate(200);
+}
 
     function alertarEmergencia(sos) {
         const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
