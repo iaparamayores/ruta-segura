@@ -948,29 +948,7 @@ function cerrarAlertaCompleta() {
             btnBLE.addEventListener('click', conectarMokoW6);
         }
     });
-        document.addEventListener('DOMContentLoaded', function() {
-    const btnMatar = document.getElementById('btnMatarSW');
-    if (btnMatar) {
-        btnMatar.addEventListener('click', async function() {
-            if ('serviceWorker' in navigator) {
-                const regs = await navigator.serviceWorker.getRegistrations();
-                for (let reg of regs) {
-                    await reg.unregister();
-                    console.log('SW desregistrado:', reg.scope);
-                }
-            }
-            if ('caches' in window) {
-                const keys = await caches.keys();
-                for (let key of keys) {
-                    await caches.delete(key);
-                    console.log('Caché borrada:', key);
-                }
-            }
-            alert('✅ Service Worker y caché eliminados.\nRecargá la página ahora.');
-            location.reload();
-        });
-    }
-});
+        
         // --- Lógica del interruptor de rol (VERSIÓN SEGURA) ---
 (function() {
     const chk = document.getElementById('chkEsPaciente');
