@@ -121,6 +121,7 @@
         <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
         <button id="btnMatarSW" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#dc2626;color:#fff;border:none;border-radius:12px;font-weight:bold;">☠️ MATAR Service Worker viejo</button>
         <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
+        <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#f59e0b;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
         <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
     <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Configuración de rol</p>
     <label style="display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-size:16px; color:#1f2937;">
@@ -971,55 +972,84 @@ function cerrarAlertaCompleta() {
         });
     }
 });
-        // --- Lógica del interruptor de rol (INTELIGENTE Y SINCRONIZADO) ---
-(async function() {
+        // --- Lógica del interruptor de rol (VERSIÓN SEGURA) ---
+(function() {
     const chk = document.getElementById('chkEsPaciente');
     const aviso = document.getElementById('avisoRol');
-    if (!chk) return;
+    if (!chk || !aviso) return;
 
-    // 1. Consultar a la base de datos si YA hay un paciente registrado
-    // (Buscamos en push_subs si hay alguien con rol 'paciente' que NO sea yo)
-    const { data: otrosPacientes } = await sb
-        .from('push_subs')
-        .select('user_id')
-        .eq('rol', 'paciente')
-        .neq('user_id', USER_ID)
-        .limit(1);
-
-    if (otrosPacientes && otrosPacientes.length > 0) {
-        // ¡YA EXISTE UN PACIENTE! Este celular se bloquea automáticamente como Familiar
-        ES_PACIENTE = false;
-        localStorage.setItem('rs_es_paciente', 'false');
-        chk.style.display = 'none'; // Ocultar checkbox
-        aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong><br><small>(Ya hay un paciente vinculado)</small>';
-    } 
-    else if (ES_PACIENTE) {
-        // Este celular ya se había marcado como paciente antes
-        chk.style.display = 'none';
-        aviso.innerHTML = '🔒 <strong>Rol de Paciente bloqueado.</strong>';
-    } 
-    else {
-        // Nadie se marcó todavía, mostrar el checkbox disponible
-        chk.checked = false;
-        aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+    // Función para actualizar la UI según el rol
+    function actualizarUI(esPaciente, bloqueado) {
+        if (esPaciente) {
+            chk.style.display = 'none';
+            aviso.innerHTML = '🔒 <strong>Rol de Paciente</strong>' + 
+                (bloqueado ? '<br><small>(Configurado y bloqueado)</small>' : '');
+        } else {
+            chk.style.display = 'none';
+            aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong>' + 
+                (bloqueado ? '<br><small>(Ya hay un paciente vinculado)</small>' : '');
+        }
     }
 
-    // 2. Qué pasa cuando el usuario tilda la casilla
-    chk.addEventListener('change', async function() {
+    // Si ya estaba marcado como paciente, bloquear
+    if (ES_PACIENTE) {
+        actualizarUI(true, true);
+    } else {
+        // Consultar Supabase de forma segura (sin bloquear la app)
+        sb.from('push_subs').select('user_id, rol').eq('rol', 'paciente').limit(1).then(result => {
+            if (result.data && result.data.length > 0 && result.data[0].user_id !== USER_ID) {
+                // Ya existe otro paciente → bloquear como familiar
+                ES_PACIENTE = false;
+                localStorage.setItem('rs_es_paciente', 'false');
+                actualizarUI(false, true);
+            } else {
+                // No hay paciente aún → mostrar checkbox
+                chk.checked = false;
+                aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+            }
+        }).catch(err => {
+            console.log('Error consultando rol:', err);
+            // Si falla, mostrar checkbox por defecto
+            chk.checked = false;
+            aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+        });
+    }
+
+    // Cuando el usuario marca la casilla
+    chk.addEventListener('change', function() {
         if (chk.checked) {
             ES_PACIENTE = true;
             localStorage.setItem('rs_es_paciente', 'true');
             
-            // Avisar a la base de datos: "¡Yo soy el paciente!"
-            await sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID);
+            // Guardar en Supabase (sin esperar respuesta)
+            sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID).then(() => {
+                console.log('Rol actualizado en Supabase');
+            }).catch(err => {
+                console.log('Error actualizando rol:', err);
+            });
 
-            // Ocultar y bloquear
-            chk.style.display = 'none';
-            aviso.innerHTML = '🔒 <strong>Rol de Paciente bloqueado.</strong>';
+            actualizarUI(true, true);
             cajaMensaje.textContent = '✅ Configurado como paciente';
         }
     });
 })();
+        // Botón de reset temporal
+document.addEventListener('DOMContentLoaded', function() {
+    const btnReset = document.getElementById('btnResetRol');
+    if (btnReset) {
+        btnReset.addEventListener('click', async function() {
+            // Resetear localStorage
+            localStorage.removeItem('rs_es_paciente');
+            ES_PACIENTE = false;
+            
+            // Quitar rol en Supabase
+            await sb.from('push_subs').update({ rol: 'familiar' }).eq('user_id', USER_ID);
+            
+            alert('✅ Rol reseteado. Recargá la página.');
+            location.reload();
+        });
+    }
+});
     </script>
 </body>
 </html>
