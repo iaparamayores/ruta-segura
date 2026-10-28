@@ -653,67 +653,57 @@ function cerrarAlertaCompleta() {
     }
 
     let ultimoSosVisto = null;
- function iniciarAlertaEnVivo() {
-        // AQUÍ ESTÁ LA CLAVE DEL FILTRO
+    let radarIniciado = false; // NUEVO: flag para saber si ya cargamos el ID inicial
+
+    function iniciarAlertaEnVivo() {
+        console.log('🆔 Mi USER_ID local es: ' + USER_ID);
+        cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '...';
+        
+        // PASO 1: Cargar el último SOS existente SIN disparar nada
+        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
+            if (!r.error && r.data && r.data[0]) {
+                ultimoSosVisto = r.data[0].id;
+                console.log('📡 ID inicial cargado: #' + ultimoSosVisto);
+            }
+            radarIniciado = true; // NUEVO: marcamos que ya estamos listos
+            cajaMensaje.textContent += ' | Vigilo desde #' + (ultimoSosVisto || 0);
+        });
+        
+        // PASO 2: Empezar a vigilar cada 6 segundos
+        setInterval(async () => {
+            // Si aún no cargamos el ID inicial, no hacemos nada
+            if (!radarIniciado) return;
+            
+            const r = await sb.from('sos_ruta').select('id, user_id, lat, lon, created_at').order('id', { ascending: false }).limit(1);
+            
+            if (r.error) { return; }
+            if (!r.data || !r.data[0]) { return; }
+            
+            const top = r.data[0];
+            
+            // Si el ID es igual o menor al que ya vimos, no hacer nada
+            if (top.id <= ultimoSosVisto) { return; }
+            
+            // ¡Es un SOS nuevo! Actualizamos el ID visto
+            ultimoSosVisto = top.id;
+            
+            // Filtro: si soy yo, no hago nada
             if (top.user_id === USER_ID) { 
-                cajaMensaje.textContent = '✅ SOS detectado, pero SOY YO. Me filtro.';
+                console.log('✅ SOS mío, me filtro');
                 return;
             }
             
-            // --- NUEVO: Lógica asimétrica según el rol ---
+            // Lógica asimétrica según el rol
             if (ES_PACIENTE) {
-                // Si YO soy el paciente y el SOS lo mandó un familiar → aviso suave
-                cajaMensaje.textContent = '🔔 Tu familiar está preocupado por vos.';
+                // Soy paciente → aviso suave
+                cajaMensaje.textContent = ' Tu familiar está pendiente de vos.';
                 mostrarAvisoSuave(top);
-                return;
             } else {
-                // Si YO soy el familiar y el SOS lo mandó el paciente → alarma completa
+                // Soy familiar → alarma completa
                 cajaMensaje.textContent = '🚨 ¡SOS del paciente! Activando alarma...';
                 notificacionLocalRespaldo(top);
                 alertarEmergencia(top);
             }
-        
-        setInterval(async () => {
-            // Pedimos explícitamente el user_id a la base de datos
-            const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
-            
-            if (r.error) { cajaMensaje.textContent = '❌ Error: ' + r.error.message; return; }
-            if (!r.data || !r.data[0]) { cajaMensaje.textContent = '📡 Esperando SOS...'; return; }
-            
-            const top = r.data[0];
-            
-            // --- DIAGNÓSTICO EN PANTALLA ---
-            console.log('--- EVALUANDO SOS ---');
-            console.log('ID del SOS:', top.id);
-            console.log('user_id en la Base de Datos:', top.user_id);
-            console.log('Mi USER_ID local:', USER_ID);
-            
-            if (ultimoSosVisto === null) { 
-                ultimoSosVisto = top.id; 
-                cajaMensaje.textContent = '📡 Vigilo desde #' + ultimoSosVisto;
-                return; 
-            }
-            
-            if (top.id <= ultimoSosVisto) { 
-                cajaMensaje.textContent = '📡 Esperando nuevo SOS... (último: #' + ultimoSosVisto + ')';
-                return; 
-            }
-            
-            ultimoSosVisto = top.id;
-            
-            // AQUÍ ESTÁ LA CLAVE DEL FILTRO
-            if (top.user_id === USER_ID) { 
-                cajaMensaje.textContent = '✅ SOS detectado, pero SOY YO. Me filtro.';
-                console.log('ME FILTRO: Los ID son iguales');
-                return; // <--- ACÁ DEBERÍA FRENAR Y NO SONAR
-            }
-            
-            // Si llega acá, es porque los ID son diferentes (o el de la BD es null)
-            cajaMensaje.textContent = '🚨 ¡SOS DE OTRO USUARIO! Activando alarma...';
-            console.log('DISPARO ALARMA: Los ID son diferentes');
-            
-            notificacionLocalRespaldo(top);
-            alertarEmergencia(top);
         }, 6000);
     }
     window.addEventListener('load', () => { iniciarAlertaEnVivo(); });
