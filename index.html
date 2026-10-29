@@ -11,18 +11,22 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        /* --- ESTILOS GENERALES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
         html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
         .contenedor { height: 100%; display: flex; flex-direction: column; padding: 12px; gap: 10px; }
         .fila-superior { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
         .nombre-app { font-size: 22px; font-weight: bold; color: #222; text-align: center; flex: 1; padding: 0 10px; }
+        
         .boton-cuadrado { width: 70px; height: 70px; border: none; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-weight: bold; flex-shrink: 0; user-select: none; -webkit-user-select: none; }
         .boton-cuadrado .icono { font-size: 24px; margin-bottom: 4px; }
         .boton-cuadrado .texto { font-size: 11px; text-align: center; }
         #botonSOS { background-color: #d32f2f; color: white; position: relative; overflow: hidden; }
         #botonAjustes { background-color: #757575; color: white; }
+        
         #mapa { flex: 1; min-height: 280px; border-radius: 12px; border: 3px solid #999; z-index: 1; }
-        #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; }
+        #cajaMensaje { background-color: white; border: 2px solid #ccc; border-radius: 10px; padding: 10px; font-size: 18px; flex-shrink: 0; text-align: center; }
+        
         .fila-botones-accion { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex-shrink: 0; }
         .boton-accion-cuadrado { height: 70px; border: none; border-radius: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 3px 6px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px; color: white; user-select: none; -webkit-user-select: none; }
         .boton-accion-cuadrado .icono { font-size: 26px; margin-bottom: 4px; }
@@ -31,11 +35,14 @@
         #botonVoz { background-color: #1976d2; }
         #btnRutaRapida { background-color: #388e3c; }
         #botonVoz.escuchando { animation: pulsar 1.5s infinite; }
+        
         @keyframes pulsar { 0% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4); } 70% { box-shadow: 0 0 0 12px rgba(25, 118, 210, 0); } 100% { box-shadow: 0 0 0 0 rgba(25, 118, 210, 0); } }
+        
         #espacioConsejos { height: 70px; background-color: #fff3e0; border: 2px dashed #ffb74d; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: 15px; color: #e65100; font-weight: bold; flex-shrink: 0; transition: opacity 0.3s ease-in-out; }
         footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
         .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
         
+        /* --- PANEL DE AJUSTES --- */
         #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
         #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
@@ -43,6 +50,7 @@
         #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
         #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
         
+        /* --- PANEL DE DATOS (Lugares/Contactos) --- */
         .panel-datos { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 16px; z-index: 200; }
         .panel-datos.visible { display: flex; }
         .panel-datos-contenido { width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 5px 18px rgba(0,0,0,0.35); }
@@ -62,6 +70,7 @@
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
 
+        /* --- ANIMACIONES DE EMERGENCIA --- */
         @keyframes latidoFondo { 0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); } 50% { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); } }
         @keyframes sirenaViva { 0%, 100% { transform: rotate(-10deg) scale(1); } 25% { transform: rotate(10deg) scale(1.2); } 50% { transform: rotate(-10deg) scale(1.05); } 75% { transform: rotate(10deg) scale(1.2); } }
         #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
@@ -84,59 +93,60 @@
         </div>
 
         <div id="mapa"></div>
-        <div id="cajaMensaje">&#9989; Todo listo</div>
+        <div id="cajaMensaje">✅ Todo listo</div>
 
         <div class="fila-botones-accion">
             <button id="btnCompartir" class="boton-accion-cuadrado"><span class="icono">&#128205;</span><span>Compartir</span></button>
-            <button id="btnLlegueBien" class="boton-accion-cuadrado"><span class="icono">&#127968;</span><span>Llegu&#233; bien</span></button>
+            <button id="btnLlegueBien" class="boton-accion-cuadrado"><span class="icono">&#127968;</span><span>Llegué bien</span></button>
             <button id="botonVoz" class="boton-accion-cuadrado"><span class="icono">&#127908;</span><span>Hablar</span></button>
             <button id="btnRutaRapida" class="boton-accion-cuadrado"><span class="icono">&#129517;</span><span>Ir a...</span></button>
         </div>
 
-        <div id="espacioConsejos">&#128161; Consejo: Manten&#233; presionado el bot&#243;n &#128681; por 2 segundos en caso de emergencia.</div>
+        <div id="espacioConsejos">💡 Consejo: Mantené presionado el botón de emergencia por 2 segundos.</div>
         <footer>Sugerencias a: iaparamayoresapp@gmail.com</footer>
     </div>
 
     <div id="panelAjustes">
-        <h3>&#128203; Mis Datos y Ayuda</h3>
+        <h3>📋 Mis Datos y Ayuda</h3>
         <input type="text" id="inputDestino" placeholder="Escribí tu destino (ej: Plaza San Martín)">
-        <button id="btnBuscarDestino">&#128269; Buscar ruta</button>
-        <button id="btnRuta">&#129517; ¿CÓMO LLEGO A...?</button>
-        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">&#128294; Linterna</button>
-        <button id="btnLugares">&#128204; Mis Lugares guardados</button>
-        <button id="btnContactos">&#128101; Contactos de confianza</button>
-        <hr style="margin:15px 0; border: 1px solid #eee;">
-        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">&#128680; Ayuda Inmediata:</p>
-        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">&#127973; Buscar Centro de Salud / Farmacia</button>
-        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">&#128110; Llamar a Policía / Emergencias</button>
-        <button id="btnHospital" style="background:#fff3e0; color:#e65100;">&#128657; Buscar Hospital con Guardia</button>
-        <hr style="margin:15px 0; border: 1px solid #eee;">
-        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">&#128205; Destinos útiles:</p>
-        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">&#127974; Buscar Banco / Cajero</button>
-        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">&#128722; Buscar Supermercado</button>
-        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">&#127795; Buscar Plaza / Iglesia</button>
+        <button id="btnBuscarDestino">🔍 Buscar ruta</button>
+        <button id="btnRuta">🗺️ ¿CÓMO LLEGO A...?</button>
+        <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">🔦 Linterna</button>
+        <button id="btnLugares">📌 Mis Lugares guardados</button>
+        <button id="btnContactos">👥 Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
         
-        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">&#128242; Instalar aplicación en el celular</button>
+        <p style="font-size:16px; color:#d32f2f; font-weight:bold; margin-bottom:10px;">🚨 Ayuda Inmediata:</p>
+        <button id="btnSalud" style="background:#e8f5e9; color:#2e7d32;">🏥 Buscar Centro de Salud / Farmacia</button>
+        <button id="btnPolicia" style="background:#ffebee; color:#c62828;">👮 Llamar a Policía / Emergencias</button>
+        <button id="btnHospital" style="background:#fff3e0; color:#e65100;">🚑 Buscar Hospital con Guardia</button>
+        <hr style="margin:15px 0; border: 1px solid #eee;">
+        
+        <p style="font-size:16px; color:#1976d2; font-weight:bold; margin-bottom:10px;">📍 Destinos útiles:</p>
+        <button id="btnBanco" style="background:#e3f2fd; color:#0d47a1;">🏦 Buscar Banco / Cajero</button>
+        <button id="btnSuper" style="background:#f3e5f5; color:#4a148c;">🛒 Buscar Supermercado</button>
+        <button id="btnPlaza" style="background:#e8f5e9; color:#2e7d32;">🌳 Buscar Plaza / Iglesia</button>
+        <hr style="margin:15px 0; border: 1px solid #eee;">
+        
+        <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">📲 Instalar aplicación en el celular</button>
         <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
         <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
-        <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#f59e0b;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
-        <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
-    <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Configuración de rol</p>
-    <label style="display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-size:16px; color:#1f2937;">
-        <input type="checkbox" id="chkEsPaciente" style="width:22px; height:22px;">
-        <span>Este es el celular del <strong>paciente</strong> (adulto mayor)</span>
-    </label>
-    <p id="avisoRol" style="font-size:13px; color:#6b7280; text-align:center; margin-top:8px;"></p>
-</div>
+        <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#9ca3af;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
         
-        <!-- INICIO: Conexión BLE Moko W6 -->
+        <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
+            <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Configuración de rol</p>
+            <label style="display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-size:16px; color:#1f2937;">
+                <input type="checkbox" id="chkEsPaciente" style="width:22px; height:22px;">
+                <span>Este es el celular del <strong>paciente</strong> (adulto mayor)</span>
+            </label>
+            <p id="avisoRol" style="font-size:13px; color:#6b7280; text-align:center; margin-top:8px;"></p>
+        </div>
+        
         <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
             <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Conectá tu anillo/pulsera Moko para usar el botón SOS físico</p>
             <button id="btnConectarBLE" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:12px;font-weight:bold;"> Conectar Anillo Moko (BLE)</button>
             <p id="estadoBLE" style="font-size:14px; color:#6b7280; margin-top:8px; text-align:center;">Estado: Desconectado</p>
         </div>
-        <!-- FIN: Conexión BLE Moko W6 -->
         
         <div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
             <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
@@ -155,7 +165,7 @@
             </div>
             <div class="form-datos">
                 <input type="text" id="inputDatoNombre" placeholder="Nombre" autocomplete="name">
-                <input type="text" id="inputDatoValor" placeholder="Direcci&#243;n o tel&#233;fono" autocomplete="off">
+                <input type="text" id="inputDatoValor" placeholder="Dirección o teléfono" autocomplete="off">
                 <button id="guardarDato" type="button">Guardar</button>
             </div>
             <div id="listaDatos"></div>
@@ -163,10 +173,13 @@
     </div>
 
     <script>
-    // --- SUPABASE (Ruta Segura) ---
+    // =========================================================================
+    // 1. CONFIGURACIÓN Y VARIABLES GLOBALES
+    // =========================================================================
     const SUPABASE_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     function esUuid(v) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v || ''); }
     function nuevoUuid() {
         if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -175,11 +188,16 @@
             return v.toString(16);
         });
     }
+    
     let USER_ID = localStorage.getItem('rs_uid');
     if (!esUuid(USER_ID)) { USER_ID = nuevoUuid(); localStorage.setItem('rs_uid', USER_ID); }
-        // --- ROL DEL DISPOSITIVO (paciente o familiar) ---
-let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
+    
+    let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
+    let sosActual = null; // Guarda las coordenadas del SOS activo para mostrarlas en el mapa
 
+    // =========================================================================
+    // 2. REFERENCIAS AL DOM
+    // =========================================================================
     const botonSOS = document.getElementById('botonSOS');
     const progresoSOS = document.querySelector('.progreso-sos');
     const botonVoz = document.getElementById('botonVoz');
@@ -214,14 +232,224 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
     let miUbicacion = null, reconocimiento = null;
     let temporizadorSOS = null, sosActivo = false;
     let mapaLeaflet = null, marcadorUsuario = null;
+    let watchId = null; // Para el seguimiento en vivo de la ubicación
     let linternaActiva = false, linternaStream = null;
     const CLAVE_LUGARES = 'rutaSegura_lugares_v1';
     const CLAVE_CONTACTOS = 'rutaSegura_contactos_v1';
     let tipoDatoActual = 'lugares';
 
+    // =========================================================================
+    // 3. INICIALIZACIÓN DEL MAPA Y UBICACIÓN EN VIVO
+    // =========================================================================
+    function inicializarMapa() {
+        mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(mapaLeaflet);
+    }
+
+    function iniciarUbicacion() {
+        if (!navigator.geolocation) { cajaMensaje.textContent = "Navegador no compatible"; return; }
+        cajaMensaje.textContent = "📡 Activando ubicación en vivo...";
+        
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+
+        watchId = navigator.geolocation.watchPosition(pos => {
+            miUbicacion = pos.coords;
+            mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
+            if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+            marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("📍 Estás aquí").openPopup();
+            cajaMensaje.textContent = "✅ Ubicación en vivo activa";
+        }, () => {
+            cajaMensaje.textContent = "⚠️ Activa la ubicación en tu teléfono";
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+
+    // =========================================================================
+    // 4. LÓGICA DE EMERGENCIA (SOS) Y ALERTAS
+    // =========================================================================
+    function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
+    function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
+    
+    botonSOS.addEventListener('mousedown', iniciarSOS);
+    botonSOS.addEventListener('touchstart', e => { e.preventDefault(); iniciarSOS(); }, {passive:false});
+    botonSOS.addEventListener('mouseup', cancelarSOS);
+    botonSOS.addEventListener('touchend', cancelarSOS);
+    botonSOS.addEventListener('mouseleave', cancelarSOS);
+
+    async function activarSOS() {
+        cajaMensaje.textContent = "🚨 SOS ACTIVADO - Avisando a tu contacto...";
+        let lat = null, lon = null;
+        if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
+        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
+
+        try { await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' }); } 
+        catch (e) { console.error('Error subiendo SOS:', e); }
+        
+        try {
+            await fetch('https://formsubmit.co/ajax/puertocolibri@gmail.com', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify({ _subject: '🚨 SOS Ruta Segura - ' + new Date().toLocaleString(), mensaje: 'Se activó el botón de emergencia.', ubicacion: mapaLink })
+            });
+        } catch (e) { console.error('Error enviando email:', e); }
+        
+        try {
+            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ from: USER_ID, lat: lat, lon: lon })
+            });
+        } catch (e) { console.error('Error enviando push:', e); }
+        
+        cajaMensaje.textContent = "✅ SOS enviado. Avisamos a tu contacto con tu ubicación.";
+    }
+
+    function mostrarCartelSOS(mapa) {
+        let d = document.getElementById('cartelSOS');
+        if (!d) {
+            d = document.createElement('div'); d.id = 'cartelSOS';
+            d.style.cssText = 'position:fixed;inset:0;background:rgba(200,0,0,0.96);color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
+            document.body.appendChild(d);
+        }
+        const botonMapaInterno = mapa ? `<button onclick="silenciarYMostrarMapaInterno()" style="display:block;width:90%;max-width:400px;background:#fff;color:#c00;font-size:20px;font-weight:bold;padding:16px 24px;border-radius:12px;margin:14px 0;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.3);">📍 Ver ubicación en el mapa (y silenciar)</button>` : '';
+        d.innerHTML = '<div class="sirena" style="font-size:64px">🚨</div><div style="font-size:26px;font-weight:bold;margin:12px 0">¡EMERGENCIA ACTIVADA!</div>' + botonMapaInterno + '<button onclick="cerrarAlertaCompleta()" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px;cursor:pointer;margin-top:10px;">✖ Cerrar alerta</button>';
+        d.style.display = 'flex';
+    }
+
+    function silenciarYMostrarMapaInterno() {
+        detenerAlarma();
+        const cartel = document.getElementById('cartelSOS');
+        if (cartel) cartel.style.display = 'none';
+        
+        // Muestra la ubicación del PACIENTE, no la del familiar
+        if (sosActual && sosActual.lat != null && sosActual.lon != null) {
+            mapaLeaflet.setView([sosActual.lat, sosActual.lon], 16);
+            if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+            marcadorUsuario = L.marker([sosActual.lat, sosActual.lon]).addTo(mapaLeaflet).bindPopup("📍 Ubicación del paciente").openPopup();
+            cajaMensaje.textContent = "📍 Ubicación del paciente mostrada. Sirena apagada.";
+        } else {
+            iniciarUbicacion();
+            cajaMensaje.textContent = "📍 Ubicación mostrada. Sirena apagada.";
+        }
+    }
+
+    function cerrarAlertaCompleta() {
+        detenerAlarma();
+        const cartel = document.getElementById('cartelSOS');
+        if (cartel) cartel.style.display = 'none';
+        cajaMensaje.textContent = "✅ Alerta cerrada. Todo listo.";
+    }
+
+    // =========================================================================
+    // 5. SISTEMA DE RADAR (POLLING) Y AUDIO
+    // =========================================================================
+    let audioCtx = null;
+    function desbloquearAudio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
+    ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
+
+    let sirenaLoop = null;
+    function unCicloSirena() {
+        if (!audioCtx) return;
+        let t = audioCtx.currentTime;
+        for (let i = 0; i < 4; i++) {
+            const freq = (i % 2 === 0) ? 1046 : 784;
+            [0, 4].forEach(det => {
+                const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                osc.type = 'square'; osc.frequency.value = freq + det;
+                g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(1.0, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+                osc.connect(g); g.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.3);
+            });
+            t += 0.3;
+        }
+    }
+
+    function sonarAlarma() {
+        try {
+            desbloquearAudio(); if (!audioCtx) return; unCicloSirena(); clearInterval(sirenaLoop);
+            sirenaLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') unCicloSirena(); else clearInterval(sirenaLoop); }, 1500);
+        } catch (e) { console.error('audio:', e); }
+    }
+
+    function detenerAlarma() { clearInterval(sirenaLoop); clearInterval(window.__vibLoop); try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {} }
+    function vibrarAlarma() {
+        try {
+            if (!navigator.vibrate) return; navigator.vibrate([700, 250, 700, 250, 700]); clearInterval(window.__vibLoop);
+            window.__vibLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]); else clearInterval(window.__vibLoop); }, 3000);
+        } catch (e) {}
+    }
+
+    let ultimoSosVisto = null;
+    let radarIniciado = false;
+
+    function iniciarAlertaEnVivo() {
+        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
+            if (!r.error && r.data && r.data[0]) ultimoSosVisto = r.data[0].id;
+            radarIniciado = true; 
+            cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '... | Vigilo desde #' + (ultimoSosVisto || 0);
+        });
+        
+        setInterval(async () => {
+            if (!radarIniciado) return;
+            const r = await sb.from('sos_ruta').select('id, user_id, lat, lon').order('id', { ascending: false }).limit(1);
+            if (r.error || !r.data || !r.data[0]) return;
+            
+            const top = r.data[0];
+            if (top.id <= ultimoSosVisto) return;
+            ultimoSosVisto = top.id;
+            
+            if (top.user_id === USER_ID) return; // Me filtro silenciosamente
+            
+            if (ES_PACIENTE) {
+                cajaMensaje.textContent = '💙 Tu familiar está pendiente de vos.';
+                mostrarAvisoSuave(top);
+            } else {
+                cajaMensaje.textContent = '🚨 ¡SOS del paciente! Activando alarma...';
+                notificacionLocalRespaldo(top);
+                alertarEmergencia(top);
+            }
+        }, 6000);
+    }
+
+    function mostrarAvisoSuave(sos) {
+        let d = document.getElementById('cartelAvisoSuave');
+        if (!d) {
+            d = document.createElement('div'); d.id = 'cartelAvisoSuave';
+            d.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);color:#1f2937;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
+            document.body.appendChild(d);
+        }
+        d.innerHTML = '<div style="font-size:64px">💙</div><div style="font-size:24px;font-weight:bold;margin:12px 0;color:#1976d2">Tu familiar está pendiente de vos</div><div style="font-size:18px;margin:10px 0;color:#4b5563">Recibió tu señal y está al tanto.</div><button onclick="document.getElementById(\'cartelAvisoSuave\').style.display=\'none\'" style="background:#1976d2;color:#fff;border:none;font-size:18px;padding:14px 28px;border-radius:10px;cursor:pointer;margin-top:20px;">Entendido, gracias</button>';
+        d.style.display = 'flex';
+        if (navigator.vibrate) navigator.vibrate(200);
+    }
+
+    function alertarEmergencia(sos) {
+        sosActual = sos; // Guardamos las coords del paciente para mostrarlas al silenciar
+        const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
+        vibrarAlarma(); sonarAlarma();
+        cajaMensaje.textContent = '🚨 ¡EMERGENCIA! Tu contacto activó el SOS.';
+        mostrarCartelSOS(mapa);
+    }
+
+    function notificacionLocalRespaldo(sos) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+                const notif = new Notification('🚨 EMERGENCIA Ruta Segura', {
+                    body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
+                    icon: './icon-192.png', tag: 'sos-emergencia', requireInteraction: true,
+                    data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
+                });
+                notif.onclick = function() { window.focus(); alertarEmergencia(sos); notif.close(); };
+                return;
+            } catch(e) { console.error('Notificación local no disponible:', e); }
+        }
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ tipo: 'sos-push', lat: sos.lat, lon: sos.lon });
+        }
+    }
+
+    // =========================================================================
+    // 6. FUNCIONES DE UTILIDAD (VOZ, LINTERNA, DATOS, CONSEJOS)
+    // =========================================================================
     function claveDatosActual() { return tipoDatoActual === 'lugares' ? CLAVE_LUGARES : CLAVE_CONTACTOS; }
     function leerDatos(clave) { try { const datos = JSON.parse(localStorage.getItem(clave) || '[]'); return Array.isArray(datos) ? datos : []; } catch (error) { return []; } }
-    function guardarDatos(clave, datos) { try { localStorage.setItem(clave, JSON.stringify(datos)); return true; } catch (error) { alert('No se pudieron guardar los datos en este dispositivo.'); return false; } }
+    function guardarDatos(clave, datos) { try { localStorage.setItem(clave, JSON.stringify(datos)); return true; } catch (error) { alert('No se pudieron guardar los datos.'); return false; } }
     function escaparHtml(valor) { return String(valor).replace(/[&<>"']/g, caracter => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[caracter])); }
 
     function abrirPanelDatos(tipo) {
@@ -242,8 +470,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
     function cerrarPanelDatos() {
         panelDatos.classList.remove('visible');
         panelDatos.setAttribute('aria-hidden', 'true');
-        inputDatoNombre.value = '';
-        inputDatoValor.value = '';
+        inputDatoNombre.value = ''; inputDatoValor.value = '';
     }
 
     function renderizarDatos() {
@@ -307,31 +534,6 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
         }
     });
 
-    function inicializarMapa() {
-        mapaLeaflet = L.map('mapa').setView([-37.3429, -57.0342], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(mapaLeaflet);
-    }
-
-    function iniciarSOS() { sosActivo = true; progresoSOS.style.width = '100%'; temporizadorSOS = setTimeout(() => { if(sosActivo) activarSOS(); }, 1500); }
-    function cancelarSOS() { sosActivo = false; progresoSOS.style.width = '0%'; if(temporizadorSOS) clearTimeout(temporizadorSOS); }
-    botonSOS.addEventListener('mousedown', iniciarSOS);
-    botonSOS.addEventListener('touchstart', e=>{e.preventDefault(); iniciarSOS();}, {passive:false});
-    botonSOS.addEventListener('mouseup', cancelarSOS);
-    botonSOS.addEventListener('touchend', cancelarSOS);
-    botonSOS.addEventListener('mouseleave', cancelarSOS);
-
-    function iniciarUbicacion() {
-        if (!navigator.geolocation) { cajaMensaje.textContent = "Navegador no compatible"; return; }
-        cajaMensaje.textContent = "Buscando tu ubicación...";
-        navigator.geolocation.getCurrentPosition(pos => {
-            miUbicacion = pos.coords;
-            mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
-            if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-            marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("&#128205; Estás aquí").openPopup();
-            cajaMensaje.textContent = "\u2705 Todo listo";
-        }, () => cajaMensaje.textContent = "Activa ubicación en tu teléfono", {enableHighAccuracy: true, timeout:10000});
-    }
-
     function iniciarVoz() {
         window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!window.SpeechRecognition) { cajaMensaje.textContent = "Usa Chrome/Android para voz"; return; }
@@ -340,7 +542,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
         reconocimiento.lang = 'es-ES'; reconocimiento.continuous = false; reconocimiento.interimResults = false;
         reconocimiento.onstart = () => { botonVoz.classList.add('escuchando'); cajaMensaje.textContent = "Te escucho... decí tu comando"; };
         reconocimiento.onresult = e => {
-            cajaMensaje.innerHTML = '&#9989; Dijiste: <strong>"' + e.results[0][0].transcript.toLowerCase() + '"</strong>';
+            cajaMensaje.innerHTML = '✅ Dijiste: <strong>"' + e.results[0][0].transcript.toLowerCase() + '"</strong>';
             procesarComando(e.results[0][0].transcript.toLowerCase());
             botonVoz.classList.remove('escuchando'); reconocimiento = null;
         };
@@ -356,7 +558,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
         for (const [clave, busqueda] of Object.entries(lugares)) {
             if (texto.includes(clave)) {
                 window.open('https://www.google.com/maps/search/' + encodeURIComponent(busqueda), '_blank');
-                encontroLugar = true; cajaMensaje.innerHTML = '&#128269; Buscando <strong>' + busqueda + '</strong> en el mapa...'; break;
+                encontroLugar = true; cajaMensaje.innerHTML = '🔍 Buscando <strong>' + busqueda + '</strong> en el mapa...'; break;
             }
         }
         if (!encontroLugar) {
@@ -367,7 +569,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
             else if (texto.includes("emergencia") || texto.includes("ayuda") || texto.includes("sos")) { activarSOS(); }
             else if (texto.includes("llegue") || texto.includes("casa")) { llegueBien(); }
             else if (texto.includes("llamar")) { if(confirm("Querés hacer una llamada?")) window.location.href = "tel:"; }
-            else { window.open('https://www.google.com/maps/search/' + encodeURIComponent(texto), '_blank'); cajaMensaje.innerHTML = '&#128269; Buscando "<strong>' + texto + '</strong>" en el mapa...'; }
+            else { window.open('https://www.google.com/maps/search/' + encodeURIComponent(texto), '_blank'); cajaMensaje.innerHTML = '🔍 Buscando "<strong>' + texto + '</strong>" en el mapa...'; }
         }
     }
 
@@ -383,37 +585,6 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
         cajaMensaje.textContent = "Abriendo WhatsApp...";
     }
 
-    const EMAIL_FAMILIAR = 'puertocolibri@gmail.com';
-    const TEL_FAMILIAR = '5491150617831';
-
-    async function activarSOS() {
-        cajaMensaje.textContent = "🚨 SOS ACTIVADO - Avisando a tu contacto...";
-        let lat = null, lon = null;
-        if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
-        const mapaLink = (lat !== null) ? ('https://maps.google.com/?q=' + lat + ',' + lon) : '(sin ubicación)';
-
-        try { await sb.from('sos_ruta').insert({ user_id: USER_ID, lat: lat, lon: lon, estado: 'activado' }); } catch (e) { console.error('Error subiendo SOS:', e); }
-        
-        try {
-            await fetch('https://formsubmit.co/ajax/' + EMAIL_FAMILIAR, {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify({ _subject: '🚨 SOS Ruta Segura - ' + new Date().toLocaleString(), mensaje: 'Se activó el botón de emergencia de Ruta Segura.', ubicacion: mapaLink })
-            });
-        } catch (e) { console.error('Error enviando email:', e); }
-        
-        try {
-            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    from: USER_ID,
-                    lat: lat,
-                    lon: lon
-                })
-            });
-        } catch (e) { console.error('Error enviando push:', e); }
-        
-        cajaMensaje.textContent = "✅ SOS enviado. Avisamos a tu contacto con tu ubicación.";
-    }
     async function toggleLinterna() {
         try {
             if (!linternaActiva) {
@@ -425,7 +596,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
                 } else { alert("Tu dispositivo no soporta linterna"); linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; }
             } else {
                 linternaStream.getTracks().forEach(t => t.stop()); linternaStream = null; linternaActiva = false;
-                cajaMensaje.textContent = "Linterna apagada"; btnLinterna.textContent = "Linterna";
+                cajaMensaje.textContent = "Linterna apagada"; btnLinterna.textContent = "🔦 Linterna";
             }
         } catch (e) { alert("No se pudo activar la linterna. Verificá los permisos de cámara."); }
     }
@@ -436,11 +607,29 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
             miUbicacion = pos.coords;
             try {
                 await sb.from('ubicaciones_ruta').insert({ user_id: USER_ID, lat: pos.coords.latitude, lon: pos.coords.longitude, precision: pos.coords.accuracy });
-                console.log('Ubicación subida a la nube');
-            } catch (e) { cajaMensaje.textContent = '\u274c Error insert: ' + e.message; }
-        }, (err) => { cajaMensaje.textContent = '\u274c Geo error: ' + err.message; }, { enableHighAccuracy: true, timeout: 10000 });
+            } catch (e) { console.error('Error insert ubicación:', e); }
+        }, (err) => { console.error('Geo error:', err); }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
+    let mensajes = [
+        "Consejo: Mantené presionado el botón de emergencia por 2 segundos.",
+        "Tocá el micrófono y decí 'Compartir' para enviar tu ubicación.",
+        "Recordá cargar la batería de tu celular antes de salir a caminar.",
+        "Conocé nuestras otras apps educativas en: Cursos IA para Mayores.",
+        "Caminar 20 minutos al día mejora tu salud y tu ánimo. ¡Vos podés!",
+        "En el menú Ajustes tenés acceso directo a hospitales y farmacias.",
+        "El modo avión gasta menos batería. Usalo si necesitás ahorrar."
+    ];
+    let indiceMensaje = 0;
+    setInterval(() => {
+        indiceMensaje = (indiceMensaje + 1) % mensajes.length;
+        espacioConsejos.style.opacity = 0;
+        setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
+    }, 17000);
+
+    // =========================================================================
+    // 7. EVENT LISTENERS DE BOTONES E INICIALIZACIÓN
+    // =========================================================================
     btnSalud.addEventListener('click', () => window.open('https://www.google.com/maps/search/farmacia+o+centro+de+salud+cerca+de+mi', '_blank'));
     btnPolicia.addEventListener('click', () => { if(confirm("Querés llamar ahora al número de emergencias?")) window.location.href = "tel:911"; });
     btnHospital.addEventListener('click', () => window.open('https://www.google.com/maps/search/hospital+con+guardia+cerca+de+mi', '_blank'));
@@ -461,7 +650,7 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
     btnRuta.addEventListener('click', () => {
         inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
         inputDestino.placeholder = "Ej: Calle 36 y Avenida 7, Hospital, etc.";
-        cajaMensaje.textContent = "\ud83e\udded Escribí tu destino y tocá 'Buscar ruta'";
+        cajaMensaje.textContent = "🗺️ Escribí tu destino y tocá 'Buscar ruta'";
         inputDestino.onkeypress = function(e) { if(e.key === 'Enter') btnBuscarDestino.click(); };
     });
 
@@ -476,34 +665,21 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
     btnRutaRapida.addEventListener('click', () => {
         panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
         inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
-        cajaMensaje.textContent = "\u270f\ufe0f Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
+        cajaMensaje.textContent = "✏️ Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
         inputDestino.onkeypress = function(e) { if(e.key === 'Enter') btnBuscarDestino.click(); };
-    });
-
-    window.addEventListener('load', () => {
-        inicializarMapa(); iniciarUbicacion(); subirUbicacionPeriodica(); setInterval(subirUbicacionPeriodica, 300000);
-        sb.from('ubicaciones_ruta').select('id').limit(1).then(res => { if (res.error) cajaMensaje.textContent = '\u274c Supabase error: ' + res.error.message; else console.log('\u2705 Supabase conectado'); });
     });
 
     botonVoz.addEventListener('click', iniciarVoz);
     btnCompartir.addEventListener('click', compartirUbicacion);
     btnLlegueBien.addEventListener('click', llegueBien);
 
-    let mensajes = [
-        "Consejo: Manten\u00e9 presionado el bot\u00f3n de emergencia por 2 segundos.",
-        "Toc\u00e1 el micr\u00f3fono y decí 'Compartir' para enviar tu ubicación.",
-        "Record\u00e1 cargar la bater\u00eda de tu celular antes de salir a caminar.",
-        "Conoc\u00e9 nuestras otras apps educativas en: Cursos IA para Mayores.",
-        "Caminar 20 minutos al d\u00eda mejora tu salud y tu \u00e1nimo. \u00a1Vos pod\u00e9s!",
-        "En el men\u00fa Ajustes ten\u00e9s acceso directo a hospitales y farmacias.",
-        "El modo avi\u00f3n gasta menos bater\u00eda. Usalo si necesit\u00e1s ahorrar."
-    ];
-    let indiceMensaje = 0;
-    setInterval(() => {
-        indiceMensaje = (indiceMensaje + 1) % mensajes.length;
-        espacioConsejos.style.opacity = 0;
-        setTimeout(() => { espacioConsejos.textContent = mensajes[indiceMensaje]; espacioConsejos.style.opacity = 1; }, 300);
-    }, 17000);
+    window.addEventListener('load', () => {
+        inicializarMapa(); 
+        iniciarUbicacion(); 
+        subirUbicacionPeriodica(); 
+        setInterval(subirUbicacionPeriodica, 300000); // Respaldo cada 5 min
+        iniciarAlertaEnVivo();
+    });
 
     let deferredPrompt;
     const btnInstalarManual = document.getElementById('btnInstalarManual');
@@ -516,255 +692,134 @@ let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
     }
 
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').then(reg => console.log('SW registrado:', reg)).catch(err => console.error('Error SW:', err)); });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('./service-worker.js').catch(err => console.error('Error SW:', err)); });
     }
 
-    function mostrarCartelSOS(mapa) {
-    let d = document.getElementById('cartelSOS');
-    if (!d) {
-        d = document.createElement('div'); d.id = 'cartelSOS';
-        d.style.cssText = 'position:fixed;inset:0;background:rgba(200,0,0,0.96);color:#fff;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
-        document.body.appendChild(d);
-    }
-    
-    // Nuevo botón que silencia y muestra el mapa interno (en lugar de abrir Google Maps)
-    const botonMapaInterno = mapa ? 
-        `<button onclick="silenciarYMostrarMapaInterno()" style="display:block;width:90%;max-width:400px;background:#fff;color:#c00;font-size:20px;font-weight:bold;padding:16px 24px;border-radius:12px;margin:14px 0;border:none;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,0.3);">📍 Ver ubicación en el mapa (y silenciar)</button>` : '';
+    // =========================================================================
+    // 8. GESTIÓN DE ROLES (PACIENTE / FAMILIAR)
+    // =========================================================================
+    (function() {
+        const chk = document.getElementById('chkEsPaciente');
+        const aviso = document.getElementById('avisoRol');
+        if (!chk || !aviso) return;
 
-    d.innerHTML = '<div class="sirena" style="font-size:64px">🚨</div>' +
-        '<div style="font-size:26px;font-weight:bold;margin:12px 0">¡EMERGENCIA ACTIVADA!</div>' +
-        botonMapaInterno +
-        '<button onclick="cerrarAlertaCompleta()" style="background:#333;color:#fff;border:none;font-size:18px;padding:12px 22px;border-radius:10px;cursor:pointer;margin-top:10px;">✖ Cerrar alerta</button>';
-    d.style.display = 'flex';
-}
-        function silenciarYMostrarMapaInterno() {
-    // 1. Detener sonido y vibración inmediatamente
-    detenerAlarma();
-    // 2. Ocultar el cartel rojo para revelar el mapa que está debajo
-    const cartel = document.getElementById('cartelSOS');
-    if (cartel) cartel.style.display = 'none';
-    // 3. Centrar el mapa de Leaflet en la ubicación actual
-    iniciarUbicacion();
-    // 4. Feedback visual
-    cajaMensaje.textContent = "📍 Ubicación mostrada. Sirena apagada.";
-}
-
-function cerrarAlertaCompleta() {
-    // 1. Detener sonido y vibración
-    detenerAlarma();
-    // 2. Ocultar el cartel rojo
-    const cartel = document.getElementById('cartelSOS');
-    if (cartel) cartel.style.display = 'none';
-    // 3. Resetear estado visual
-    cajaMensaje.textContent = "✅ Alerta cerrada. Todo listo.";
-}
-    let audioCtx = null;
-    function desbloquearAudio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
-    ['touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, desbloquearAudio, { passive: true }));
-
-    let sirenaLoop = null;
-    function unCicloSirena() {
-        if (!audioCtx) return;
-        let t = audioCtx.currentTime;
-        for (let i = 0; i < 4; i++) {
-            const freq = (i % 2 === 0) ? 1046 : 784;
-            [0, 4].forEach(det => {
-                const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                osc.type = 'square'; osc.frequency.value = freq + det;
-                g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(1.0, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
-                osc.connect(g); g.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.3);
-            });
-            t += 0.3;
-        }
-    }
-
-    function sonarAlarma() {
-        try {
-            desbloquearAudio(); if (!audioCtx) return; unCicloSirena(); clearInterval(sirenaLoop);
-            sirenaLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') unCicloSirena(); else clearInterval(sirenaLoop); }, 1500);
-        } catch (e) { console.log('audio:', e); }
-    }
-
-    function detenerAlarma() { clearInterval(sirenaLoop); clearInterval(window.__vibLoop); try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) {} }
-    function vibrarAlarma() {
-        try {
-            if (!navigator.vibrate) return; navigator.vibrate([700, 250, 700, 250, 700]); clearInterval(window.__vibLoop);
-            window.__vibLoop = setInterval(() => { const c = document.getElementById('cartelSOS'); if (c && c.style.display !== 'none') navigator.vibrate([700, 250, 700]); else clearInterval(window.__vibLoop); }, 3000);
-        } catch (e) {}
-    }
-        function notificacionLocalRespaldo(sos) {
-    // Intentar mostrar notificación local (solo funciona si la app está abierta)
-    if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-            const notif = new Notification('🚨 EMERGENCIA Ruta Segura', {
-                body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
-                icon: './icon-192.png',
-                badge: './icon-192.png',
-                tag: 'sos-emergencia',
-                requireInteraction: true,
-                data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
-            });
-            
-            notif.onclick = function() {
-                window.focus();
-                alertarEmergencia(sos);
-                notif.close();
-            };
-            return; // Si funcionó, salir
-        } catch(e) {
-            console.log('Notificación local no disponible:', e);
-        }
-    }
-    
-    // Si la app está en background, enviar mensaje al Service Worker
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            tipo: 'sos-push',
-            lat: sos.lat,
-            lon: sos.lon
-        });
-    }
-}
-        function mostrarAvisoSuave(sos) {
-    // Aviso tranquilizador para el paciente (sin sirena, sin pantalla roja)
-    let d = document.getElementById('cartelAvisoSuave');
-    if (!d) {
-        d = document.createElement('div');
-        d.id = 'cartelAvisoSuave';
-        d.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);color:#1f2937;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
-        document.body.appendChild(d);
-    }
-    
-    d.innerHTML = '<div style="font-size:64px">💙</div>' +
-        '<div style="font-size:24px;font-weight:bold;margin:12px 0;color:#1976d2">Tu familiar está pendiente de vos</div>' +
-        '<div style="font-size:18px;margin:10px 0;color:#4b5563">Recibió tu señal y está al tanto.</div>' +
-        '<button onclick="document.getElementById(\'cartelAvisoSuave\').style.display=\'none\'" style="background:#1976d2;color:#fff;border:none;font-size:18px;padding:14px 28px;border-radius:10px;cursor:pointer;margin-top:20px;">Entendido, gracias</button>';
-    d.style.display = 'flex';
-    
-    // Vibración suave (una sola vez, corta)
-    if (navigator.vibrate) navigator.vibrate(200);
-}
-
-    function alertarEmergencia(sos) {
-        const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
-        vibrarAlarma(); sonarAlarma();
-        cajaMensaje.textContent = '\ud83d\udea8 \u00a1EMERGENCIA! Tu contacto activ\u00f3 el SOS.';
-        mostrarCartelSOS(mapa);
-    }
-
-    let ultimoSosVisto = null;
-    let radarIniciado = false; // NUEVO: flag para saber si ya cargamos el ID inicial
-
-    function iniciarAlertaEnVivo() {
-        console.log('🆔 Mi USER_ID local es: ' + USER_ID);
-        cajaMensaje.textContent = '🆔 Mi ID: ' + USER_ID.substring(0, 8) + '...';
-        
-        // PASO 1: Cargar el último SOS existente SIN disparar nada
-        sb.from('sos_ruta').select('id').order('id', { ascending: false }).limit(1).then(r => { 
-            if (!r.error && r.data && r.data[0]) {
-                ultimoSosVisto = r.data[0].id;
-                console.log('📡 ID inicial cargado: #' + ultimoSosVisto);
-            }
-            radarIniciado = true; // NUEVO: marcamos que ya estamos listos
-            cajaMensaje.textContent += ' | Vigilo desde #' + (ultimoSosVisto || 0);
-        });
-        
-        // PASO 2: Empezar a vigilar cada 6 segundos
-        setInterval(async () => {
-            // Si aún no cargamos el ID inicial, no hacemos nada
-            if (!radarIniciado) return;
-            
-            const r = await sb.from('sos_ruta').select('id, user_id, lat, lon, created_at').order('id', { ascending: false }).limit(1);
-            
-            if (r.error) { return; }
-            if (!r.data || !r.data[0]) { return; }
-            
-            const top = r.data[0];
-            
-            // Si el ID es igual o menor al que ya vimos, no hacer nada
-            if (top.id <= ultimoSosVisto) { return; }
-            
-            // ¡Es un SOS nuevo! Actualizamos el ID visto
-            ultimoSosVisto = top.id;
-            
-            // Filtro: si soy yo, no hago nada
-            if (top.user_id === USER_ID) { 
-                console.log('✅ SOS mío, me filtro');
-                return;
-            }
-            
-            // Lógica asimétrica según el rol
-            if (ES_PACIENTE) {
-                // Soy paciente → aviso suave
-                cajaMensaje.textContent = ' Tu familiar está pendiente de vos.';
-                mostrarAvisoSuave(top);
+        function actualizarUI(esPaciente, bloqueado) {
+            if (esPaciente) {
+                chk.style.display = 'none';
+                aviso.innerHTML = '🔒 <strong>Rol de Paciente</strong>' + (bloqueado ? '<br><small>(Configurado y bloqueado)</small>' : '');
             } else {
-                // Soy familiar → alarma completa
-                cajaMensaje.textContent = '🚨 ¡SOS del paciente! Activando alarma...';
-                notificacionLocalRespaldo(top);
-                alertarEmergencia(top);
+                chk.style.display = 'none';
+                aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong>' + (bloqueado ? '<br><small>(Ya hay un paciente vinculado)</small>' : '');
             }
-        }, 6000);
-    }
-    window.addEventListener('load', () => { iniciarAlertaEnVivo(); });
+        }
 
-    // ===== NUBE RUTA SEGURA =====
-    const SUPA_URL_RS = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
-    const SUPA_KEY_RS = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
-    let supaRS = null, uidRS = null, nubeOK_RS = false, nubeModo_RS = 'off';
-    function nubeToastRS(msg) {
-        let t = document.getElementById('nube-toast-rs');
-        if (!t) { t = document.createElement('div'); t.id = 'nube-toast-rs'; document.body.appendChild(t); }
-        t.textContent = msg; t.classList.add('ver'); setTimeout(() => t.classList.remove('ver'), 3500);
-    }
-    (function () {
-        const st = document.createElement('style');
-        st.textContent = '#nube-rs{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube-rs.tocable{cursor:pointer;text-decoration:underline;} #nube-form-rs{display:none;text-align:center;margin:.4rem 0;} #nube-toast-rs{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast-rs.ver{opacity:1;}';
-        document.head.appendChild(st);
+        if (ES_PACIENTE) {
+            actualizarUI(true, true);
+        } else {
+            sb.from('push_subs').select('user_id, rol').eq('rol', 'paciente').limit(1).then(result => {
+                if (result.data && result.data.length > 0 && result.data[0].user_id !== USER_ID) {
+                    ES_PACIENTE = false;
+                    localStorage.setItem('rs_es_paciente', 'false');
+                    actualizarUI(false, true);
+                } else {
+                    chk.checked = false;
+                    chk.style.display = 'inline-block'; // Mostrar checkbox si no hay paciente
+                    aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+                }
+            }).catch(() => {
+                chk.checked = false;
+                chk.style.display = 'inline-block';
+                aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+            });
+        }
+
+        chk.addEventListener('change', function() {
+            if (chk.checked) {
+                ES_PACIENTE = true;
+                localStorage.setItem('rs_es_paciente', 'true');
+                sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID).catch(console.error);
+                actualizarUI(true, true);
+                cajaMensaje.textContent = '✅ Configurado como paciente';
+            }
+        });
     })();
-    const nubeElRS = document.createElement('p'); nubeElRS.id = 'nube-rs';
-    const nubeFormRS = document.createElement('div'); nubeFormRS.id = 'nube-form-rs';
-    nubeFormRS.innerHTML = '<input id="nube-mail-rs" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass-rs" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"><br><button id="nube-ok-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button> <button id="nube-new-rs" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#27ae60;color:#fff;font-weight:700;font-size:1rem;">Crear cuenta</button>';
-    const anclaRS = document.querySelector('h1');
-    if (anclaRS) { anclaRS.after(nubeElRS); nubeElRS.after(nubeFormRS); } else { document.body.prepend(nubeFormRS); document.body.prepend(nubeElRS); }
-    function nubeEstadoRS(txt, tocable) { nubeElRS.textContent = txt; if (tocable) nubeElRS.classList.add('tocable'); else nubeElRS.classList.remove('tocable'); }
-    try { if (window.supabase && window.supabase.createClient) { supaRS = window.supabase.createClient(SUPA_URL_RS, SUPA_KEY_RS, { auth: { persistSession: true, autoRefreshToken: true, flowType: 'implicit', detectSessionInUrl: true } }); } } catch (e) {}
-    async function nubeRescatarTokenRS() {
-        if (!supaRS) return;
-        try {
-            const h = window.location.hash || '';
-            if (h.includes('access_token=')) { const p = new URLSearchParams(h.substring(1)); const at = p.get('access_token'); const rt = p.get('refresh_token'); if (at) await supaRS.auth.setSession({ access_token: at, refresh_token: rt || at }); }
-            const q = new URLSearchParams(window.location.search); const code = q.get('code'); if (code) await supaRS.auth.exchangeCodeForSession(code);
-            if (h.includes('access_token=') || code) history.replaceState(null, '', window.location.pathname);
-        } catch (e) { console.log('[nube rs] rescate', e); }
-    }
-    async function nubeConectarRS() {
-        if (!supaRS) { nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); return; }
-        try {
-            const { data: ses } = await supaRS.auth.getSession();
-            if (ses && ses.session) { uidRS = ses.session.user.id; nubeOK_RS = true; nubeModo_RS = 'ok'; nubeEstadoRS('☁️ Conectado con tu familia — alerta familiar activa'); } 
-            else { uidRS = null; nubeOK_RS = false; nubeModo_RS = 'off'; nubeEstadoRS('☁️ Nube apagada — tocá acá para activarla', true); }
-        } catch (e) { nubeOK_RS = false; nubeEstadoRS('⚠️ Sin nube: la alerta familiar no existe'); }
-    }
-    nubeElRS.addEventListener('click', () => { if (nubeOK_RS) { nubeToastRS('☁️ La nube ya está conectada'); return; } if (!supaRS) { nubeToastRS('Nube no disponible en este navegador'); return; } nubeFormRS.style.display = (nubeFormRS.style.display === 'none') ? 'block' : 'none'; });
-    document.getElementById('nube-ok-rs').addEventListener('click', async () => {
-        const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
-        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; } if (!pass) { nubeToastRS('Escribí tu contraseña'); return; }
-        try { const { error } = await supaRS.auth.signInWithPassword({ email: mail, password: pass }); if (error) throw error; nubeToastRS('☁️ Conectado a la nube'); nubeFormRS.style.display = 'none'; await nubeConectarRS(); } 
-        catch (e) { nubeToastRS('️ ' + (e && e.message ? e.message : 'No se pudo entrar')); }
-    });
-    document.getElementById('nube-new-rs').addEventListener('click', async () => {
-        const mail = (document.getElementById('nube-mail-rs').value || '').trim(); const pass = (document.getElementById('nube-pass-rs').value || '');
-        if (!mail || !mail.includes('@')) { nubeToastRS('Escribí un email válido'); return; } if (pass.length < 6) { nubeToastRS('La contraseña necesita 6 caracteres o más'); return; }
-        try {
-            const { data, error } = await supaRS.auth.signUp({ email: mail, password: pass }); if (error) throw error;
-            if (data && data.session) { uidRS = data.session.user.id; nubeOK_RS = true; nubeToastRS('☁️ Cuenta creada y conectada'); nubeFormRS.style.display = 'none'; await nubeConectarRS(); } 
-            else { nubeToastRS('Cuenta creada: ahora tocá Entrar'); }
-        } catch (e) { const m = (e && e.message) || ''; if (/already registered/i.test(m)) nubeToastRS('Ese mail ya tiene cuenta: tocá Entrar'); else nubeToastRS('⚠️ ' + (m || 'No se pudo crear')); }
-    });
-    window.addEventListener('load', async () => { await nubeRescatarTokenRS(); await nubeConectarRS(); });
 
-    // --- Push VAPID propio ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnReset = document.getElementById('btnResetRol');
+        if (btnReset) {
+            btnReset.addEventListener('click', async function() {
+                localStorage.removeItem('rs_es_paciente');
+                ES_PACIENTE = false;
+                await sb.from('push_subs').update({ rol: 'familiar' }).eq('user_id', USER_ID);
+                alert('✅ Rol reseteado. Recargá la página.');
+                location.reload();
+            });
+        }
+    });
+
+    // =========================================================================
+    // 9. INTEGRACIÓN BLE (MOKO W6)
+    // =========================================================================
+    let mokoDevice = null, mokoCharacteristic = null, bleConectado = false;
+
+    async function conectarMokoW6() {
+        if (!navigator.bluetooth) {
+            document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+            return;
+        }
+        try {
+            document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg.<br>2. Seleccioná 'BeaconX Pro' o 'Moko'.";
+            document.getElementById('estadoBLE').style.color = "#f59e0b";
+
+            mokoDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801'] });
+            document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
+            
+            const server = await Promise.race([ mokoDevice.gatt.connect(), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000)) ]);
+            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
+            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
+            
+            await mokoCharacteristic.startNotifications();
+            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
+            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
+
+            bleConectado = true;
+            document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
+            document.getElementById('estadoBLE').style.color = "#059669";
+        } catch (error) {
+            console.error('[BLE] Error:', error);
+            let mensaje = "❌ No se pudo conectar.";
+            if (error.name === 'NotFoundError') mensaje = "❌ No se seleccionó ningún dispositivo.";
+            else if (error.message.includes('Timeout')) mensaje = "⏳ Se agotó el tiempo. Reinicialo (apretá 5 seg) y probá de nuevo.";
+            else mensaje += " " + error.message;
+            document.getElementById('estadoBLE').innerHTML = mensaje;
+            document.getElementById('estadoBLE').style.color = "#dc2626";
+        }
+    }
+
+    function manejarCambioBotonMoko(event) {
+        try {
+            const valor = event.target.value.getUint8(0);
+            if (valor === 0x00) {
+                if (typeof activarSOS === 'function') activarSOS();
+            }
+        } catch (error) { console.error('[BLE] Error al leer valor:', error); }
+    }
+
+    function onMokoDesconectado() {
+        bleConectado = false;
+        document.getElementById('estadoBLE').innerHTML = "⚠️ <b>Desconectado.</b><br>Tocá el botón para volver a enlazar.";
+        document.getElementById('estadoBLE').style.color = "#f59e0b";
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnBLE = document.getElementById('btnConectarBLE');
+        if (btnBLE) btnBLE.addEventListener('click', conectarMokoW6);
+    });
+
+    // =========================================================================
+    // 10. PUSH VAPID Y NOTIFICACIONES
+    // =========================================================================
     (function(){
       function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -793,40 +848,22 @@ function cerrarAlertaCompleta() {
             await sb.from('push_subs').delete().eq('user_id', USER_ID);
             var ins = await sb.from('push_subs').insert({ endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, user_id: USER_ID });
             if (ins.error) throw ins.error;
-            alert('✅ AVISOS ACTIVADOS (suscripción nueva)\nEndpoint: ' + json.endpoint.slice(0,40));
+            alert('✅ AVISOS ACTIVADOS (suscripción nueva)');
           } catch(e) { alert('❌ Error push: ' + e.message); }
         });
       });
-        if ('serviceWorker' in navigator) {
-        // COMENTADO: El push llega a todos los suscriptores (incluido el propio usuario)
-        // y dispara la alarma sin filtrar. El polling ya maneja la lógica correctamente.
-        /*
-        navigator.serviceWorker.addEventListener('message', function (evento) {
-          var d = evento.data || {};
-          if (d.tipo === 'sos-push') { alertarEmergencia({ lat: d.lat, lon: d.lon }); }
-        });
-        */
-
-        // Este sí lo dejamos: cuando el usuario TOCA la notificación en la barra
+      
+      if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(function(registration) {
           registration.addEventListener('notificationclick', function(event) {
             event.notification.close();
             window.focus();
-            
             if (event.notification.data && event.notification.data.tipo === 'sos-push') {
               alertarEmergencia({ lat: event.notification.data.lat, lon: event.notification.data.lon });
             }
           });
         });
       }
-      window.addEventListener('load', function () {
-        var q = new URLSearchParams(window.location.search);
-        if (q.get('sos') === '1') {
-          var lat = q.get('lat') ? parseFloat(q.get('lat')) : null;
-          var lon = q.get('lon') ? parseFloat(q.get('lon')) : null;
-          setTimeout(function () { alertarEmergencia({ lat: lat, lon: lon }); }, 500);
-        }
-      });
     })();
 
     // --- Generar código de vinculación ---
@@ -838,185 +875,19 @@ function cerrarAlertaCompleta() {
       if (btnGenerar) {
         btnGenerar.addEventListener('click', async function() {
           try {
-            const { data: codigosExistentes, error: errorBusqueda } = await sb.from('codigos_vinculacion').select('codigo').eq('adulto_id', USER_ID).eq('usada', false).limit(1);
-            if (errorBusqueda) throw errorBusqueda;
+            const { data: codigosExistentes } = await sb.from('codigos_vinculacion').select('codigo').eq('adulto_id', USER_ID).eq('usada', false).limit(1);
             let codigo;
             if (codigosExistentes && codigosExistentes.length > 0) { codigo = codigosExistentes[0].codigo; } 
             else {
               codigo = Math.floor(100000 + Math.random() * 900000).toString();
-              const { data, error } = await sb.from('codigos_vinculacion').insert({ codigo: codigo, adulto_id: USER_ID, nombre_adulto: 'Usuario', usada: false }).select();
-              if (error) throw error;
+              await sb.from('codigos_vinculacion').insert({ codigo: codigo, adulto_id: USER_ID, nombre_adulto: 'Usuario', usada: false });
             }
             codigoTexto.textContent = codigo; codigoGenerado.style.display = 'block';
-          } catch (e) { console.error('[DEBUG] Error:', e); alert('❌ Error al generar código: ' + e.message); }
+          } catch (e) { console.error('Error al generar código:', e); alert('❌ Error al generar código'); }
         });
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
     });
-
-    // ============================================
-    // INTEGRACIÓN BLE - MOKO W6 / BEACONX PRO
-    // ============================================
-    let mokoDevice = null;
-    let mokoCharacteristic = null;
-    let bleConectado = false;
-
-    async function conectarMokoW6() {
-        if (!navigator.bluetooth) {
-            document.getElementById('estadoBLE').innerHTML = "❌ Tu navegador no soporta Bluetooth.<br><small>Usá Chrome en Android.</small>";
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-            return;
-        }
-        try {
-            document.getElementById('estadoBLE').innerHTML = "⏳ <b>¡Atención!</b><br>1. Mantené apretado el botón del tag por 5 seg para despertarlo.<br>2. Seleccioná 'BeaconX Pro' o 'Moko' en la lista.";
-            document.getElementById('estadoBLE').style.color = "#f59e0b";
-
-            mokoDevice = await navigator.bluetooth.requestDevice({
-                acceptAllDevices: true,
-                optionalServices: ['e62a0001-1362-4f28-9327-f5b74e970801']
-            });
-
-            document.getElementById('estadoBLE').textContent = "📡 Conectando a: " + (mokoDevice.name || "Dispositivo") + "...";
-            
-            const server = await Promise.race([
-                mokoDevice.gatt.connect(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000))
-            ]);
-
-            const service = await server.getPrimaryService('e62a0001-1362-4f28-9327-f5b74e970801');
-            mokoCharacteristic = await service.getCharacteristic('e62a000d-1362-4f28-9327-f5b74e970801');
-            
-            await mokoCharacteristic.startNotifications();
-            mokoCharacteristic.addEventListener('characteristicvaluechanged', manejarCambioBotonMoko);
-            mokoDevice.addEventListener('gattserverdisconnected', onMokoDesconectado);
-
-            bleConectado = true;
-            document.getElementById('estadoBLE').innerHTML = "✅ <b>¡Conectado!</b><br>El botón físico del tag ahora dispara la alerta SOS.";
-            document.getElementById('estadoBLE').style.color = "#059669";
-            console.log('[BLE] ✅ Conectado exitosamente al tag');
-            
-        } catch (error) {
-            console.error('[BLE] Error:', error);
-            let mensaje = "❌ No se pudo conectar.";
-            if (error.name === 'NotFoundError') {
-                mensaje = "❌ No se seleccionó ningún dispositivo. Intentá de nuevo.";
-            } else if (error.message.includes('Timeout')) {
-                mensaje = "⏳ Se agotó el tiempo. El tag puede estar dormido. Reinicialo (apretá 5 seg) y probá de nuevo.";
-            } else {
-                mensaje += " " + error.message;
-            }
-            document.getElementById('estadoBLE').innerHTML = mensaje;
-            document.getElementById('estadoBLE').style.color = "#dc2626";
-        }
-    }
-
-    function manejarCambioBotonMoko(event) {
-        try {
-            const valor = event.target.value.getUint8(0);
-            console.log('[BLE] Valor recibido del botón:', valor);
-            if (valor === 0x00) {
-                console.log('[BLE] 🚨 ¡BOTÓN PRESIONADO! Disparando SOS...');
-                if (typeof activarSOS === 'function') {
-                    activarSOS();
-                }
-            }
-        } catch (error) {
-            console.error('[BLE] Error al leer valor:', error);
-        }
-    }
-
-    function onMokoDesconectado() {
-        console.log('[BLE] Dispositivo desconectado');
-        bleConectado = false;
-        document.getElementById('estadoBLE').innerHTML = "⚠️ <b>Desconectado.</b><br>Tocá el botón para volver a enlazar.";
-        document.getElementById('estadoBLE').style.color = "#f59e0b";
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnBLE = document.getElementById('btnConectarBLE');
-        if (btnBLE) {
-            btnBLE.addEventListener('click', conectarMokoW6);
-        }
-    });
-        
-        // --- Lógica del interruptor de rol (VERSIÓN SEGURA) ---
-(function() {
-    const chk = document.getElementById('chkEsPaciente');
-    const aviso = document.getElementById('avisoRol');
-    if (!chk || !aviso) return;
-
-    // Función para actualizar la UI según el rol
-    function actualizarUI(esPaciente, bloqueado) {
-        if (esPaciente) {
-            chk.style.display = 'none';
-            aviso.innerHTML = '🔒 <strong>Rol de Paciente</strong>' + 
-                (bloqueado ? '<br><small>(Configurado y bloqueado)</small>' : '');
-        } else {
-            chk.style.display = 'none';
-            aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong>' + 
-                (bloqueado ? '<br><small>(Ya hay un paciente vinculado)</small>' : '');
-        }
-    }
-
-    // Si ya estaba marcado como paciente, bloquear
-    if (ES_PACIENTE) {
-        actualizarUI(true, true);
-    } else {
-        // Consultar Supabase de forma segura (sin bloquear la app)
-        sb.from('push_subs').select('user_id, rol').eq('rol', 'paciente').limit(1).then(result => {
-            if (result.data && result.data.length > 0 && result.data[0].user_id !== USER_ID) {
-                // Ya existe otro paciente → bloquear como familiar
-                ES_PACIENTE = false;
-                localStorage.setItem('rs_es_paciente', 'false');
-                actualizarUI(false, true);
-            } else {
-                // No hay paciente aún → mostrar checkbox
-                chk.checked = false;
-                aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
-            }
-        }).catch(err => {
-            console.log('Error consultando rol:', err);
-            // Si falla, mostrar checkbox por defecto
-            chk.checked = false;
-            aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
-        });
-    }
-
-    // Cuando el usuario marca la casilla
-    chk.addEventListener('change', function() {
-        if (chk.checked) {
-            ES_PACIENTE = true;
-            localStorage.setItem('rs_es_paciente', 'true');
-            
-            // Guardar en Supabase (sin esperar respuesta)
-            sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID).then(() => {
-                console.log('Rol actualizado en Supabase');
-            }).catch(err => {
-                console.log('Error actualizando rol:', err);
-            });
-
-            actualizarUI(true, true);
-            cajaMensaje.textContent = '✅ Configurado como paciente';
-        }
-    });
-})();
-        // Botón de reset temporal
-document.addEventListener('DOMContentLoaded', function() {
-    const btnReset = document.getElementById('btnResetRol');
-    if (btnReset) {
-        btnReset.addEventListener('click', async function() {
-            // Resetear localStorage
-            localStorage.removeItem('rs_es_paciente');
-            ES_PACIENTE = false;
-            
-            // Quitar rol en Supabase
-            await sb.from('push_subs').update({ rol: 'familiar' }).eq('user_id', USER_ID);
-            
-            alert('✅ Rol reseteado. Recargá la página.');
-            location.reload();
-        });
-    }
-});
     </script>
 </body>
 </html>
