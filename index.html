@@ -833,25 +833,61 @@
         var btn = document.getElementById('btnAvisos');
         if (!btn) return;
         btn.addEventListener('click', async function(){
-          try {
-            if (!('serviceWorker' in navigator) || !('PushManager' in window)) { alert('❌ Este navegador no soporta push'); return; }
-            var perm = await Notification.requestPermission();
-            if (perm !== 'granted') { alert('❌ Permiso: ' + perm); return; }
-            var reg = await navigator.serviceWorker.ready;
-            var r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
-            var j = await r.json();
-            if (!j.publicKey) { alert('❌ No se pudo obtener la clave pública'); return; }
-            var vieja = await reg.pushManager.getSubscription();
-            if (vieja) { await vieja.unsubscribe(); }
-            var sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(j.publicKey) });
-            var json = sub.toJSON();
-            await sb.from('push_subs').delete().eq('user_id', USER_ID);
-            var ins = await sb.from('push_subs').insert({ endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, user_id: USER_ID });
-            if (ins.error) throw ins.error;
-            alert('✅ AVISOS ACTIVADOS (suscripción nueva)');
-          } catch(e) { alert('❌ Error push: ' + e.message); }
-        });
-      });
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) { 
+        alert('❌ Este navegador no soporta push'); 
+        return; 
+    }
+    
+    var perm = await Notification.requestPermission();
+    if (perm !== 'granted') { 
+        alert('❌ Permiso: ' + perm); 
+        return; 
+    }
+    
+    var reg = await navigator.serviceWorker.ready;
+    var r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
+    var j = await r.json();
+    if (!j.publicKey) { 
+        alert('❌ No se pudo obtener la clave pública'); 
+        return; 
+    }
+    
+    // Desuscribirse de la vieja si existe
+    var vieja = await reg.pushManager.getSubscription();
+    if (vieja) { 
+        await vieja.unsubscribe(); 
+    }
+    
+    // Suscribirse de nuevo
+    var sub = await reg.pushManager.subscribe({ 
+        userVisibleOnly: true, 
+        applicationServerKey: urlBase64ToUint8Array(j.publicKey) 
+    });
+    
+    var json = sub.toJSON();
+    
+    // BORRAR primero y luego INSERTAR
+    await sb.from('push_subs').delete().eq('user_id', USER_ID);
+    
+    // Pequeña pausa para asegurar que el DELETE se completó
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    var ins = await sb.from('push_subs').insert({ 
+        endpoint: json.endpoint, 
+        p256dh: json.keys.p256dh, 
+        auth: json.keys.auth, 
+        user_id: USER_ID 
+    });
+    
+    if (ins.error) throw ins.error;
+    
+    alert('✅ AVISOS ACTIVADOS correctamente');
+    
+  } catch(e) { 
+    alert('❌ Error push: ' + e.message); 
+  }
+});
       
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(function(registration) {
