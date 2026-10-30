@@ -928,6 +928,98 @@
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
     });
+        // =========================================================================
+    // 11. VER RECORRIDO DEL PACIENTE (CON PIN)
+    // =========================================================================
+    
+    // Mostrar u ocultar el botón según el rol
+    function actualizarBotonRecorrido() {
+        const btnRecorrido = document.getElementById('btnVerRecorrido');
+        if (btnRecorrido) {
+            // Solo se muestra si NO es paciente
+            btnRecorrido.style.display = ES_PACIENTE ? 'none' : 'block';
+        }
+    }
+    
+    // Llamar a esta función cuando se carga el rol
+    // (Ya la agregamos abajo en el evento DOMContentLoaded)
+
+    document.getElementById('btnVerRecorrido').addEventListener('click', async function() {
+        // 1. Obtener el ID del paciente desde la base de datos
+        const { data: pacientes } = await sb.from('push_subs').select('user_id').eq('rol', 'paciente').limit(1);
+        if (!pacientes || pacientes.length === 0) {
+            alert('⚠️ No se encontró un paciente vinculado en el sistema.');
+            return;
+        }
+        const pacienteId = pacientes[0].user_id;
+
+        // 2. Lógica del PIN
+        let pinGuardado = localStorage.getItem('pin_familiar');
+        
+        if (!pinGuardado) {
+            let nuevoPin = prompt('🔒 Creá un PIN de 4 dígitos para proteger esta vista:');
+            if (nuevoPin && nuevoPin.length === 4 && !isNaN(nuevoPin)) {
+                localStorage.setItem('pin_familiar', nuevoPin);
+                // Opcional: guardarlo también en Supabase
+                await sb.from('push_subs').update({ pin: nuevoPin }).eq('user_id', USER_ID);
+                alert('✅ PIN creado exitosamente.');
+            } else {
+                alert('❌ PIN inválido. Debe ser exactamente 4 números.');
+                return;
+            }
+        } else {
+            let intento = prompt('🔒 Ingresá tu PIN de 4 dígitos para ver el recorrido:');
+            if (intento !== pinGuardado) {
+                alert('❌ PIN incorrecto. Acceso denegado.');
+                return;
+            }
+        }
+
+        // 3. Buscar las últimas 10 ubicaciones del paciente
+        cajaMensaje.textContent = '📡 Buscando recorrido...';
+        const { data: ubicaciones, error } = await sb
+            .from('ubicaciones_ruta')
+            .select('lat, lon, created_at')
+            .eq('user_id', pacienteId)
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (error || !ubicaciones || ubicaciones.length < 2) {
+            alert('⚠️ No hay suficientes datos de recorrido aún (se necesitan al menos 2 puntos).');
+            cajaMensaje.textContent = '✅ Todo listo';
+            return;
+        }
+
+        // 4. Dibujar en el mapa
+        // Invertimos el array para que vaya del más antiguo al más nuevo
+        const puntos = ubicaciones.reverse().map(u => [u.lat, u.lon]);
+        
+        // Limpiar dibujos anteriores si existen
+        if (window.recorridoPolyline) mapaLeaflet.removeLayer(window.recorridoPolyline);
+        if (window.marcadoresRecorrido) {
+            window.marcadoresRecorrido.forEach(m => mapaLeaflet.removeLayer(m));
+        }
+        window.marcadoresRecorrido = [];
+
+        // Dibujar la línea azul
+        window.recorridoPolyline = L.polyline(puntos, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(mapaLeaflet);
+        
+        // Ajustar el mapa para que se vea todo el recorrido
+        mapaLeaflet.fitBounds(window.recorridoPolyline.getBounds(), { padding: [30, 30] });
+
+        // Poner marcadores de Inicio y Fin
+        const inicio = L.marker(puntos[0]).addTo(mapaLeaflet).bindPopup('🟢 Inicio del recorrido');
+        const fin = L.marker(puntos[puntos.length - 1]).addTo(mapaLeaflet).bindPopup('🔴 Último punto registrado');
+        window.marcadoresRecorrido.push(inicio, fin);
+
+        cajaMensaje.textContent = `👣 Recorrido mostrado (${ubicaciones.length} puntos).`;
+        panelAjustes.style.display = 'none'; // Cerrar el panel para ver el mapa
+    });
+
+    // Asegurarnos de que el botón se muestre/oculte al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        actualizarBotonRecorrido();
+    });
     </script>
 </body>
 </html>
