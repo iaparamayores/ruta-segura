@@ -435,15 +435,26 @@
     function notificacionLocalRespaldo(sos) {
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
-                const notif = new Notification('🚨 EMERGENCIA Ruta Segura', {
-                    body: 'El Usuario activó el SOS. Tocá para ver la ubicación.',
-                    icon: './icon-192.png', tag: 'sos-emergencia', requireInteraction: true,
+                const notif = new Notification('🚨 ¡EMERGENCIA! SOS ACTIVADO', {
+                    body: 'El Usuario necesita ayuda. ¡Tocá esta alerta AHORA!',
+                    icon: './icon-192.png',
+                    badge: './icon-192.png',
+                    tag: 'sos-emergencia', // Evita que se apilen varias notificaciones
+                    requireInteraction: true, // ¡CLAVE! La notificación NO se cierra sola, se queda en pantalla
+                    vibrate: [1000, 500, 1000, 500, 1000], // ¡CLAVE! Vibra 1 seg, pausa 0.5 seg, repite (muy llamativo)
                     data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
                 });
-                notif.onclick = function() { window.focus(); alertarEmergencia(sos); notif.close(); };
+                
+                notif.onclick = function() { 
+                    window.focus(); 
+                    alertarEmergencia(sos); // Al tocar, la app se abre y SUENA LA SIRENA REAL
+                    notif.close(); 
+                };
                 return;
             } catch(e) { console.error('Notificación local no disponible:', e); }
         }
+        
+        // Respaldo si la app está en segundo plano y el Service Worker está activo
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             navigator.serviceWorker.controller.postMessage({ tipo: 'sos-push', lat: sos.lat, lon: sos.lon });
         }
