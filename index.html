@@ -93,6 +93,12 @@
         </div>
 
         <div id="mapa"></div>
+        
+        <!-- BOTÓN EXCLUSIVO PARA CUIDADOR: Ver ubicación del Usuario -->
+        <button id="btnVerUbicacionUsuario" style="display:none; width:100%; padding:14px; font-size:18px; margin:0 0 10px 0; background:#7c3aed; color:#fff; border:none; border-radius:12px; font-weight:bold; box-shadow: 0 3px 6px rgba(0,0,0,0.2); cursor:pointer;">
+            👁️ Ver ubicación del Usuario
+        </button>
+
         <div id="cajaMensaje">✅ Todo listo</div>
 
         <div class="fila-botones-accion">
@@ -130,15 +136,14 @@
         
         <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">📲 Instalar aplicación en el celular</button>
         <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
-        <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi familiar</button>
+        <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi Cuidador</button>
         <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#9ca3af;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
-        <button id="btnVerRecorrido" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#2563eb;color:#fff;border:none;border-radius:12px;font-weight:bold;display:none;">👣 Ver último recorrido del paciente</button>
         
         <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
             <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Configuración de rol</p>
             <label style="display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-size:16px; color:#1f2937;">
-                <input type="checkbox" id="chkEsPaciente" style="width:22px; height:22px;">
-                <span>Este es el celular del <strong>paciente</strong> (adulto mayor)</span>
+                <input type="checkbox" id="chkEsUsuario" style="width:22px; height:22px;">
+                <span>Este es el celular del <strong>Usuario</strong> (adulto mayor)</span>
             </label>
             <p id="avisoRol" style="font-size:13px; color:#6b7280; text-align:center; margin-top:8px;"></p>
         </div>
@@ -152,7 +157,7 @@
         <div id="codigoGenerado" style="display:none;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;padding:20px;text-align:center;margin:10px 0;">
             <p style="font-size:16px;margin:0 0 10px 0;color:#856404;">Tu código es:</p>
             <p id="codigoTexto" style="font-size:48px;font-weight:bold;color:#059669;letter-spacing:8px;margin:10px 0;"></p>
-            <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu familiar (es permanente)</p>
+            <p style="font-size:14px;color:#856404;margin:10px 0 0 0;">Mostrale este código a tu Cuidador (es permanente)</p>
             <button id="btnCerrarCodigo" style="margin-top:15px;padding:10px 20px;background:#6c757d;color:white;border:none;border-radius:8px;">Cerrar</button>
         </div>
         <button id="cerrarAjustes" style="background:#d32f2f; color:white; width:100%; padding:12px; font-size:16px; margin-top:15px; border:none; border-radius:12px; font-weight:bold;">❌ Cerrar</button>
@@ -193,8 +198,10 @@
     let USER_ID = localStorage.getItem('rs_uid');
     if (!esUuid(USER_ID)) { USER_ID = nuevoUuid(); localStorage.setItem('rs_uid', USER_ID); }
     
-    let ES_PACIENTE = localStorage.getItem('rs_es_paciente') === 'true';
-    let sosActual = null; // Guarda las coordenadas del SOS activo para mostrarlas en el mapa
+    // NUEVA TERMINOLOGÍA: ES_USUARIO en lugar de ES_PACIENTE
+    let ES_USUARIO = localStorage.getItem('rs_es_usuario') === 'true';
+    let sosActual = null; 
+    let mostrandoUbicacionUsuario = false; // Controla el botón de ver ubicación
 
     // =========================================================================
     // 2. REFERENCIAS AL DOM
@@ -229,11 +236,12 @@
     const inputDatoValor = document.getElementById('inputDatoValor');
     const guardarDato = document.getElementById('guardarDato');
     const listaDatos = document.getElementById('listaDatos');
+    const btnVerUbicacionUsuario = document.getElementById('btnVerUbicacionUsuario');
 
     let miUbicacion = null, reconocimiento = null;
     let temporizadorSOS = null, sosActivo = false;
     let mapaLeaflet = null, marcadorUsuario = null;
-    let watchId = null; // Para el seguimiento en vivo de la ubicación
+    let watchId = null; 
     let linternaActiva = false, linternaStream = null;
     const CLAVE_LUGARES = 'rutaSegura_lugares_v1';
     const CLAVE_CONTACTOS = 'rutaSegura_contactos_v1';
@@ -257,6 +265,8 @@
             miUbicacion = pos.coords;
             mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
             if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+            
+            // Marcador azul para el Cuidador/Usuario actual
             marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("📍 Estás aquí").openPopup();
             cajaMensaje.textContent = "✅ Ubicación en vivo activa";
         }, () => {
@@ -319,12 +329,11 @@
         const cartel = document.getElementById('cartelSOS');
         if (cartel) cartel.style.display = 'none';
         
-        // Muestra la ubicación del PACIENTE, no la del familiar
         if (sosActual && sosActual.lat != null && sosActual.lon != null) {
             mapaLeaflet.setView([sosActual.lat, sosActual.lon], 16);
             if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-            marcadorUsuario = L.marker([sosActual.lat, sosActual.lon]).addTo(mapaLeaflet).bindPopup("📍 Ubicación del paciente").openPopup();
-            cajaMensaje.textContent = "📍 Ubicación del paciente mostrada. Sirena apagada.";
+            marcadorUsuario = L.marker([sosActual.lat, sosActual.lon]).addTo(mapaLeaflet).bindPopup("📍 Ubicación del Usuario").openPopup();
+            cajaMensaje.textContent = "📍 Ubicación del Usuario mostrada. Sirena apagada.";
         } else {
             iniciarUbicacion();
             cajaMensaje.textContent = "📍 Ubicación mostrada. Sirena apagada.";
@@ -395,13 +404,13 @@
             if (top.id <= ultimoSosVisto) return;
             ultimoSosVisto = top.id;
             
-            if (top.user_id === USER_ID) return; // Me filtro silenciosamente
+            if (top.user_id === USER_ID) return; 
             
-            if (ES_PACIENTE) {
-                cajaMensaje.textContent = '💙 Tu familiar está pendiente de vos.';
+            if (ES_USUARIO) {
+                cajaMensaje.textContent = '💙 Tu Cuidador está pendiente de vos.';
                 mostrarAvisoSuave(top);
             } else {
-                cajaMensaje.textContent = '🚨 ¡SOS del paciente! Activando alarma...';
+                cajaMensaje.textContent = '🚨 ¡SOS del Usuario! Activando alarma...';
                 notificacionLocalRespaldo(top);
                 alertarEmergencia(top);
             }
@@ -415,13 +424,13 @@
             d.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.97);color:#1f2937;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;';
             document.body.appendChild(d);
         }
-        d.innerHTML = '<div style="font-size:64px">💙</div><div style="font-size:24px;font-weight:bold;margin:12px 0;color:#1976d2">Tu familiar está pendiente de vos</div><div style="font-size:18px;margin:10px 0;color:#4b5563">Recibió tu señal y está al tanto.</div><button onclick="document.getElementById(\'cartelAvisoSuave\').style.display=\'none\'" style="background:#1976d2;color:#fff;border:none;font-size:18px;padding:14px 28px;border-radius:10px;cursor:pointer;margin-top:20px;">Entendido, gracias</button>';
+        d.innerHTML = '<div style="font-size:64px">💙</div><div style="font-size:24px;font-weight:bold;margin:12px 0;color:#1976d2">Tu Cuidador está pendiente de vos</div><div style="font-size:18px;margin:10px 0;color:#4b5563">Recibió tu señal y está al tanto.</div><button onclick="document.getElementById(\'cartelAvisoSuave\').style.display=\'none\'" style="background:#1976d2;color:#fff;border:none;font-size:18px;padding:14px 28px;border-radius:10px;cursor:pointer;margin-top:20px;">Entendido, gracias</button>';
         d.style.display = 'flex';
         if (navigator.vibrate) navigator.vibrate(200);
     }
 
     function alertarEmergencia(sos) {
-        sosActual = sos; // Guardamos las coords del paciente para mostrarlas al silenciar
+        sosActual = sos; 
         const mapa = (sos.lat != null && sos.lon != null) ? ('https://maps.google.com/?q=' + sos.lat + ',' + sos.lon) : '';
         vibrarAlarma(); sonarAlarma();
         cajaMensaje.textContent = '🚨 ¡EMERGENCIA! Tu contacto activó el SOS.';
@@ -432,7 +441,7 @@
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
                 const notif = new Notification('🚨 EMERGENCIA Ruta Segura', {
-                    body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
+                    body: 'El Usuario activó el SOS. Tocá para ver la ubicación.',
                     icon: './icon-192.png', tag: 'sos-emergencia', requireInteraction: true,
                     data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
                 });
@@ -678,7 +687,7 @@
         inicializarMapa(); 
         iniciarUbicacion(); 
         subirUbicacionPeriodica(); 
-        setInterval(subirUbicacionPeriodica, 300000); // Respaldo cada 5 min
+        setInterval(subirUbicacionPeriodica, 300000); 
         iniciarAlertaEnVivo();
     });
 
@@ -697,50 +706,56 @@
     }
 
     // =========================================================================
-    // 8. GESTIÓN DE ROLES (PACIENTE / FAMILIAR)
+    // 8. GESTIÓN DE ROLES (USUARIO / CUIDADOR) - CON UPSERT
     // =========================================================================
     (function() {
-        const chk = document.getElementById('chkEsPaciente');
+        const chk = document.getElementById('chkEsUsuario');
         const aviso = document.getElementById('avisoRol');
         if (!chk || !aviso) return;
 
-        function actualizarUI(esPaciente, bloqueado) {
-            if (esPaciente) {
+        function actualizarUI(esUsuario, bloqueado) {
+            if (esUsuario) {
                 chk.style.display = 'none';
-                aviso.innerHTML = '🔒 <strong>Rol de Paciente</strong>' + (bloqueado ? '<br><small>(Configurado y bloqueado)</small>' : '');
+                aviso.innerHTML = '🔒 <strong>Rol de Usuario</strong>' + (bloqueado ? '<br><small>(Configurado y bloqueado)</small>' : '');
             } else {
                 chk.style.display = 'none';
-                aviso.innerHTML = '🔒 <strong>Rol de Familiar</strong>' + (bloqueado ? '<br><small>(Ya hay un paciente vinculado)</small>' : '');
+                aviso.innerHTML = '🔒 <strong>Rol de Cuidador</strong>' + (bloqueado ? '<br><small>(Vinculado a un Usuario)</small>' : '');
             }
         }
 
-        if (ES_PACIENTE) {
+        if (ES_USUARIO) {
             actualizarUI(true, true);
         } else {
-            sb.from('push_subs').select('user_id, rol').eq('rol', 'paciente').limit(1).then(result => {
+            sb.from('push_subs').select('user_id, rol').eq('rol', 'usuario').limit(1).then(result => {
                 if (result.data && result.data.length > 0 && result.data[0].user_id !== USER_ID) {
-                    ES_PACIENTE = false;
-                    localStorage.setItem('rs_es_paciente', 'false');
+                    ES_USUARIO = false;
+                    localStorage.setItem('rs_es_usuario', 'false');
                     actualizarUI(false, true);
                 } else {
                     chk.checked = false;
-                    chk.style.display = 'inline-block'; // Mostrar checkbox si no hay paciente
-                    aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+                    chk.style.display = 'inline-block'; 
+                    aviso.textContent = 'ℹ️ Tocá si este es el celular del Usuario';
                 }
             }).catch(() => {
                 chk.checked = false;
                 chk.style.display = 'inline-block';
-                aviso.textContent = 'ℹ️ Tocá si este es el celular del paciente';
+                aviso.textContent = 'ℹ️ Tocá si este es el celular del Usuario';
             });
         }
 
         chk.addEventListener('change', function() {
             if (chk.checked) {
-                ES_PACIENTE = true;
-                localStorage.setItem('rs_es_paciente', 'true');
-                sb.from('push_subs').update({ rol: 'paciente' }).eq('user_id', USER_ID).catch(console.error);
+                ES_USUARIO = true;
+                localStorage.setItem('rs_es_usuario', 'true');
+                
+                // UPSERT: Si existe la fila, actualiza; si no, la crea automáticamente
+                sb.from('push_subs').upsert({ 
+                    user_id: USER_ID, 
+                    rol: 'usuario' 
+                }, { onConflict: 'user_id' }).catch(console.error);
+                
                 actualizarUI(true, true);
-                cajaMensaje.textContent = '✅ Configurado como paciente';
+                cajaMensaje.textContent = '✅ Configurado como Usuario';
             }
         });
     })();
@@ -749,9 +764,9 @@
         const btnReset = document.getElementById('btnResetRol');
         if (btnReset) {
             btnReset.addEventListener('click', async function() {
-                localStorage.removeItem('rs_es_paciente');
-                ES_PACIENTE = false;
-                await sb.from('push_subs').update({ rol: 'familiar' }).eq('user_id', USER_ID);
+                localStorage.removeItem('rs_es_usuario');
+                ES_USUARIO = false;
+                await sb.from('push_subs').update({ rol: 'cuidador' }).eq('user_id', USER_ID);
                 alert('✅ Rol reseteado. Recargá la página.');
                 location.reload();
             });
@@ -819,7 +834,7 @@
     });
 
     // =========================================================================
-    // 10. PUSH VAPID Y NOTIFICACIONES
+    // 10. PUSH VAPID Y NOTIFICACIONES (CORREGIDO Y CON DESAPARICIÓN)
     // =========================================================================
     (function(){
       function urlBase64ToUint8Array(base64String) {
@@ -832,7 +847,6 @@
       }
       
       document.addEventListener('DOMContentLoaded', function(){
-        // ¡AQUÍ ESTABA EL ERROR! Faltaba definir 'btn'
         var btn = document.getElementById('btnAvisos');
         if (!btn) return;
 
@@ -857,36 +871,33 @@
                 return; 
             }
             
-            // Desuscribirse de la vieja si existe
             var vieja = await reg.pushManager.getSubscription();
-            if (vieja) { 
-                await vieja.unsubscribe(); 
-            }
+            if (vieja) { await vieja.unsubscribe(); }
             
-            // Suscribirse de nuevo
             var sub = await reg.pushManager.subscribe({ 
                 userVisibleOnly: true, 
                 applicationServerKey: urlBase64ToUint8Array(j.publicKey) 
             });
             
             var json = sub.toJSON();
-            
-            // BORRAR primero y luego INSERTAR
             await sb.from('push_subs').delete().eq('user_id', USER_ID);
-            
-            // Pequeña pausa para asegurar que el DELETE se completó
             await new Promise(resolve => setTimeout(resolve, 500));
             
+            // INSERT con el rol actual (usuario o cuidador)
             var ins = await sb.from('push_subs').insert({ 
                 endpoint: json.endpoint, 
                 p256dh: json.keys.p256dh, 
                 auth: json.keys.auth, 
-                user_id: USER_ID 
+                user_id: USER_ID,
+                rol: ES_USUARIO ? 'usuario' : 'cuidador'
             });
             
             if (ins.error) throw ins.error;
             
             alert('✅ AVISOS ACTIVADOS correctamente');
+            
+            // ¡AQUÍ ESTÁ LA MAGIA! El botón desaparece después de activarse con éxito
+            btn.style.display = 'none';
             
           } catch(e) { 
             alert('❌ Error push: ' + e.message); 
@@ -907,7 +918,82 @@
       }
     })();
 
-    // --- Generar código de vinculación ---
+    // =========================================================================
+    // 11. BOTÓN PARA QUE EL CUIDADOR VEA LA UBICACIÓN DEL USUARIO
+    // =========================================================================
+    function actualizarBotonCuidador() {
+        if (btnVerUbicacionUsuario) {
+            btnVerUbicacionUsuario.style.display = ES_USUARIO ? 'none' : 'block';
+        }
+    }
+
+    if (btnVerUbicacionUsuario) {
+        btnVerUbicacionUsuario.addEventListener('click', async function() {
+            if (mostrandoUbicacionUsuario) {
+                // Volver a mi ubicación (Cuidador)
+                iniciarUbicacion();
+                this.innerHTML = '👁️ Ver ubicación del Usuario';
+                this.style.backgroundColor = '#7c3aed';
+                mostrandoUbicacionUsuario = false;
+                cajaMensaje.textContent = '✅ Mostrando tu ubicación.';
+            } else {
+                // Buscar ubicación del Usuario
+                cajaMensaje.textContent = '📡 Buscando ubicación del Usuario...';
+                
+                // 1. Encontrar el ID del usuario
+                const { data: usuarios } = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
+                if (!usuarios || usuarios.length === 0) {
+                    alert('⚠️ No se encontró un Usuario vinculado.\nAsegurate de que el Usuario haya marcado su rol en Ajustes.');
+                    cajaMensaje.textContent = '✅ Todo listo';
+                    return;
+                }
+                const usuarioId = usuarios[0].user_id;
+                
+                // 2. Buscar su última ubicación
+                const { data: ubics } = await sb.from('ubicaciones_ruta')
+                    .select('lat, lon')
+                    .eq('user_id', usuarioId)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                    
+                if (!ubics || ubics.length === 0) {
+                    alert('⚠️ El Usuario aún no ha compartido su ubicación.\nPedile que abra la app un momento.');
+                    cajaMensaje.textContent = '✅ Todo listo';
+                    return;
+                }
+                
+                // 3. Mostrar en el mapa
+                const lat = ubics[0].lat;
+                const lon = ubics[0].lon;
+                
+                mapaLeaflet.setView([lat, lon], 16);
+                if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
+                
+                // Marcador ROJO para el Usuario
+                const iconoRojo = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: "<div style='background-color:#d32f2f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+                marcadorUsuario = L.marker([lat, lon], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup("📍 Ubicación del Usuario").openPopup();
+                
+                this.innerHTML = '❌ Volver a mi ubicación';
+                this.style.backgroundColor = '#d32f2f';
+                cajaMensaje.textContent = '📍 Mostrando ubicación del Usuario.';
+                mostrandoUbicacionUsuario = true;
+            }
+        });
+    }
+
+    // Asegurarnos de que el botón se muestre/oculte al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        actualizarBotonCuidador();
+    });
+
+    // =========================================================================
+    // 12. GENERAR CÓDIGO DE VINCULACIÓN
+    // =========================================================================
     window.addEventListener('DOMContentLoaded', function() {
       const btnGenerar = document.getElementById('btnGenerarCodigo');
       const btnCerrar = document.getElementById('btnCerrarCodigo');
@@ -928,110 +1014,6 @@
         });
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
-    });
-        
-
-// =========================================================================
-    // 11. VER RECORRIDO DEL PACIENTE (CON PIN) - VERSIÓN MEJORADA
-    // =========================================================================
-    
-    // Mostrar u ocultar el botón según el rol
-    function actualizarBotonRecorrido() {
-        const btnRecorrido = document.getElementById('btnVerRecorrido');
-        if (btnRecorrido) {
-            // Solo se muestra si NO es paciente
-            btnRecorrido.style.display = ES_PACIENTE ? 'none' : 'block';
-        }
-    }
-
-    document.getElementById('btnVerRecorrido').addEventListener('click', async function() {
-        cajaMensaje.textContent = '📡 Buscando paciente vinculado...';
-        
-        // 1. Intentar encontrar el ID del paciente (primero por rol, luego por ubicación)
-        let { data: pacientes } = await sb.from('push_subs').select('user_id').eq('rol', 'paciente').limit(1);
-        
-        // Si no lo encuentra por rol, lo busca en el historial de ubicaciones (cualquier ID que no sea el mío)
-        if (!pacientes || pacientes.length === 0) {
-            const { data: ubics } = await sb.from('ubicaciones_ruta').select('user_id').neq('user_id', USER_ID).limit(1);
-            if (ubics && ubics.length > 0) {
-                pacientes = [{ user_id: ubics[0].user_id }];
-            }
-        }
-
-        if (!pacientes || pacientes.length === 0) {
-            alert('⚠️ No se encontró un paciente vinculado.\n\nAsegurate de que en el celular del paciente:\n1. Se haya tocado "Activar avisos".\n2. Se haya marcado la casilla "Este es el celular del paciente" en Ajustes.');
-            cajaMensaje.textContent = '✅ Todo listo';
-            return;
-        }
-        
-        const pacienteId = pacientes[0].user_id;
-
-        // 2. Lógica del PIN
-        let pinGuardado = localStorage.getItem('pin_familiar');
-        
-        if (!pinGuardado) {
-            let nuevoPin = prompt('🔒 Creá un PIN de 4 dígitos para proteger esta vista:');
-            if (nuevoPin && nuevoPin.length === 4 && !isNaN(nuevoPin)) {
-                localStorage.setItem('pin_familiar', nuevoPin);
-                alert('✅ PIN creado exitosamente. Guárdalo en tu memoria.');
-            } else {
-                alert('❌ PIN inválido. Debe ser exactamente 4 números.');
-                cajaMensaje.textContent = '✅ Todo listo';
-                return;
-            }
-        } else {
-            let intento = prompt('🔒 Ingresá tu PIN de 4 dígitos para ver el recorrido:');
-            if (intento !== pinGuardado) {
-                alert('❌ PIN incorrecto. Acceso denegado.');
-                cajaMensaje.textContent = '✅ Todo listo';
-                return;
-            }
-        }
-
-        // 3. Buscar las últimas 10 ubicaciones del paciente
-        cajaMensaje.textContent = '📡 Dibujando recorrido...';
-        const { data: ubicaciones, error } = await sb
-            .from('ubicaciones_ruta')
-            .select('lat, lon, created_at')
-            .eq('user_id', pacienteId)
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (error || !ubicaciones || ubicaciones.length < 2) {
-            alert('⚠️ No hay suficientes datos de recorrido aún.\nEl paciente debe abrir la app o moverse para que se guarden al menos 2 puntos en el mapa.');
-            cajaMensaje.textContent = '✅ Todo listo';
-            return;
-        }
-
-        // 4. Dibujar en el mapa
-        // Invertimos el array para que vaya del más antiguo al más nuevo
-        const puntos = ubicaciones.reverse().map(u => [u.lat, u.lon]);
-        
-        // Limpiar dibujos anteriores si existen
-        if (window.recorridoPolyline) mapaLeaflet.removeLayer(window.recorridoPolyline);
-        if (window.marcadoresRecorrido) {
-            window.marcadoresRecorrido.forEach(m => mapaLeaflet.removeLayer(m));
-        }
-        window.marcadoresRecorrido = [];
-
-        // Dibujar la línea azul
-        window.recorridoPolyline = L.polyline(puntos, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(mapaLeaflet);
-        
-        // Ajustar el mapa para que se vea todo el recorrido
-        mapaLeaflet.fitBounds(window.recorridoPolyline.getBounds(), { padding: [40, 40] });
-
-        // Poner marcadores de Inicio y Fin
-        const inicio = L.marker(puntos[0]).addTo(mapaLeaflet).bindPopup('🟢 Inicio del recorrido');
-        const fin = L.marker(puntos[puntos.length - 1]).addTo(mapaLeaflet).bindPopup('🔴 Último punto registrado');
-        window.marcadoresRecorrido.push(inicio, fin);
-
-        cajaMensaje.textContent = `👣 Recorrido mostrado (${ubicaciones.length} puntos).`;
-        panelAjustes.style.display = 'none'; // Cerrar el panel para ver el mapa
-    });
-
-    // Asegurarnos de que el botón se muestre/oculte al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        actualizarBotonRecorrido();
     });
     </script>
 </body>
