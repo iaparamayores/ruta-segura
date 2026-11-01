@@ -929,8 +929,10 @@
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
     });
-        // =========================================================================
-    // 11. VER RECORRIDO DEL PACIENTE (CON PIN)
+        
+
+// =========================================================================
+    // 11. VER RECORRIDO DEL PACIENTE (CON PIN) - VERSIÓN MEJORADA
     // =========================================================================
     
     // Mostrar u ocultar el botón según el rol
@@ -941,17 +943,27 @@
             btnRecorrido.style.display = ES_PACIENTE ? 'none' : 'block';
         }
     }
-    
-    // Llamar a esta función cuando se carga el rol
-    // (Ya la agregamos abajo en el evento DOMContentLoaded)
 
     document.getElementById('btnVerRecorrido').addEventListener('click', async function() {
-        // 1. Obtener el ID del paciente desde la base de datos
-        const { data: pacientes } = await sb.from('push_subs').select('user_id').eq('rol', 'paciente').limit(1);
+        cajaMensaje.textContent = '📡 Buscando paciente vinculado...';
+        
+        // 1. Intentar encontrar el ID del paciente (primero por rol, luego por ubicación)
+        let { data: pacientes } = await sb.from('push_subs').select('user_id').eq('rol', 'paciente').limit(1);
+        
+        // Si no lo encuentra por rol, lo busca en el historial de ubicaciones (cualquier ID que no sea el mío)
         if (!pacientes || pacientes.length === 0) {
-            alert('⚠️ No se encontró un paciente vinculado en el sistema.');
+            const { data: ubics } = await sb.from('ubicaciones_ruta').select('user_id').neq('user_id', USER_ID).limit(1);
+            if (ubics && ubics.length > 0) {
+                pacientes = [{ user_id: ubics[0].user_id }];
+            }
+        }
+
+        if (!pacientes || pacientes.length === 0) {
+            alert('⚠️ No se encontró un paciente vinculado.\n\nAsegurate de que en el celular del paciente:\n1. Se haya tocado "Activar avisos".\n2. Se haya marcado la casilla "Este es el celular del paciente" en Ajustes.');
+            cajaMensaje.textContent = '✅ Todo listo';
             return;
         }
+        
         const pacienteId = pacientes[0].user_id;
 
         // 2. Lógica del PIN
@@ -961,23 +973,23 @@
             let nuevoPin = prompt('🔒 Creá un PIN de 4 dígitos para proteger esta vista:');
             if (nuevoPin && nuevoPin.length === 4 && !isNaN(nuevoPin)) {
                 localStorage.setItem('pin_familiar', nuevoPin);
-                // Opcional: guardarlo también en Supabase
-                await sb.from('push_subs').update({ pin: nuevoPin }).eq('user_id', USER_ID);
-                alert('✅ PIN creado exitosamente.');
+                alert('✅ PIN creado exitosamente. Guárdalo en tu memoria.');
             } else {
                 alert('❌ PIN inválido. Debe ser exactamente 4 números.');
+                cajaMensaje.textContent = '✅ Todo listo';
                 return;
             }
         } else {
             let intento = prompt('🔒 Ingresá tu PIN de 4 dígitos para ver el recorrido:');
             if (intento !== pinGuardado) {
                 alert('❌ PIN incorrecto. Acceso denegado.');
+                cajaMensaje.textContent = '✅ Todo listo';
                 return;
             }
         }
 
         // 3. Buscar las últimas 10 ubicaciones del paciente
-        cajaMensaje.textContent = '📡 Buscando recorrido...';
+        cajaMensaje.textContent = '📡 Dibujando recorrido...';
         const { data: ubicaciones, error } = await sb
             .from('ubicaciones_ruta')
             .select('lat, lon, created_at')
@@ -986,7 +998,7 @@
             .limit(10);
 
         if (error || !ubicaciones || ubicaciones.length < 2) {
-            alert('⚠️ No hay suficientes datos de recorrido aún (se necesitan al menos 2 puntos).');
+            alert('⚠️ No hay suficientes datos de recorrido aún.\nEl paciente debe abrir la app o moverse para que se guarden al menos 2 puntos en el mapa.');
             cajaMensaje.textContent = '✅ Todo listo';
             return;
         }
@@ -1006,7 +1018,7 @@
         window.recorridoPolyline = L.polyline(puntos, { color: '#2563eb', weight: 5, opacity: 0.8 }).addTo(mapaLeaflet);
         
         // Ajustar el mapa para que se vea todo el recorrido
-        mapaLeaflet.fitBounds(window.recorridoPolyline.getBounds(), { padding: [30, 30] });
+        mapaLeaflet.fitBounds(window.recorridoPolyline.getBounds(), { padding: [40, 40] });
 
         // Poner marcadores de Inicio y Fin
         const inicio = L.marker(puntos[0]).addTo(mapaLeaflet).bindPopup('🟢 Inicio del recorrido');
