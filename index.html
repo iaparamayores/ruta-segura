@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- ESTILOS GENERALES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
         html, body { height: 100%; overflow: hidden; background-color: #f5f5f5; }
         .contenedor { height: 100%; display: flex; flex-direction: column; padding: 12px; gap: 10px; }
@@ -42,7 +41,6 @@
         footer { height: 50px; line-height: 50px; text-align: center; font-size: 14px; color: #555; background-color: #e8e8e8; border-radius: 8px; flex-shrink: 0; }
         .progreso-sos { position: absolute; bottom: 0; left: 0; width: 0%; height: 6px; background: rgba(255,255,255,0.85); transition: width 1.5s linear; }
         
-        /* --- PANEL DE AJUSTES --- */
         #panelAjustes { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; max-height: 85vh; overflow-y: auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100; }
         #panelAjustes h3 { margin-bottom: 15px; font-size: 20px; }
         #panelAjustes button { display: block; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #f0f0f0; cursor: pointer; }
@@ -50,7 +48,6 @@
         #inputDestino { display: none; width: 100%; padding: 12px; margin: 10px 0; font-size: 17px; border: 2px solid #1976d2; border-radius: 8px; }
         #btnBuscarDestino { display: none; width: 100%; padding: 12px; margin: 8px 0; font-size: 17px; border: none; border-radius: 8px; background: #1976d2; color: white; cursor: pointer; font-weight: bold; }
         
-        /* --- PANEL DE DATOS (Lugares/Contactos) --- */
         .panel-datos { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; padding: 16px; z-index: 200; }
         .panel-datos.visible { display: flex; }
         .panel-datos-contenido { width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 5px 18px rgba(0,0,0,0.35); }
@@ -70,7 +67,6 @@
         .btn-principal-dato { background: #e3f2fd; color: #0d47a1; }
         .btn-eliminar-dato { background: #ffebee; color: #b71c1c; }
 
-        /* --- ANIMACIONES DE EMERGENCIA --- */
         @keyframes latidoFondo { 0%, 100% { background: rgba(180, 0, 0, 0.96); transform: scale(1); } 50% { background: rgba(235, 25, 25, 0.98); transform: scale(1.02); } }
         @keyframes sirenaViva { 0%, 100% { transform: rotate(-10deg) scale(1); } 25% { transform: rotate(10deg) scale(1.2); } 50% { transform: rotate(-10deg) scale(1.05); } 75% { transform: rotate(10deg) scale(1.2); } }
         #cartelSOS { animation: latidoFondo 0.9s ease-in-out infinite; }
@@ -133,7 +129,9 @@
         <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi Cuidador</button>
         <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#9ca3af;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
         
+        <!-- Botón Premium: solo visible para Cuidadores con suscripción activa -->
         <button id="btnVerUbicacionUsuario" style="display:none; width:100%; padding:14px; font-size:18px; margin:6px 0; background:#7c3aed; color:#fff; border:none; border-radius:12px; font-weight:bold;">👁️ Ver ubicación del Usuario</button>
+        
         <div style="border-top:2px solid #e5e7eb; margin:15px 0; padding-top:15px;">
             <p style="font-size:14px; color:#4b5563; margin-bottom:10px; text-align:center;">Configuración de rol</p>
             <label style="display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; font-size:16px; color:#1f2937;">
@@ -173,6 +171,26 @@
         </div>
     </div>
 
+    <!-- PANTALLA DE BIENVENIDA (aparece 1 día después de la primera apertura, solo a Cuidadores) -->
+    <div id="modalBienvenida" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:16px; padding:30px; max-width:320px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            <div style="font-size:50px; margin-bottom:15px;">🛡️</div>
+            <h2 style="color:#1976d2; margin-bottom:10px; font-size:22px;">¡Bienvenido a Ruta Segura!</h2>
+            <p style="color:#4b5563; font-size:16px; margin-bottom:20px; line-height:1.4;">
+                Para cuidar a tu familiar, necesitamos activar las alertas de emergencia.
+            </p>
+            <p style="color:#059669; font-size:14px; font-weight:bold; margin-bottom:25px;">
+                🎁 Incluimos 14 días de prueba Premium GRATIS.
+            </p>
+            <button id="btnBienvenidaActivar" style="width:100%; padding:14px; font-size:18px; background:#6a1b9a; color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; margin-bottom:10px;">
+                🔔 Activar Alertas y Comenzar
+            </button>
+            <button id="btnBienvenidaCerrar" style="width:100%; padding:10px; font-size:14px; background:#f3f4f6; color:#4b5563; border:none; border-radius:8px; cursor:pointer;">
+                Hacerlo más tarde
+            </button>
+        </div>
+    </div>
+
     <script>
     // =========================================================================
     // 1. CONFIGURACIÓN Y VARIABLES GLOBALES
@@ -193,10 +211,9 @@
     let USER_ID = localStorage.getItem('rs_uid');
     if (!esUuid(USER_ID)) { USER_ID = nuevoUuid(); localStorage.setItem('rs_uid', USER_ID); }
     
-    // NUEVA TERMINOLOGÍA: ES_USUARIO en lugar de ES_PACIENTE
     let ES_USUARIO = localStorage.getItem('rs_es_usuario') === 'true';
     let sosActual = null; 
-    let mostrandoUbicacionUsuario = false; // Controla el botón de ver ubicación
+    let mostrandoUbicacionUsuario = false;
 
     // =========================================================================
     // 2. REFERENCIAS AL DOM
@@ -260,8 +277,6 @@
             miUbicacion = pos.coords;
             mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
             if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-            
-            // Marcador azul para el Cuidador/Usuario actual
             marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("📍 Estás aquí").openPopup();
             cajaMensaje.textContent = "✅ Ubicación en vivo activa";
         }, () => {
@@ -432,6 +447,7 @@
         mostrarCartelSOS(mapa);
     }
 
+    // Notificación push INSISTENTE (vibración + no se cierra sola)
     function notificacionLocalRespaldo(sos) {
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
@@ -439,22 +455,21 @@
                     body: 'El Usuario necesita ayuda. ¡Tocá esta alerta AHORA!',
                     icon: './icon-192.png',
                     badge: './icon-192.png',
-                    tag: 'sos-emergencia', // Evita que se apilen varias notificaciones
-                    requireInteraction: true, // ¡CLAVE! La notificación NO se cierra sola, se queda en pantalla
-                    vibrate: [1000, 500, 1000, 500, 1000], // ¡CLAVE! Vibra 1 seg, pausa 0.5 seg, repite (muy llamativo)
+                    tag: 'sos-emergencia',
+                    requireInteraction: true, // No se cierra sola
+                    vibrate: [1000, 500, 1000, 500, 1000], // Patrón SOS: vibra fuerte
                     data: { tipo: 'sos-push', lat: sos.lat, lon: sos.lon }
                 });
                 
                 notif.onclick = function() { 
                     window.focus(); 
-                    alertarEmergencia(sos); // Al tocar, la app se abre y SUENA LA SIRENA REAL
+                    alertarEmergencia(sos); 
                     notif.close(); 
                 };
                 return;
             } catch(e) { console.error('Notificación local no disponible:', e); }
         }
         
-        // Respaldo si la app está en segundo plano y el Service Worker está activo
         if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             navigator.serviceWorker.controller.postMessage({ tipo: 'sos-push', lat: sos.lat, lon: sos.lon });
         }
@@ -753,13 +768,10 @@
             if (chk.checked) {
                 ES_USUARIO = true;
                 localStorage.setItem('rs_es_usuario', 'true');
-                
-                // UPSERT: Si existe la fila, actualiza; si no, la crea automáticamente
                 sb.from('push_subs').upsert({ 
                     user_id: USER_ID, 
                     rol: 'usuario' 
                 }, { onConflict: 'user_id' }).catch(console.error);
-                
                 actualizarUI(true, true);
                 cajaMensaje.textContent = '✅ Configurado como Usuario';
             }
@@ -780,7 +792,7 @@
     });
 
     // =========================================================================
-    // 9. INTEGRACIÓN BLE (MOKO W6)
+    // 9. INTEGRACIÓN BLE (MOKO W6) - EN FREEZER
     // =========================================================================
     let mokoDevice = null, mokoCharacteristic = null, bleConectado = false;
 
@@ -840,7 +852,7 @@
     });
 
     // =========================================================================
-    // 10. PUSH VAPID Y NOTIFICACIONES (CORREGIDO Y CON DESAPARICIÓN)
+    // 10. PUSH VAPID Y NOTIFICACIONES (CON SUSCRIPCIÓN DE 14 DÍAS)
     // =========================================================================
     (function(){
       function urlBase64ToUint8Array(base64String) {
@@ -889,20 +901,24 @@
             await sb.from('push_subs').delete().eq('user_id', USER_ID);
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // INSERT con el rol actual (usuario o cuidador)
+            // Calcular fecha de vencimiento (Hoy + 14 días)
+            let fechaFin = new Date();
+            fechaFin.setDate(fechaFin.getDate() + 14);
+            let fechaString = fechaFin.toISOString().split('T')[0];
+            
             var ins = await sb.from('push_subs').insert({ 
                 endpoint: json.endpoint, 
                 p256dh: json.keys.p256dh, 
                 auth: json.keys.auth, 
                 user_id: USER_ID,
-                rol: ES_USUARIO ? 'usuario' : 'cuidador'
+                rol: ES_USUARIO ? 'usuario' : 'cuidador',
+                premium_fin: fechaString
             });
             
             if (ins.error) throw ins.error;
             
-            alert('✅ AVISOS ACTIVADOS correctamente');
+            alert('✅ AVISOS ACTIVADOS correctamente\n🎁 Tenés 14 días de prueba Premium.');
             
-            // ¡AQUÍ ESTÁ LA MAGIA! El botón desaparece después de activarse con éxito
             btn.style.display = 'none';
             
           } catch(e) { 
@@ -925,7 +941,42 @@
     })();
 
     // =========================================================================
-    // 11. BOTÓN PARA QUE EL CUIDADOR VEA LA UBICACIÓN DEL USUARIO
+    // 11. CONTROL DE SUSCRIPCIÓN PREMIUM
+    // =========================================================================
+    async function verificarSuscripcion() {
+        if (ES_USUARIO) return; // Los Usuarios siempre tienen todo gratis
+
+        try {
+            const { data, error } = await sb.from('push_subs')
+                .select('premium_fin')
+                .eq('user_id', USER_ID)
+                .single();
+
+            if (error || !data || !data.premium_fin) return;
+
+            const hoy = new Date().toISOString().split('T')[0];
+            const fechaVencimiento = data.premium_fin;
+
+            if (hoy > fechaVencimiento) {
+                console.log('⏳ Suscripción vencida. Modo Free activado.');
+                
+                const btnUbicacion = document.getElementById('btnVerUbicacionUsuario');
+                const btnAvisos = document.getElementById('btnAvisos');
+                
+                if (btnUbicacion) btnUbicacion.style.display = 'none';
+                if (btnAvisos) btnAvisos.style.display = 'none';
+                
+                if (cajaMensaje && cajaMensaje.textContent === '✅ Todo listo') {
+                    cajaMensaje.textContent = '🔒 Modo Básico. Renová Premium para ver el mapa.';
+                }
+            }
+        } catch (e) {
+            console.error('Error verificando suscripción:', e);
+        }
+    }
+
+    // =========================================================================
+    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (con fallback a SOS)
     // =========================================================================
     function actualizarBotonCuidador() {
         if (btnVerUbicacionUsuario) {
@@ -936,17 +987,14 @@
     if (btnVerUbicacionUsuario) {
         btnVerUbicacionUsuario.addEventListener('click', async function() {
             if (mostrandoUbicacionUsuario) {
-                // Volver a mi ubicación (Cuidador)
                 iniciarUbicacion();
                 this.innerHTML = '👁️ Ver ubicación del Usuario';
                 this.style.backgroundColor = '#7c3aed';
                 mostrandoUbicacionUsuario = false;
                 cajaMensaje.textContent = '✅ Mostrando tu ubicación.';
             } else {
-                // Buscar ubicación del Usuario
                 cajaMensaje.textContent = '📡 Buscando ubicación del Usuario...';
                 
-                // 1. Encontrar el ID del usuario
                 const { data: usuarios } = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
                 if (!usuarios || usuarios.length === 0) {
                     alert('⚠️ No se encontró un Usuario vinculado.\nAsegurate de que el Usuario haya marcado su rol en Ajustes.');
@@ -955,27 +1003,37 @@
                 }
                 const usuarioId = usuarios[0].user_id;
                 
-                // 2. Buscar su última ubicación
-                const { data: ubics } = await sb.from('ubicaciones_ruta')
+                // Buscar ubicación: primero en ubicaciones_ruta, fallback a sos_ruta
+                let { data: ubics } = await sb.from('ubicaciones_ruta')
                     .select('lat, lon')
                     .eq('user_id', usuarioId)
                     .order('created_at', { ascending: false })
                     .limit(1);
+
+                if (!ubics || ubics.length === 0 || ubics[0].lat == null) {
+                    const { data: sos } = await sb.from('sos_ruta')
+                        .select('lat, lon')
+                        .eq('user_id', usuarioId)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+                        
+                    if (sos && sos.length > 0 && sos[0].lat != null) {
+                        ubics = [{ lat: sos[0].lat, lon: sos[0].lon }];
+                    }
+                }
                     
-                if (!ubics || ubics.length === 0) {
-                    alert('⚠️ El Usuario aún no ha compartido su ubicación.\nPedile que abra la app un momento.');
+                if (!ubics || ubics.length === 0 || ubics[0].lat == null) {
+                    alert('⚠️ El Usuario aún no ha registrado ninguna ubicación.\nPedile que abra la app o que envíe un SOS de prueba.');
                     cajaMensaje.textContent = '✅ Todo listo';
                     return;
                 }
                 
-                // 3. Mostrar en el mapa
                 const lat = ubics[0].lat;
                 const lon = ubics[0].lon;
                 
                 mapaLeaflet.setView([lat, lon], 16);
                 if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
                 
-                // Marcador ROJO para el Usuario
                 const iconoRojo = L.divIcon({
                     className: 'custom-div-icon',
                     html: "<div style='background-color:#d32f2f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
@@ -992,13 +1050,54 @@
         });
     }
 
-    // Asegurarnos de que el botón se muestre/oculte al cargar
+    // =========================================================================
+    // 13. PANTALLA DE BIENVENIDA (1 día de retraso, solo Cuidadores)
+    // =========================================================================
     document.addEventListener('DOMContentLoaded', function() {
-        actualizarBotonCuidador();
+        const modal = document.getElementById('modalBienvenida');
+        const btnActivar = document.getElementById('btnBienvenidaActivar');
+        const btnCerrar = document.getElementById('btnBienvenidaCerrar');
+        
+        // REGLA 1: Si ya está marcado como USUARIO, NO mostramos NADA.
+        if (ES_USUARIO) return;
+
+        // REGLA 2: Si ya vio el cartel antes, NO lo mostramos.
+        if (localStorage.getItem('rs_bienvenida_vista')) return;
+
+        // REGLA 3: El retraso de 1 día (24 horas = 86,400,000 ms)
+        const ahora = Date.now();
+        const primeraApertura = localStorage.getItem('rs_primera_apertura');
+
+        if (!primeraApertura) {
+            localStorage.setItem('rs_primera_apertura', ahora);
+            return; 
+        }
+
+        const pasoUnDia = (ahora - primeraApertura) > 86400000; 
+
+        if (pasoUnDia && modal) {
+            modal.style.display = 'flex';
+        }
+
+        if (btnActivar) {
+            btnActivar.addEventListener('click', function() {
+                const btnAjustes = document.getElementById('btnAvisos');
+                if (btnAjustes) btnAjustes.click(); 
+                localStorage.setItem('rs_bienvenida_vista', 'true');
+                modal.style.display = 'none';
+            });
+        }
+
+        if (btnCerrar) {
+            btnCerrar.addEventListener('click', function() {
+                localStorage.setItem('rs_bienvenida_vista', 'true');
+                modal.style.display = 'none';
+            });
+        }
     });
 
     // =========================================================================
-    // 12. GENERAR CÓDIGO DE VINCULACIÓN
+    // 14. GENERAR CÓDIGO DE VINCULACIÓN
     // =========================================================================
     window.addEventListener('DOMContentLoaded', function() {
       const btnGenerar = document.getElementById('btnGenerarCodigo');
@@ -1020,6 +1119,12 @@
         });
       }
       if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
+    });
+
+    // Inicializar verificación de suscripción y botones al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        verificarSuscripcion();
+        actualizarBotonCuidador();
     });
     </script>
 </body>
