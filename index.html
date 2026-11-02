@@ -189,6 +189,10 @@
                 Hacerlo más tarde
             </button>
         </div>
+        <!-- Indicador de conexión a Supabase -->
+    <div id="nube-rs" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:9998;opacity:0.9;">
+        ⏳ Conectando...
+    </div>
     </div>
 
     <script>
@@ -1126,6 +1130,25 @@
         verificarSuscripcion();
         actualizarBotonCuidador();
     });
+        // Indicador de estado de conexión a Supabase
+    (function() {
+        const nubeEl = document.getElementById('nube-rs');
+        if (!nubeEl) return;
+        
+        // Verificar conexión inicial
+        sb.from('sos_ruta').select('id').limit(1).then(res => {
+            if (res.error) {
+                nubeEl.textContent = '❌ Sin conexión';
+                nubeEl.style.background = 'rgba(220, 38, 38, 0.9)';
+            } else {
+                nubeEl.textContent = '✅ Conectado a la nube';
+                nubeEl.style.background = 'rgba(5, 150, 105, 0.9)';
+            }
+        }).catch(() => {
+            nubeEl.textContent = '⚠️ Error de conexión';
+            nubeEl.style.background = 'rgba(245, 158, 11, 0.9)';
+        });
+    })();
     </script>
 </body>
 </html>
