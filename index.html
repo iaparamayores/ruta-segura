@@ -1145,23 +1145,25 @@
         verificarSuscripcion();
         actualizarBotonCuidador();
     });
-        // Indicador de estado de conexión a Supabase
+        // Indicador de estado de conexión
     (function() {
-        const nubeEl = document.getElementById('nube-rs');
-        if (!nubeEl) return;
+        const indicator = document.getElementById('nube-indicator');
+        if (!indicator) return;
         
-        // Verificar conexión inicial
         sb.from('sos_ruta').select('id').limit(1).then(res => {
             if (res.error) {
-                nubeEl.textContent = '❌ Sin conexión';
-                nubeEl.style.background = 'rgba(220, 38, 38, 0.9)';
+                indicator.innerHTML = '❌ Sin conexión a la nube';
+                indicator.style.background = '#fee2e2';
+                indicator.style.color = '#dc2626';
             } else {
-                nubeEl.textContent = '✅ Conectado a la nube';
-                nubeEl.style.background = 'rgba(5, 150, 105, 0.9)';
+                indicator.innerHTML = '✅ Conectado a la nube';
+                indicator.style.background = '#d1fae5';
+                indicator.style.color = '#059669';
             }
         }).catch(() => {
-            nubeEl.textContent = '⚠️ Error de conexión';
-            nubeEl.style.background = 'rgba(245, 158, 11, 0.9)';
+            indicator.innerHTML = '⚠️ Error de conexión';
+            indicator.style.background = '#fef3c7';
+            indicator.style.color = '#d97706';
         });
     })();
     </script>
