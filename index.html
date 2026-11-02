@@ -979,8 +979,9 @@
         }
     }
 
-    // =========================================================================
-    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (con fallback a SOS)
+    
+// =========================================================================
+    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (CORREGIDO)
     // =========================================================================
     function actualizarBotonCuidador() {
         if (btnVerUbicacionUsuario) {
@@ -991,53 +992,67 @@
     if (btnVerUbicacionUsuario) {
         btnVerUbicacionUsuario.addEventListener('click', async function() {
             if (mostrandoUbicacionUsuario) {
+                // Volver a mi ubicación (Cuidador)
                 iniciarUbicacion();
                 this.innerHTML = '👁️ Ver ubicación del Usuario';
                 this.style.backgroundColor = '#7c3aed';
                 mostrandoUbicacionUsuario = false;
                 cajaMensaje.textContent = '✅ Mostrando tu ubicación.';
             } else {
+                // Buscar ubicación del Usuario
                 cajaMensaje.textContent = '📡 Buscando ubicación del Usuario...';
                 
-                const { data: usuarios } = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
-                if (!usuarios || usuarios.length === 0) {
+                // 1. Encontrar el ID del usuario
+                const respuesta1 = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
+                
+                if (respuesta1.error || !respuesta1.data || respuesta1.data.length === 0) {
                     alert('⚠️ No se encontró un Usuario vinculado.\nAsegurate de que el Usuario haya marcado su rol en Ajustes.');
                     cajaMensaje.textContent = '✅ Todo listo';
                     return;
                 }
-                const usuarioId = usuarios[0].user_id;
+                const usuarioId = respuesta1.data[0].user_id;
                 
-                // Buscar ubicación: primero en ubicaciones_ruta, fallback a sos_ruta
-                let { data: ubics } = await sb.from('ubicaciones_ruta')
+                // 2. Buscar su última ubicación en ubicaciones_ruta
+                const respuesta2 = await sb.from('ubicaciones_ruta')
                     .select('lat, lon')
                     .eq('user_id', usuarioId)
                     .order('created_at', { ascending: false })
                     .limit(1);
 
-                if (!ubics || ubics.length === 0 || ubics[0].lat == null) {
-                    const { data: sos } = await sb.from('sos_ruta')
+                let ubics = null;
+                
+                if (!respuesta2.error && respuesta2.data && respuesta2.data.length > 0 && respuesta2.data[0].lat != null) {
+                    ubics = respuesta2.data;
+                }
+
+                // 3. Si no hay en ubicaciones_ruta, buscar en sos_ruta (fallback)
+                if (!ubics) {
+                    const respuesta3 = await sb.from('sos_ruta')
                         .select('lat, lon')
                         .eq('user_id', usuarioId)
                         .order('created_at', { ascending: false })
                         .limit(1);
                         
-                    if (sos && sos.length > 0 && sos[0].lat != null) {
-                        ubics = [{ lat: sos[0].lat, lon: sos[0].lon }];
+                    if (!respuesta3.error && respuesta3.data && respuesta3.data.length > 0 && respuesta3.data[0].lat != null) {
+                        ubics = respuesta3.data;
                     }
                 }
                     
+                // 4. Si todavía no hay nada, mostrar error
                 if (!ubics || ubics.length === 0 || ubics[0].lat == null) {
                     alert('⚠️ El Usuario aún no ha registrado ninguna ubicación.\nPedile que abra la app o que envíe un SOS de prueba.');
                     cajaMensaje.textContent = '✅ Todo listo';
                     return;
                 }
                 
+                // 5. Mostrar en el mapa
                 const lat = ubics[0].lat;
                 const lon = ubics[0].lon;
                 
                 mapaLeaflet.setView([lat, lon], 16);
                 if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
                 
+                // Marcador ROJO para el Usuario
                 const iconoRojo = L.divIcon({
                     className: 'custom-div-icon',
                     html: "<div style='background-color:#d32f2f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
