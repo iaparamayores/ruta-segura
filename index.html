@@ -1050,6 +1050,7 @@
                         });
                         marcadorUsuario = L.marker([lat, lon], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup("📍 Ubicación del Usuario").openPopup();
                         
+                        panelAjustes.style.display = 'none';
                         this.innerHTML = '❌ Volver a mi ubicación';
                         this.style.backgroundColor = '#d32f2f';
                         cajaMensaje.textContent = '📍 Mostrando ubicación del Usuario.';
