@@ -280,6 +280,12 @@
 
         watchId = navigator.geolocation.watchPosition(pos => {
             miUbicacion = pos.coords;
+            
+            // Si estamos viendo la ubicación del Usuario, NO sobrescribir el mapa
+            if (mostrandoUbicacionUsuario) {
+                return; // Salimos sin tocar el mapa
+            }
+            
             mapaLeaflet.setView([pos.coords.latitude, pos.coords.longitude], 16);
             if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
             marcadorUsuario = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapaLeaflet).bindPopup("📍 Estás aquí").openPopup();
