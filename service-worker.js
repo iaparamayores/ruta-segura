@@ -1,4 +1,4 @@
-// Ruta Segura SW v3.1 - caché PWA + push propio + alarma completa al tocar
+// Ruta Segura SW v3.2 - caché PWA + push propio + alarma completa al tocar
 const CACHE = 'ruta-segura-v3';
 const SUPA_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
 const SUPA_ANON = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
@@ -49,22 +49,27 @@ self.addEventListener('push', (e) => {
       const d = await r.json();
       if (d && d[0] && d[0].lat != null) { lat = d[0].lat; lon = d[0].lon; }
     } catch (err) {}
+    
     const url = (lat != null)
-      ? ('/ruta-segura/?sos=1&lat=' + lat + '&lon=' + lon)
-      : '/ruta-segura/?sos=1';
-    await self.registration.showNotification('\ud83d\udea8 Ruta Segura', {
-      body: 'SOS de tu contacto. Toc\u00e1 para la alarma completa.',
+      ? ('/?sos=1&lat=' + lat + '&lon=' + lon)
+      : '/?sos=1';
+      
+    await self.registration.showNotification('🚨 Ruta Segura', {
+      body: 'SOS de tu contacto. Tocá para la alarma completa.',
       data: { url: url, lat: lat, lon: lon },
       tag: 'sos-ruta',
-      requireInteraction: true
+      requireInteraction: true,
+      vibrate: [1000, 500, 1000, 500, 1000]
     });
   })());
 });
 
+// UN SOLO listener de notificationclick (el duplicado causaba conflictos)
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   const data = e.notification.data || {};
-  const url = data.url || '/ruta-segura/?sos=1';
+  const url = data.url || '/?sos=1';
+  
   e.waitUntil((async () => {
     const clientes = await clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const c of clientes) {
@@ -76,46 +81,4 @@ self.addEventListener('notificationclick', (e) => {
     }
     await clients.openWindow(url);
   })());
-});
-// Escuchar mensajes de la app principal
-self.addEventListener('message', function(event) {
-  if (event.data && event.data.tipo === 'sos-push') {
-    const data = event.data;
-    
-    // Mostrar notificación nativa del sistema
-    self.registration.showNotification('🚨 EMERGENCIA Ruta Segura', {
-      body: 'Tu contacto activó el SOS. Tocá para ver la ubicación.',
-      icon: './icon-192.png', // O el ícono que uses
-      badge: './icon-192.png',
-      tag: 'sos-emergencia',
-      requireInteraction: true,
-      data: { lat: data.lat, lon: data.lon }
-    });
-  }
-});
-
-// Cuando el usuario toca la notificación
-self.addEventListener('notificationclick', function(event) {
-  event.notification.close();
-  
-  // Abrir la app y enviar el mensaje para que dispare la alarma
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(function(clientList) {
-      for (let i = 0; i < clientList.length; i++) {
-        const client = clientList[i];
-        if ('focus' in client) {
-          client.postMessage({
-            tipo: 'sos-push',
-            lat: event.notification.data.lat,
-            lon: event.notification.data.lon
-          });
-          return client.focus();
-        }
-      }
-      // Si no hay ventana abierta, abrir una nueva
-      if (clients.openWindow) {
-        return clients.openWindow('/');
-      }
-    })
-  );
 });
