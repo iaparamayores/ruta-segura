@@ -796,14 +796,21 @@
         });
     })();
 
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
         const btnReset = document.getElementById('btnResetRol');
         if (btnReset) {
             btnReset.addEventListener('click', async function() {
+                // Borra el rol
                 localStorage.removeItem('rs_es_usuario');
                 ES_USUARIO = false;
-                await sb.from('push_subs').update({ rol: 'cuidador' }).eq('user_id', USER_ID);
-                alert('✅ Rol reseteado. Recargá la página.');
+                
+                // ¡EL TRUCO! También borra la vinculación para poder probar de nuevo
+                localStorage.removeItem('rs_usuario_vinculado');
+                
+                // Resetea en Supabase
+                await sb.from('push_subs').update({ rol: 'cuidador', usuario_vinculado_id: null }).eq('user_id', USER_ID);
+                
+                alert('✅ Rol y vinculación reseteados. Recargá la página para probar de nuevo.');
                 location.reload();
             });
         }
