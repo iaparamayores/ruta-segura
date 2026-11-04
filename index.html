@@ -1427,6 +1427,94 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+        // =========================================================================
+    // HISTORIAL DE ACTIVIDAD (Solo Cuidador)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnVerHistorial = document.getElementById('btnVerHistorial');
+        const btnCerrarHistorial = document.getElementById('btnCerrarHistorial');
+        const modalHistorial = document.getElementById('modalHistorial');
+        const listaHistorial = document.getElementById('listaHistorial');
+
+        if (btnVerHistorial) {
+            // Solo mostrar si es Cuidador
+            btnVerHistorial.style.display = ES_USUARIO ? 'none' : 'block';
+
+            btnVerHistorial.addEventListener('click', async function() {
+                modalHistorial.style.display = 'flex';
+                listaHistorial.innerHTML = '<p style="text-align:center; color:#6b7280;">⏳ Cargando historial...</p>';
+
+                try {
+                    // Buscar el ID del usuario vinculado
+                    let usuarioId = localStorage.getItem('rs_usuario_vinculado');
+                    
+                    if (!usuarioId) {
+                        // Si no hay vinculación por código, buscar por rol
+                        const r1 = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
+                        if (r1.data && r1.data.length > 0) {
+                            usuarioId = r1.data[0].user_id;
+                        }
+                    }
+
+                    if (!usuarioId) {
+                        listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ No hay usuario vinculado</p>';
+                        return;
+                    }
+
+                    // Buscar últimas 50 actividades
+                    const { data, error } = await sb.from('actividad_ruta')
+                        .select('accion, creado_en')
+                        .eq('user_id', usuarioId)
+                        .order('creado_en', { ascending: false })
+                        .limit(50);
+
+                    if (error || !data || data.length === 0) {
+                        listaHistorial.innerHTML = '<p style="text-align:center; color:#6b7280;">📭 Sin actividad registrada aún</p>';
+                        return;
+                    }
+
+                    // Mostrar actividades con formato bonito
+                    listaHistorial.innerHTML = data.map(act => {
+                        const fecha = new Date(act.creado_en);
+                        const fechaFormateada = fecha.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                        const horaFormateada = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+                        let icono = '📱';
+                        let texto = 'Abrió la aplicación';
+                        
+                        if (act.accion === 'sos_activado') {
+                            icono = '🚨';
+                            texto = 'Activó emergencia SOS';
+                        }
+
+                        return `
+                            <div style="padding:12px; background:#f9fafb; border-radius:8px; border-left:4px solid #1976d2;">
+                                <div style="font-size:16px; font-weight:bold; color:#1f2937;">${icono} ${texto}</div>
+                                <div style="font-size:13px; color:#6b7280; margin-top:4px;">${fechaFormateada} a las ${horaFormateada}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                } catch (e) {
+                    console.error(e);
+                    listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ Error al cargar historial</p>';
+                }
+            });
+        }
+
+        if (btnCerrarHistorial) {
+            btnCerrarHistorial.addEventListener('click', function() {
+                modalHistorial.style.display = 'none';
+            });
+        }
+
+        // Cerrar modal al tocar fuera
+        modalHistorial.addEventListener('click', function(e) {
+            if (e.target === modalHistorial) {
+                modalHistorial.style.display = 'none';
+            }
+        });
+    });
     </script>
 </body>
 </html>
