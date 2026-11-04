@@ -1324,6 +1324,121 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (updateError) throw updateError;
 
+// =========================================================================
+    // 14. SISTEMA DE VINCULACIÓN POR CÓDIGO (VERSIÓN MEJORADA)
+    // =========================================================================
+    window.addEventListener('DOMContentLoaded', function() {
+        
+        // --- A. LÓGICA PARA EL USUARIO (Mostrar/Generar Código) ---
+        const btnGenerar = document.getElementById('btnGenerarCodigo');
+        const btnCerrar = document.getElementById('btnCerrarCodigo');
+        const codigoGenerado = document.getElementById('codigoGenerado');
+        const codigoTexto = document.getElementById('codigoTexto');
+        
+        if (btnGenerar) {
+            // Solo mostrar si es Usuario
+            btnGenerar.style.display = ES_USUARIO ? 'block' : 'none';
+            
+            btnGenerar.addEventListener('click', async function() {
+                try {
+                    // Buscar si ya tiene un código activo
+                    const { data: codigosExistentes, error } = await sb.from('codigos_vinculacion')
+                        .select('codigo')
+                        .eq('adulto_id', USER_ID)
+                        .eq('usada', false)
+                        .limit(1);
+                    
+                    let codigo;
+                    let esCodigoNuevo = false;
+                    
+                    if (codigosExistentes && codigosExistentes.length > 0) { 
+                        // Ya tiene código: mostrarlo (no generar uno nuevo)
+                        codigo = codigosExistentes[0].codigo;
+                    } else {
+                        // No tiene código: generar uno nuevo
+                        codigo = Math.floor(100000 + Math.random() * 900000).toString();
+                        await sb.from('codigos_vinculacion').insert({ 
+                            codigo: codigo, 
+                            adulto_id: USER_ID, 
+                            nombre_adulto: 'Usuario', 
+                            usada: false 
+                        });
+                        esCodigoNuevo = true;
+                    }
+                    
+                    // Mostrar el código en la tarjeta
+                    codigoTexto.textContent = codigo;
+                    
+                    // Cambiar el mensaje según si es nuevo o existente
+                    const tituloCodigo = codigoGenerado.querySelector('p:first-child');
+                    if (tituloCodigo) {
+                        if (esCodigoNuevo) {
+                            tituloCodigo.textContent = '🎉 Tu código de vinculación es:';
+                        } else {
+                            tituloCodigo.textContent = '📋 Tu código de vinculación es:';
+                        }
+                    }
+                    
+                    codigoGenerado.style.display = 'block';
+                    
+                } catch (e) { 
+                    console.error(e); 
+                    alert('❌ Error al generar código'); 
+                }
+            });
+        }
+        if (btnCerrar) { 
+            btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); 
+        }
+
+        // --- B. LÓGICA PARA EL CUIDADOR (Ingresar Código) ---
+        const btnIngresar = document.getElementById('btnIngresarCodigo');
+        const msgVinculacion = document.getElementById('msgVinculacion');
+
+        if (btnIngresar) {
+            // Solo mostrar si es Cuidador
+            btnIngresar.style.display = ES_USUARIO ? 'none' : 'block';
+
+            btnIngresar.addEventListener('click', async function() {
+                const codigoIngresado = prompt('🔗 Ingresá el código de 6 dígitos que te dio tu familiar:');
+                
+                if (!codigoIngresado || codigoIngresado.length !== 6) {
+                    alert('❌ El código debe tener exactamente 6 números.');
+                    return;
+                }
+
+                if (msgVinculacion) {
+                    msgVinculacion.textContent = '⏳ Buscando código...';
+                    msgVinculacion.style.display = 'block';
+                    msgVinculacion.style.color = '#d97706';
+                }
+
+                try {
+                    const { data, error } = await sb.from('codigos_vinculacion')
+                        .select('adulto_id')
+                        .eq('codigo', codigoIngresado)
+                        .eq('usada', false)
+                        .single();
+
+                    if (error || !data) {
+                        if (msgVinculacion) {
+                            msgVinculacion.textContent = '❌ Código no válido o ya usado.';
+                            msgVinculacion.style.color = '#dc2626';
+                        } else {
+                            alert('❌ Código no válido o ya usado.');
+                        }
+                        return;
+                    }
+
+                    const usuarioVinculadoId = data.adulto_id;
+
+                    // Actualizamos la fila del cuidador actual para guardar a quién cuida
+                    const { error: updateError } = await sb.from('push_subs')
+                        .update({ usuario_vinculado_id: usuarioVinculadoId })
+                        .eq('user_id', USER_ID);
+
+                    if (updateError) throw updateError;
+
                     if (msgVinculacion) {
                         msgVinculacion.textContent = '✅ ¡Vinculación exitosa! Ya podés ver su ubicación.';
                         msgVinculacion.style.color = '#059669';
