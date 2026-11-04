@@ -986,10 +986,9 @@
         }
     }
 
-    
-
+                        
 // =========================================================================
-    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (CON DIAGNÓSTICO)
+    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (CON RECORRIDO + PIN)
     // =========================================================================
     function actualizarBotonCuidador() {
         if (btnVerUbicacionUsuario) {
@@ -997,115 +996,172 @@
         }
     }
 
+    // Función para pedir/verificar PIN
+    function verificarPIN() {
+        let pinGuardado = localStorage.getItem('rs_pin_cuidador');
+        
+        if (!pinGuardado) {
+            // Primera vez: crear PIN
+            let nuevoPin = prompt('🔒 Creá un PIN de 4 dígitos para proteger esta vista:\n\n(Solo vos podrás ver la ubicación del Usuario)');
+            if (nuevoPin && nuevoPin.length === 4 && !isNaN(nuevoPin)) {
+                localStorage.setItem('rs_pin_cuidador', nuevoPin);
+                alert('✅ PIN creado exitosamente.\n\nGuárdalo en tu memoria. Te lo vamos a pedir cada vez que quieras ver la ubicación.');
+                return true;
+            } else {
+                alert('❌ PIN inválido. Debe ser exactamente 4 números.');
+                return false;
+            }
+        } else {
+            // Ya tiene PIN: verificar
+            let intento = prompt('🔒 Ingresá tu PIN de 4 dígitos para ver la ubicación:');
+            if (intento === pinGuardado) {
+                return true;
+            } else {
+                alert('❌ PIN incorrecto. Acceso denegado.');
+                return false;
+            }
+        }
+    }
+
+    // Función para limpiar el recorrido del mapa
+    function limpiarRecorrido() {
+        if (polylineRecorrido) {
+            mapaLeaflet.removeLayer(polylineRecorrido);
+            polylineRecorrido = null;
+        }
+        marcadoresRecorrido.forEach(m => mapaLeaflet.removeLayer(m));
+        marcadoresRecorrido = [];
+    }
+
     if (btnVerUbicacionUsuario) {
         btnVerUbicacionUsuario.addEventListener('click', async function() {
             if (mostrandoUbicacionUsuario) {
+                // VOLVER A MI UBICACIÓN
+                limpiarRecorrido();
                 iniciarUbicacion();
                 this.innerHTML = '👁️ Ver ubicación del Usuario';
                 this.style.backgroundColor = '#7c3aed';
                 mostrandoUbicacionUsuario = false;
                 cajaMensaje.textContent = '✅ Mostrando tu ubicación.';
             } else {
-                cajaMensaje.textContent = '🔍 Diagnosticando...';
+                // VER UBICACIÓN DEL USUARIO
+                
+                // 1. Pedir PIN primero
+                if (!verificarPIN()) {
+                    return; // PIN incorrecto o cancelado
+                }
+                
+                cajaMensaje.textContent = '🔍 Buscando al Usuario...';
                 
                 try {
-                    // PASO 1: Buscar el user_id del Usuario
-                    const r1 = await sb.from('push_subs').select('user_id, rol').eq('rol', 'usuario').limit(1);
-                    
-                    let debugMsg = '📋 DIAGNÓSTICO:\n\n';
-                    debugMsg += '1. push_subs consultado\n';
-                    debugMsg += '   Error: ' + (r1.error ? r1.error.message : 'NINGUNO') + '\n';
-                    debugMsg += '   Filas: ' + (r1.data ? r1.data.length : 0) + '\n';
+                    // 2. Buscar el ID del Usuario
+                    const r1 = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
                     
                     if (r1.error || !r1.data || r1.data.length === 0) {
-                        alert(debugMsg + '\n❌ No se encontró usuario con rol=usuario');
+                        alert('⚠️ No se encontró un Usuario vinculado.\n\nAsegurate de que el Usuario haya marcado su rol en Ajustes.');
+                        cajaMensaje.textContent = '✅ Todo listo';
+                        return;
+                    }
+                    const usuarioId = r1.data[0].user_id;
+                    
+                    // 3. Buscar últimas 20 ubicaciones (para dibujar el recorrido)
+                    const r2 = await sb.from('ubicaciones_ruta')
+                        .select('lat, lon, creado_en')
+                        .eq('user_id', usuarioId)
+                        .not('lat', 'is', null)
+                        .not('lon', 'is', null)
+                        .order('creado_en', { ascending: false })
+                        .limit(20);
+                    
+                    let puntosRecorrido = [];
+                    
+                    if (!r2.error && r2.data && r2.data.length > 0) {
+                        // Invertir para que vaya del más antiguo al más nuevo
+                        puntosRecorrido = r2.data.reverse();
+                    }
+                    
+                    // 4. Si no hay en ubicaciones_ruta, buscar último SOS
+                    if (puntosRecorrido.length === 0) {
+                        const r3 = await sb.from('sos_ruta')
+                            .select('lat, lon, creado_en')
+                            .eq('user_id', usuarioId)
+                            .not('lat', 'is', null)
+                            .not('lon', 'is', null)
+                            .order('creado_en', { ascending: false })
+                            .limit(1);
+                        
+                        if (!r3.error && r3.data && r3.data.length > 0) {
+                            puntosRecorrido = r3.data;
+                        }
+                    }
+                    
+                    // 5. Si no hay nada, mostrar error
+                    if (puntosRecorrido.length === 0 || puntosRecorrido[0].lat == null) {
+                        alert('⚠️ El Usuario aún no ha registrado ninguna ubicación.\n\nPedile que:\n1. Abra la app y espere 30 segundos\n2. O apriete el botón SOS rojo');
                         cajaMensaje.textContent = '✅ Todo listo';
                         return;
                     }
                     
-                    const usuarioId = r1.data[0].user_id;
-                    debugMsg += '   user_id encontrado: ' + usuarioId.substring(0, 8) + '...\n\n';
+                    // 6. Calcular tiempo transcurrido desde la última ubicación
+                    const ultimaUbic = puntosRecorrido[puntosRecorrido.length - 1];
+                    const ahora = new Date();
+                    const haceCuanto = new Date(ultimaUbic.creado_en);
+                    const minutosPasados = Math.floor((ahora - haceCuanto) / 60000);
                     
-                    // PASO 2: Buscar en ubicaciones_ruta (consulta SIMPLE, sin filtros)
-                    const r2 = await sb.from('ubicaciones_ruta')
-                        .select('lat, lon, user_id')
-                        .eq('user_id', usuarioId)
-                        .limit(3);
-                    
-                    debugMsg += '2. ubicaciones_ruta consultado\n';
-                    debugMsg += '   Error: ' + (r2.error ? r2.error.message : 'NINGUNO') + '\n';
-                    debugMsg += '   Filas encontradas: ' + (r2.data ? r2.data.length : 0) + '\n';
-                    
-                    if (r2.data && r2.data.length > 0) {
-                        debugMsg += '   Primera fila: lat=' + r2.data[0].lat + ', lon=' + r2.data[0].lon + '\n';
+                    let textoTiempo = '';
+                    if (minutosPasados < 1) textoTiempo = 'hace menos de 1 minuto';
+                    else if (minutosPasados < 60) textoTiempo = `hace ${minutosPasados} minuto${minutosPasados > 1 ? 's' : ''}`;
+                    else {
+                        const horas = Math.floor(minutosPasados / 60);
+                        textoTiempo = `hace ${horas} hora${horas > 1 ? 's' : ''}`;
                     }
                     
-                    if (!r2.error && r2.data && r2.data.length > 0 && r2.data[0].lat != null) {
-                        // ¡ENCONTRADO! Mostrar en el mapa
-                        const lat = r2.data[0].lat;
-                        const lon = r2.data[0].lon;
-                        
-                        mapaLeaflet.setView([lat, lon], 16);
-                        if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-                        
-                        const iconoRojo = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: "<div style='background-color:#d32f2f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
-                            iconSize: [16, 16],
-                            iconAnchor: [8, 8]
-                        });
-                        marcadorUsuario = L.marker([lat, lon], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup("📍 Ubicación del Usuario").openPopup();
-                        
-                        panelAjustes.style.display = 'none';
-                        this.innerHTML = '❌ Volver a mi ubicación';
-                        this.style.backgroundColor = '#d32f2f';
-                        cajaMensaje.textContent = '📍 Mostrando ubicación del Usuario.';
-                        mostrandoUbicacionUsuario = true;
-                        return;
-                    }
+                    // 7. Dibujar en el mapa
+                    limpiarRecorrido();
                     
-                    debugMsg += '\n';
+                    const puntos = puntosRecorrido.map(p => [p.lat, p.lon]);
                     
-                    // PASO 3: Si no hay en ubicaciones, buscar en sos_ruta
-                    const r3 = await sb.from('sos_ruta')
-                        .select('lat, lon, user_id')
-                        .eq('user_id', usuarioId)
-                        .limit(3);
+                    // Dibujar línea azul del recorrido
+                    polylineRecorrido = L.polyline(puntos, { 
+                        color: '#2563eb', 
+                        weight: 4, 
+                        opacity: 0.7 
+                    }).addTo(mapaLeaflet);
                     
-                    debugMsg += '3. sos_ruta consultado\n';
-                    debugMsg += '   Error: ' + (r3.error ? r3.error.message : 'NINGUNO') + '\n';
-                    debugMsg += '   Filas encontradas: ' + (r3.data ? r3.data.length : 0) + '\n';
+                    // Ajustar el mapa para ver todo el recorrido
+                    mapaLeaflet.fitBounds(polylineRecorrido.getBounds(), { padding: [30, 30] });
                     
-                    if (r3.data && r3.data.length > 0) {
-                        debugMsg += '   Primera fila: lat=' + r3.data[0].lat + ', lon=' + r3.data[0].lon + '\n';
-                    }
+                    // Marcador VERDE de inicio
+                    const iconoVerde = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#16a34a;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
+                        iconSize: [14, 14],
+                        iconAnchor: [7, 7]
+                    });
+                    const marcadorInicio = L.marker(puntos[0], {icon: iconoVerde})
+                        .addTo(mapaLeaflet)
+                        .bindPopup('🟢 Inicio del recorrido');
+                    marcadoresRecorrido.push(marcadorInicio);
                     
-                    if (!r3.error && r3.data && r3.data.length > 0 && r3.data[0].lat != null) {
-                        const lat = r3.data[0].lat;
-                        const lon = r3.data[0].lon;
-                        
-                        mapaLeaflet.setView([lat, lon], 16);
-                        if (marcadorUsuario) mapaLeaflet.removeLayer(marcadorUsuario);
-                        
-                        const iconoRojo = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: "<div style='background-color:#d32f2f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
-                            iconSize: [16, 16],
-                            iconAnchor: [8, 8]
-                        });
-                        marcadorUsuario = L.marker([lat, lon], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup("📍 Ubicación del Usuario (SOS)").openPopup();
-                        
-                        this.innerHTML = '❌ Volver a mi ubicación';
-                        this.style.backgroundColor = '#d32f2f';
-                        cajaMensaje.textContent = '📍 Mostrando ubicación del Usuario (SOS).';
-                        mostrandoUbicacionUsuario = true;
-                        return;
-                    }
+                    // Marcador ROJO de última ubicación
+                    const iconoRojo = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: "<div style='background-color:#d32f2f;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,0.7);'></div>",
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+                    const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo})
+                        .addTo(mapaLeaflet)
+                        .bindPopup(`🔴 Última ubicación<br><small>${textoTiempo}</small>`)
+                        .openPopup();
+                    marcadoresRecorrido.push(marcadorFin);
                     
-                    // Si llegamos acá, no hay datos
-                    debugMsg += '\n❌ No se encontraron coordenadas válidas en ninguna tabla.';
-                    alert(debugMsg);
-                    cajaMensaje.textContent = '✅ Todo listo';
+                    // 8. Cerrar panel y actualizar UI
+                    panelAjustes.style.display = 'none';
+                    this.innerHTML = '❌ Volver a mi ubicación';
+                    this.style.backgroundColor = '#d32f2f';
+                    cajaMensaje.textContent = `📍 Usuario visto ${textoTiempo} (${puntosRecorrido.length} puntos).`;
+                    mostrandoUbicacionUsuario = true;
                     
                 } catch (e) {
                     alert('❌ Error inesperado: ' + e.message);
@@ -1114,7 +1170,6 @@
             }
         });
     }
-
     // =========================================================================
     // 13. PANTALLA DE BIENVENIDA (1 día de retraso, solo Cuidadores)
     // =========================================================================
