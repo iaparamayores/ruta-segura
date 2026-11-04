@@ -219,6 +219,8 @@
     let ES_USUARIO = localStorage.getItem('rs_es_usuario') === 'true';
     let sosActual = null; 
     let mostrandoUbicacionUsuario = false;
+        let polylineRecorrido = null; // La línea azul del camino
+    let marcadoresRecorrido = []; // Los marcadores de inicio/fin
 
     // =========================================================================
     // 2. REFERENCIAS AL DOM
