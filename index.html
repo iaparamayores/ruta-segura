@@ -1222,58 +1222,154 @@
             });
         }
     });
-
-    // =========================================================================
-    // 14. GENERAR CÓDIGO DE VINCULACIÓN
+// =========================================================================
+    // 14. SISTEMA DE VINCULACIÓN POR CÓDIGO (Usuario y Cuidador)
     // =========================================================================
     window.addEventListener('DOMContentLoaded', function() {
-      const btnGenerar = document.getElementById('btnGenerarCodigo');
-      const btnCerrar = document.getElementById('btnCerrarCodigo');
-      const codigoGenerado = document.getElementById('codigoGenerado');
-      const codigoTexto = document.getElementById('codigoTexto');
-      if (btnGenerar) {
-        btnGenerar.addEventListener('click', async function() {
-          try {
-            const { data: codigosExistentes } = await sb.from('codigos_vinculacion').select('codigo').eq('adulto_id', USER_ID).eq('usada', false).limit(1);
-            let codigo;
-            if (codigosExistentes && codigosExistentes.length > 0) { codigo = codigosExistentes[0].codigo; } 
-            else {
-              codigo = Math.floor(100000 + Math.random() * 900000).toString();
-              await sb.from('codigos_vinculacion').insert({ codigo: codigo, adulto_id: USER_ID, nombre_adulto: 'Usuario', usada: false });
-            }
-            codigoTexto.textContent = codigo; codigoGenerado.style.display = 'block';
-          } catch (e) { console.error('Error al generar código:', e); alert('❌ Error al generar código'); }
-        });
-      }
-      if (btnCerrar) { btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); }
+        
+        // --- A. LÓGICA PARA EL USUARIO (Generar Código) ---
+        const btnGenerar = document.getElementById('btnGenerarCodigo');
+        const btnCerrar = document.getElementById('btnCerrarCodigo');
+        const codigoGenerado = document.getElementById('codigoGenerado');
+        const codigoTexto = document.getElementById('codigoTexto');
+        
+        if (btnGenerar) {
+            // Solo mostrar si es Usuario
+            btnGenerar.style.display = ES_USUARIO ? 'block' : 'none';
+            
+            btnGenerar.addEventListener('click', async function() {
+                try {
+                    const { data: codigosExistentes } = await sb.from('codigos_vinculacion')
+                        .select('codigo')
+                        .eq('adulto_id', USER_ID)
+                        .eq('usada', false)
+                        .limit(1);
+                    
+                    let codigo;
+                    if (codigosExistentes && codigosExistentes.length > 0) { 
+                        codigo = codigosExistentes[0].codigo; 
+                    } else {
+                        codigo = Math.floor(100000 + Math.random() * 900000).toString();
+                        await sb.from('codigos_vinculacion').insert({ 
+                            codigo: codigo, 
+                            adulto_id: USER_ID, 
+                            nombre_adulto: 'Usuario', 
+                            usada: false 
+                        });
+                    }
+                    codigoTexto.textContent = codigo; 
+                    codigoGenerado.style.display = 'block';
+                } catch (e) { 
+                    console.error(e); 
+                    alert('❌ Error al generar código'); 
+                }
+            });
+        }
+        if (btnCerrar) { 
+            btnCerrar.addEventListener('click', function() { codigoGenerado.style.display = 'none'; }); 
+        }
+
+        // --- B. LÓGICA PARA EL CUIDADOR (Ingresar Código) ---
+        const btnIngresar = document.getElementById('btnIngresarCodigo');
+        const msgVinculacion = document.getElementById('msgVinculacion');
+
+        if (btnIngresar) {
+            // Solo mostrar si es Cuidador
+            btnIngresar.style.display = ES_USUARIO ? 'none' : 'block';
+
+            btnIngresar.addEventListener('click', async function() {
+                const codigoIngresado = prompt('🔗 Ingresá el código de 6 dígitos que te dio tu familiar:');
+                
+                if (!codigoIngresado || codigoIngresado.length !== 6) {
+                    alert('❌ El código debe tener exactamente 6 números.');
+                    return;
+                }
+
+                if (msgVinculacion) {
+                    msgVinculacion.textContent = '⏳ Buscando código...';
+                    msgVinculacion.style.display = 'block';
+                    msgVinculacion.style.color = '#d97706';
+                }
+
+                try {
+                    const { data, error } = await sb.from('codigos_vinculacion')
+                        .select('adulto_id')
+                        .eq('codigo', codigoIngresado)
+                        .eq('usada', false)
+                        .single();
+
+                    if (error || !data) {
+                        if (msgVinculacion) {
+                            msgVinculacion.textContent = '❌ Código no válido o ya usado.';
+                            msgVinculacion.style.color = '#dc2626';
+                        } else {
+                            alert('❌ Código no válido o ya usado.');
+                        }
+                        return;
+                    }
+
+                    const usuarioVinculadoId = data.adulto_id;
+
+                    // Actualizamos la fila del cuidador actual para guardar a quién cuida
+                    const { error: updateError } = await sb.from('push_subs')
+                        .update({ usuario_vinculado_id: usuarioVinculadoId })
+                        .eq('user_id', USER_ID);
+
+                    if (updateError) throw updateError;
+
+                    if (msgVinculacion) {
+                        msgVinculacion.textContent = '✅ ¡Vinculación exitosa! Ya podés ver su ubicación.';
+                        msgVinculacion.style.color = '#059669';
+                    } else {
+                        alert('✅ ¡Vinculación exitosa!');
+                    }
+                    
+                    localStorage.setItem('rs_usuario_vinculado', usuarioVinculadoId);
+
+                } catch (e) {
+                    console.error(e);
+                    if (msgVinculacion) {
+                        msgVinculacion.textContent = '❌ Error de conexión.';
+                        msgVinculacion.style.color = '#dc2626';
+                    } else {
+                        alert('❌ Error de conexión.');
+                    }
+                }
+            });
+        }
     });
 
-    // Inicializar verificación de suscripción y botones al cargar
+    // =========================================================================
+    // 15. INICIALIZACIÓN FINAL Y INDICADOR DE NUBE
+    // =========================================================================
     document.addEventListener('DOMContentLoaded', function() {
+        // 1. Verificar suscripción y actualizar botones
         verificarSuscripcion();
         actualizarBotonCuidador();
-    });
-        // Indicador de estado de conexión
-    (function() {
-        const indicator = document.getElementById('nube-indicator');
-        if (!indicator) return;
         
-        sb.from('sos_ruta').select('id').limit(1).then(res => {
-            if (res.error) {
-                indicator.innerHTML = '❌ Sin conexión a la nube';
-                indicator.style.background = '#fee2e2';
-                indicator.style.color = '#dc2626';
-            } else {
-                indicator.innerHTML = '✅ Conectado a la nube';
-                indicator.style.background = '#d1fae5';
-                indicator.style.color = '#059669';
-            }
-        }).catch(() => {
-            indicator.innerHTML = '⚠️ Error de conexión';
-            indicator.style.background = '#fef3c7';
-            indicator.style.color = '#d97706';
-        });
-    })();
+        // 2. Indicador de estado de conexión a la nube
+        const indicator = document.getElementById('nube-indicator');
+        if (indicator) {
+            sb.from('sos_ruta').select('id').limit(1).then(res => {
+                if (res.error) {
+                    indicator.innerHTML = '❌ Sin conexión a la nube';
+                    indicator.style.background = '#fee2e2';
+                    indicator.style.color = '#dc2626';
+                } else {
+                    indicator.innerHTML = '✅ Conectado a la nube';
+                    indicator.style.background = '#d1fae5';
+                    indicator.style.color = '#059669';
+                }
+            }).catch(() => {
+                indicator.innerHTML = '⚠️ Error de conexión';
+                indicator.style.background = '#fef3c7';
+                indicator.style.color = '#d97706';
+            });
+        }
+    });
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
