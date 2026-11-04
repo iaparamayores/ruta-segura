@@ -202,6 +202,18 @@
             <button id="btnBienvenidaCerrar" style="width:100%; padding:10px; font-size:14px; background:#f3f4f6; color:#4b5563; border:none; border-radius:8px; cursor:pointer;">
                 Hacerlo más tarde
             </button>
+            <!-- Modal de Historial de Actividad -->
+    <div id="modalHistorial" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:16px; padding:25px; max-width:400px; width:100%; max-height:80vh; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="color:#1976d2; font-size:20px; margin:0;">📜 Historial de Actividad</h3>
+                <button id="btnCerrarHistorial" style="background:none; border:none; font-size:24px; cursor:pointer; color:#6b7280;">✕</button>
+            </div>
+            <div id="listaHistorial" style="display:flex; flex-direction:column; gap:10px;">
+                <p style="text-align:center; color:#6b7280;">Cargando...</p>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
     
