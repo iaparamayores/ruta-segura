@@ -332,6 +332,7 @@
     botonSOS.addEventListener('mouseleave', cancelarSOS);
 
     async function activarSOS() {
+        registrarActividad('sos_activado');
         cajaMensaje.textContent = "🚨 SOS ACTIVADO - Avisando a tu contacto...";
         let lat = null, lon = null;
         if (miUbicacion) { lat = miUbicacion.latitude; lon = miUbicacion.longitude; }
