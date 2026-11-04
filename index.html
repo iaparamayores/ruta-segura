@@ -745,6 +745,8 @@
         subirUbicacionPeriodica(); 
         setInterval(subirUbicacionPeriodica, 300000); 
         iniciarAlertaEnVivo();
+        // 👇 AGREGÁ ESTA LÍNEA AQUÍ 👇
+        registrarActividad('app_abierta');
     });
 
     let deferredPrompt;
