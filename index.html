@@ -226,7 +226,20 @@
     let mostrandoUbicacionUsuario = false;
         let polylineRecorrido = null; // La línea azul del camino
     let marcadoresRecorrido = []; // Los marcadores de inicio/fin
-
+        
+// =========================================================================
+    // FUNCIÓN PARA REGISTRAR ACTIVIDAD EN SUPABASE
+    // =========================================================================
+    async function registrarActividad(accion) {
+        try {
+            await sb.from('actividad_ruta').insert({
+                user_id: USER_ID,
+                accion: accion
+            });
+        } catch (e) {
+            console.error('Error registrando actividad:', e);
+        }
+    }
     // =========================================================================
     // 2. REFERENCIAS AL DOM
     // =========================================================================
