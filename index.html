@@ -1056,10 +1056,10 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error verificando suscripción:', e);
         }
     }
-
-                        
+                    
+                    
 // =========================================================================
-    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (CON RECORRIDO + PIN)
+    // 12. BOTÓN PARA VER UBICACIÓN DEL USUARIO (CON RECORRIDO + PIN + GEOCODING)
     // =========================================================================
     function actualizarBotonCuidador() {
         if (btnVerUbicacionUsuario) {
@@ -1072,7 +1072,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let pinGuardado = localStorage.getItem('rs_pin_cuidador');
         
         if (!pinGuardado) {
-            // Primera vez: crear PIN
             let nuevoPin = prompt('🔒 Creá un PIN de 4 dígitos para proteger esta vista:\n\n(Solo vos podrás ver la ubicación del Usuario)');
             if (nuevoPin && nuevoPin.length === 4 && !isNaN(nuevoPin)) {
                 localStorage.setItem('rs_pin_cuidador', nuevoPin);
@@ -1083,7 +1082,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
         } else {
-            // Ya tiene PIN: verificar
             let intento = prompt('🔒 Ingresá tu PIN de 4 dígitos para ver la ubicación:');
             if (intento === pinGuardado) {
                 return true;
@@ -1119,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 1. Pedir PIN primero
                 if (!verificarPIN()) {
-                    return; // PIN incorrecto o cancelado
+                    return;
                 }
                 
                 cajaMensaje.textContent = '🔍 Buscando al Usuario...';
@@ -1135,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     const usuarioId = r1.data[0].user_id;
                     
-                    // 3. Buscar últimas 20 ubicaciones (para dibujar el recorrido)
+                    // 3. Buscar últimas 20 ubicaciones
                     const r2 = await sb.from('ubicaciones_ruta')
                         .select('lat, lon, creado_en')
                         .eq('user_id', usuarioId)
@@ -1145,9 +1143,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         .limit(20);
                     
                     let puntosRecorrido = [];
-                    
                     if (!r2.error && r2.data && r2.data.length > 0) {
-                        // Invertir para que vaya del más antiguo al más nuevo
                         puntosRecorrido = r2.data.reverse();
                     }
                     
@@ -1173,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     
-                    // 6. Calcular tiempo transcurrido desde la última ubicación
+                    // 6. Calcular tiempo transcurrido
                     const ultimaUbic = puntosRecorrido[puntosRecorrido.length - 1];
                     const ahora = new Date();
                     const haceCuanto = new Date(ultimaUbic.creado_en);
@@ -1189,85 +1185,52 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // 7. Dibujar en el mapa
                     limpiarRecorrido();
-                    
                     const puntos = puntosRecorrido.map(p => [p.lat, p.lon]);
                     
-                    // Dibujar línea azul del recorrido
-                    polylineRecorrido = L.polyline(puntos, { 
-                        color: '#2563eb', 
-                        weight: 4, 
-                        opacity: 0.7 
-                    }).addTo(mapaLeaflet);
-                    
-                    // Ajustar el mapa para ver todo el recorrido
+                    polylineRecorrido = L.polyline(puntos, { color: '#2563eb', weight: 4, opacity: 0.7 }).addTo(mapaLeaflet);
                     mapaLeaflet.fitBounds(polylineRecorrido.getBounds(), { padding: [30, 30] });
                     
                     // Marcador VERDE de inicio
                     const iconoVerde = L.divIcon({
                         className: 'custom-div-icon',
                         html: "<div style='background-color:#16a34a;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 0 6px rgba(0,0,0,0.6);'></div>",
-                        iconSize: [14, 14],
-                        iconAnchor: [7, 7]
+                        iconSize: [14, 14], iconAnchor: [7, 7]
                     });
-                    const marcadorInicio = L.marker(puntos[0], {icon: iconoVerde})
-                        .addTo(mapaLeaflet)
-                        .bindPopup('🟢 Inicio del recorrido');
-                    marcadoresRecorrido.push(marcadorInicio);
+                    marcadoresRecorrido.push(L.marker(puntos[0], {icon: iconoVerde}).addTo(mapaLeaflet).bindPopup('🟢 Inicio del recorrido'));
                     
                     // Marcador ROJO de última ubicación
                     const iconoRojo = L.divIcon({
                         className: 'custom-div-icon',
                         html: "<div style='background-color:#d32f2f;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(0,0,0,0.7);'></div>",
-                        iconSize: [18, 18],
-                        iconAnchor: [9, 9]
+                        iconSize: [18, 18], iconAnchor: [9, 9]
                     });
-                    // Obtener dirección de la última ubicación
-                    const direccion = await obtenerDireccion(
-                    
-                    // Obtener dirección de la última ubicación (de forma segura)
+
+                    // Obtener dirección de forma segura (sin romper el código si falla)
                     let direccion = null;
                     try {
-                        direccion = await obtenerDireccion(
-                            puntos[puntos.length - 1].lat, 
-                            puntos[puntos.length - 1].lon
-                        );
+                        direccion = await obtenerDireccion(puntos[puntos.length - 1].lat, puntos[puntos.length - 1].lon);
                     } catch (e) {
                         console.error('Geocoding falló:', e);
-                        direccion = null;
                     }
                     
-                    // Texto del popup (siempre funciona, con o sin dirección)
                     const textoPopup = direccion 
                         ? `🔴 <strong>Última ubicación</strong><br><small>${textoTiempo}</small><br><small style="color:#4b5563;">📍 ${direccion}</small>`
                         : `🔴 Última ubicación<br><small>${textoTiempo}</small>`;
                     
-                    const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo})
-                        .addTo(mapaLeaflet)
-                        .bindPopup(textoPopup);
-                    
+                    const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup(textoPopup);
                     marcadoresRecorrido.push(marcadorFin);
                     
-                    // Abrir el popup con un pequeño delay para asegurar que el mapa esté listo
+                    // Abrir el popup y cerrar el panel con un pequeño delay
                     setTimeout(() => {
                         marcadorFin.openPopup();
-                    }, 300);
-                    
-                    // 8. Cerrar panel y actualizar UI (SIEMPRE, pase lo que pase)
-                    setTimeout(() => {
                         panelAjustes.style.display = 'none';
-                    }, 100);
+                    }, 300);
                     
                     this.innerHTML = '❌ Volver a mi ubicación';
                     this.style.backgroundColor = '#d32f2f';
                     cajaMensaje.textContent = direccion 
                         ? `📍 Usuario visto ${textoTiempo} en ${direccion}`
                         : `📍 Usuario visto ${textoTiempo} (${puntosRecorrido.length} puntos).`;
-                    mostrandoUbicacionUsuario = true;
-                    // 8. Cerrar panel y actualizar UI
-                    panelAjustes.style.display = 'none';
-                    this.innerHTML = '❌ Volver a mi ubicación';
-                    this.style.backgroundColor = '#d32f2f';
-                    cajaMensaje.textContent = `📍 Usuario visto ${textoTiempo} (${puntosRecorrido.length} puntos).`;
                     mostrandoUbicacionUsuario = true;
                     
                 } catch (e) {
