@@ -1223,20 +1223,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     // Obtener dirección de la última ubicación
                     const direccion = await obtenerDireccion(
-                        puntos[puntos.length - 1].lat, 
-                        puntos[puntos.length - 1].lon
-                    );
                     
+                    // Obtener dirección de la última ubicación (de forma segura)
+                    let direccion = null;
+                    try {
+                        direccion = await obtenerDireccion(
+                            puntos[puntos.length - 1].lat, 
+                            puntos[puntos.length - 1].lon
+                        );
+                    } catch (e) {
+                        console.error('Geocoding falló:', e);
+                        direccion = null;
+                    }
+                    
+                    // Texto del popup (siempre funciona, con o sin dirección)
                     const textoPopup = direccion 
                         ? `🔴 <strong>Última ubicación</strong><br><small>${textoTiempo}</small><br><small style="color:#4b5563;">📍 ${direccion}</small>`
                         : `🔴 Última ubicación<br><small>${textoTiempo}</small>`;
                     
                     const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo})
                         .addTo(mapaLeaflet)
-                        .bindPopup(textoPopup)
-                        .openPopup();
+                        .bindPopup(textoPopup);
+                    
                     marcadoresRecorrido.push(marcadorFin);
                     
+                    // Abrir el popup con un pequeño delay para asegurar que el mapa esté listo
+                    setTimeout(() => {
+                        marcadorFin.openPopup();
+                    }, 300);
+                    
+                    // 8. Cerrar panel y actualizar UI (SIEMPRE, pase lo que pase)
+                    setTimeout(() => {
+                        panelAjustes.style.display = 'none';
+                    }, 100);
+                    
+                    this.innerHTML = '❌ Volver a mi ubicación';
+                    this.style.backgroundColor = '#d32f2f';
+                    cajaMensaje.textContent = direccion 
+                        ? `📍 Usuario visto ${textoTiempo} en ${direccion}`
+                        : `📍 Usuario visto ${textoTiempo} (${puntosRecorrido.length} puntos).`;
+                    mostrandoUbicacionUsuario = true;
                     // 8. Cerrar panel y actualizar UI
                     panelAjustes.style.display = 'none';
                     this.innerHTML = '❌ Volver a mi ubicación';
