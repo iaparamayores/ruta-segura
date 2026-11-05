@@ -262,23 +262,30 @@
     // =========================================================================
     async function obtenerDireccion(lat, lon) {
         try {
-            const respuesta = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
-                { headers: { 'Accept-Language': 'es' } }
-            );
-            const datos = await respuesta.json();
+            // Intentamos con Nominatim
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=es`;
+            const response = await fetch(url);
             
-            if (datos && datos.display_name) {
-                // Tomamos solo las primeras 2 partes de la dirección (calle y número/cruce)
-                const partes = datos.display_name.split(',');
+            if (!response.ok) {
+                console.warn('Nominatim respondió con error:', response.status);
+                return `📍 Coordenadas: ${lat.toFixed(4)}, ${lon.toFixed(4)} (Dirección no disponible)`;
+            }
+            
+            const data = await response.json();
+            console.log('Datos de geocoding:', data); // Esto te ayuda a ver qué devuelve
+            
+            if (data && data.display_name) {
+                const partes = data.display_name.split(',');
                 const calle = partes[0].trim();
                 const barrio = partes[1] ? partes[1].trim() : '';
                 return `${calle}${barrio ? ', ' + barrio : ''}`;
             }
-            return null;
+            
+            return `📍 Coordenadas: ${lat.toFixed(4)}, ${lon.toFixed(4)} (Sin dirección exacta)`;
+            
         } catch (e) {
-            console.error('Error geocoding:', e);
-            return null;
+            console.error('Error en geocoding:', e);
+            return `📍 Coordenadas: ${lat.toFixed(4)}, ${lon.toFixed(4)} (Error de conexión)`;
         }
     }
     // =========================================================================
