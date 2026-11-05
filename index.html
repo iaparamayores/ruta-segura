@@ -257,6 +257,30 @@
             console.error('Error registrando actividad:', e);
         }
     }
+        // =========================================================================
+    // GEOCODING INVERSO (Convertir coordenadas en dirección)
+    // =========================================================================
+    async function obtenerDireccion(lat, lon) {
+        try {
+            const respuesta = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+                { headers: { 'Accept-Language': 'es' } }
+            );
+            const datos = await respuesta.json();
+            
+            if (datos && datos.display_name) {
+                // Tomamos solo las primeras 2 partes de la dirección (calle y número/cruce)
+                const partes = datos.display_name.split(',');
+                const calle = partes[0].trim();
+                const barrio = partes[1] ? partes[1].trim() : '';
+                return `${calle}${barrio ? ', ' + barrio : ''}`;
+            }
+            return null;
+        } catch (e) {
+            console.error('Error geocoding:', e);
+            return null;
+        }
+    }
     // =========================================================================
     // 2. REFERENCIAS AL DOM
     // =========================================================================
@@ -1197,9 +1221,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         iconSize: [18, 18],
                         iconAnchor: [9, 9]
                     });
+                    // Obtener dirección de la última ubicación
+                    const direccion = await obtenerDireccion(
+                        puntos[puntos.length - 1].lat, 
+                        puntos[puntos.length - 1].lon
+                    );
+                    
+                    const textoPopup = direccion 
+                        ? `🔴 <strong>Última ubicación</strong><br><small>${textoTiempo}</small><br><small style="color:#4b5563;">📍 ${direccion}</small>`
+                        : `🔴 Última ubicación<br><small>${textoTiempo}</small>`;
+                    
                     const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo})
                         .addTo(mapaLeaflet)
-                        .bindPopup(`🔴 Última ubicación<br><small>${textoTiempo}</small>`)
+                        .bindPopup(textoPopup)
                         .openPopup();
                     marcadoresRecorrido.push(marcadorFin);
                     
