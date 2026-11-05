@@ -1226,19 +1226,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup(textoPopup);
                     marcadoresRecorrido.push(marcadorFin);
-                    
-                    // Abrir el popup y cerrar el panel con un pequeño delay
-                    setTimeout(() => {
-                        marcadorFin.openPopup();
-                        panelAjustes.style.display = 'none';
-                    }, 300);
-                    
+                    // 1. Cerrar el panel de ajustes INMEDIATAMENTE (sin esperar a nada)
+                    const panel = document.getElementById('panelAjustes');
+                    if (panel) {
+                        panel.style.display = 'none';
+                    }
+
+                    // 2. Actualizar el botón y mostrar mensaje temporal
                     this.innerHTML = '❌ Volver a mi ubicación';
                     this.style.backgroundColor = '#d32f2f';
-                    cajaMensaje.textContent = direccion 
-                        ? `📍 Usuario visto ${textoTiempo} en ${direccion}`
-                        : `📍 Usuario visto ${textoTiempo} (${puntosRecorrido.length} puntos).`;
+                    cajaMensaje.textContent = '📍 Buscando dirección de la calle...';
                     mostrandoUbicacionUsuario = true;
+
+                    // 3. Abrir el marcador en el mapa
+                    setTimeout(() => {
+                        marcadorFin.openPopup();
+                    }, 300);
+
+                    // 4. Obtener la dirección en segundo plano (sin bloquear la app)
+                    obtenerDireccion(puntos[puntos.length - 1].lat, puntos[puntos.length - 1].lon).then(direccion => {
+                        // Actualizar el popup con la dirección (o coordenadas si falla)
+                        const textoPopupFinal = direccion 
+                            ? `🔴 <strong>Última ubicación</strong><br><small>${textoTiempo}</small><br><small style="color:#4b5563;">📍 ${direccion}</small>`
+                            : `🔴 Última ubicación<br><small>${textoTiempo}</small><br><small style="color:#d97706;">📍 ${puntos[puntos.length - 1].lat.toFixed(4)}, ${puntos[puntos.length - 1].lon.toFixed(4)}</small>`;
+                        
+                        marcadorFin.setPopupContent(textoPopupFinal);
+                        
+                        // Actualizar el mensaje de la caja también
+                        cajaMensaje.textContent = direccion 
+                            ? `📍 Usuario visto ${textoTiempo} en ${direccion}`
+                            : `📍 Usuario visto ${textoTiempo} (Coordenadas: ${puntos[puntos.length - 1].lat.toFixed(4)}, ${puntos[puntos.length - 1].lon.toFixed(4)})`;
+                    }).catch(err => {
+                        console.error("Error geocoding:", err);
+                        cajaMensaje.textContent = `📍 Usuario visto ${textoTiempo} (Sin dirección exacta)`;
+                    });
                     
                 } catch (e) {
                     alert('❌ Error inesperado: ' + e.message);
