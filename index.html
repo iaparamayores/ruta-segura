@@ -1227,35 +1227,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     const marcadorFin = L.marker(puntos[puntos.length - 1], {icon: iconoRojo}).addTo(mapaLeaflet).bindPopup(textoPopup);
                     marcadoresRecorrido.push(marcadorFin);
                     
-// 1. Cerrar el panel de ajustes (probamos TODAS las formas posibles)
-                    
-                    // Forma A: Por ID
+                    // 1. Cerrar el panel de ajustes de forma segura y directa
                     const panel = document.getElementById('panelAjustes');
-                    if (panel) panel.style.display = 'none';
+                    if (panel) {
+                        panel.style.display = 'none';
+                    }
                     
-                    // Forma B: Por clase (si usa 'modal' o 'panel')
-                    const panelPorClase = document.querySelector('.modal, .panel-ajustes, [id*="ajuste"]');
-                    if (panelPorClase) panelPorClase.style.display = 'none';
-                    
-                    // Forma C: Hacer click en el botón "Cerrar" si existe
-                    const btnCerrar = document.querySelector('#btnCerrarAjustes, button:contains("Cerrar"), .btn-cerrar');
-                    if (btnCerrar) btnCerrar.click();
-                    
-                    // Forma D: Buscar cualquier botón que diga "Cerrar" en su texto
-                    const botones = document.querySelectorAll('button');
-                    botones.forEach(btn => {
-                        if (btn.textContent.trim() === 'Cerrar' || btn.textContent.includes('Cerrar')) {
-                            btn.click();
-                        }
-                    });
-                    
-                    // Forma E: Forzar ocultar cualquier modal visible
-                    const modales = document.querySelectorAll('[style*="display: flex"], [style*="display:block"]');
-                    modales.forEach(m => {
-                        if (m.style.position === 'fixed' || m.classList.contains('modal')) {
-                            m.style.display = 'none';
-                        }
-                    });
+                    // Disparamos el click del botón cerrar real (su ID en tu HTML es 'cerrarAjustes')
+                    const btnCerrarReal = document.getElementById('cerrarAjustes');
+                    if (btnCerrarReal) {
+                        btnCerrarReal.click();
+                    }
+
                     // 2. Actualizar el botón y mostrar mensaje temporal
                     this.innerHTML = '❌ Volver a mi ubicación';
                     this.style.backgroundColor = '#d32f2f';
