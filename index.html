@@ -318,6 +318,60 @@
             return `📍 Coordenadas: ${lat.toFixed(4)}, ${lon.toFixed(4)} (Error de conexión)`;
         }
     }
+        // =========================================================================
+    // FÓRMULA DE HAVERSINE (Calcula distancia en metros entre 2 puntos GPS)
+    // =========================================================================
+    function calcularDistancia(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // Radio de la Tierra en metros
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distancia en metros
+    }
+        // =========================================================================
+    // VERIFICAR SI EL USUARIO SALIÓ/ENTRÓ DE UNA ZONA SEGURA
+    // =========================================================================
+    async function verificarZonasSeguras(lat, lon) {
+        try {
+            // 1. Buscar todas las zonas del usuario
+            const { data: zonas, error } = await sb
+                .from('zonas_seguras')
+                .select('id, nombre, lat, lon, radio_metros')
+                .eq('user_id', USER_ID);
+
+            if (error || !zonas || zonas.length === 0) return;
+
+            // 2. Verificar cada zona
+            for (const zona of zonas) {
+                const distancia = calcularDistancia(lat, lon, zona.lat, zona.lon);
+                const estaDentro = distancia <= zona.radio_metros;
+                
+                // Clave única para evitar spamear (ej: "zona_123_dentro")
+                const claveEstado = `zona_${zona.id}_estado`;
+                const estadoAnterior = localStorage.getItem(claveEstado); // "dentro" o "fuera"
+                const estadoActual = estaDentro ? 'dentro' : 'fuera';
+
+                // 3. Si cambió el estado, registrar la actividad
+                if (estadoAnterior !== estadoActual) {
+                    const accion = estaDentro 
+                        ? `Entró a ${zona.nombre}` 
+                        : `Salió de ${zona.nombre}`;
+                    
+                    await registrarActividad(accion);
+                    
+                    // Guardar el nuevo estado
+                    localStorage.setItem(claveEstado, estadoActual);
+                    
+                    console.log(`🏡 ${accion} (distancia: ${Math.round(distancia)}m)`);
+                }
+            }
+        } catch (e) {
+            console.error('Error verificando zonas:', e);
+        }
+    }
     // =========================================================================
     // 2. REFERENCIAS AL DOM
     // =========================================================================
