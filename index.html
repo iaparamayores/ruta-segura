@@ -216,7 +216,36 @@
             </div>
         </div>
     </div>
+    
+<!-- Modal de Zonas Seguras -->
+    <div id="modalZonas" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:16px; padding:25px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="color:#0369a1; font-size:20px; margin:0;">🏡 Zonas Seguras</h3>
+                <button id="btnCerrarZonas" style="background:none; border:none; font-size:24px; cursor:pointer; color:#6b7280;">✕</button>
+            </div>
+            
+            <p style="font-size:14px; color:#4b5563; margin-bottom:15px;">Parate en el lugar y tocá el botón para guardar sus coordenadas exactas.</p>
+            
+            <button id="btnObtenerGPS" style="width:100%; padding:12px; background:#0ea5e9; color:white; border:none; border-radius:8px; font-weight:bold; margin-bottom:15px; font-size:16px;">
+                📍 Obtener mi ubicación actual
+            </button>
 
+            <div id="formZona" style="display:none; background:#f0f9ff; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <p style="font-size:12px; color:#0369a1; margin:0 0 10px 0;">✅ Coordenadas obtenidas. Completá los datos:</p>
+                <input type="text" id="inputNombreZona" placeholder="Nombre (ej: Casa, Plaza)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                <input type="number" id="inputRadioZona" placeholder="Radio en metros (ej: 200)" value="200" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                <button id="btnGuardarZona" style="width:100%; padding:12px; background:#059669; color:white; border:none; border-radius:8px; font-weight:bold; font-size:16px;">
+                    💾 Guardar Zona Segura
+                </button>
+            </div>
+
+            <h4 style="margin:15px 0 10px 0; color:#1f2937;">Tus zonas guardadas:</h4>
+            <div id="listaZonas" style="display:flex; flex-direction:column; gap:10px;">
+                <p style="text-align:center; color:#6b7280; font-size:14px;">Cargando...</p>
+            </div>
+        </div>
+    </div>
     
     <script>
     // =========================================================================
