@@ -1574,6 +1574,170 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+        // =========================================================================
+    // 16. ZONAS SEGURAS (GEOFENCING - CARGA POR GPS)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnZonas = document.getElementById('btnZonasSeguras');
+        const modalZonas = document.getElementById('modalZonas');
+        const btnCerrarZonas = document.getElementById('btnCerrarZonas');
+        const btnObtenerGPS = document.getElementById('btnObtenerGPS');
+        const formZona = document.getElementById('formZona');
+        const btnGuardarZona = document.getElementById('btnGuardarZona');
+        const listaZonas = document.getElementById('listaZonas');
+        
+        let latActual = null;
+        let lonActual = null;
+
+        // Abrir modal
+        if (btnZonas) {
+            btnZonas.addEventListener('click', function() {
+                modalZonas.style.display = 'flex';
+                cargarListaZonas();
+            });
+        }
+
+        // Cerrar modal
+        if (btnCerrarZonas) {
+            btnCerrarZonas.addEventListener('click', () => modalZonas.style.display = 'none');
+        }
+        modalZonas.addEventListener('click', (e) => {
+            if (e.target === modalZonas) modalZonas.style.display = 'none';
+        });
+
+        // Obtener GPS
+        if (btnObtenerGPS) {
+            btnObtenerGPS.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    alert('❌ Tu navegador no soporta geolocalización.');
+                    return;
+                }
+                btnObtenerGPS.textContent = '📡 Buscando satélites...';
+                btnObtenerGPS.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        latActual = pos.coords.latitude;
+                        lonActual = pos.coords.longitude;
+                        btnObtenerGPS.textContent = '✅ Ubicación obtenida';
+                        btnObtenerGPS.style.background = '#059669';
+                        formZona.style.display = 'block';
+                        setTimeout(() => {
+                            btnObtenerGPS.disabled = false;
+                            btnObtenerGPS.textContent = '📍 Obtener mi ubicación actual';
+                            btnObtenerGPS.style.background = '#0ea5e9';
+                        }, 2000);
+                    },
+                    (err) => {
+                        alert('⚠️ No se pudo obtener la ubicación. Asegurate de tener el GPS activado y dar permisos.');
+                        btnObtenerGPS.disabled = false;
+                        btnObtenerGPS.textContent = '📍 Obtener mi ubicación actual';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+        }
+
+        // Guardar Zona
+        if (btnGuardarZona) {
+            btnGuardarZona.addEventListener('click', async function() {
+                const nombre = document.getElementById('inputNombreZona').value.trim();
+                const radio = parseInt(document.getElementById('inputRadioZona').value);
+
+                if (!nombre || !radio || latActual === null) {
+                    alert('⚠️ Completá el nombre y asegurate de haber obtenido la ubicación.');
+                    return;
+                }
+
+                // Determinar el ID del usuario dueño de la zona
+                // Si es Cuidador, la zona es del Usuario vinculado. Si es Usuario, es suyo propio.
+                const targetUserId = localStorage.getItem('rs_usuario_vinculado') || USER_ID;
+
+                try {
+                    // 1. Verificar límite de 10 zonas
+                    const { count, error: countError } = await sb
+                        .from('zonas_seguras')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', targetUserId);
+
+                    if (countError) throw countError;
+                    if (count >= 10) {
+                        alert('⚠️ Límite alcanzado: Ya tenés 10 Zonas Seguras. Eliminá una para agregar otra.');
+                        return;
+                    }
+
+                    // 2. Guardar en Supabase
+                    const { error } = await sb.from('zonas_seguras').insert({
+                        user_id: targetUserId,
+                        nombre: nombre,
+                        lat: latActual,
+                        lon: lonActual,
+                        radio_metros: radio
+                    });
+
+                    if (error) throw error;
+
+                    alert('✅ ¡Zona Segura guardada con éxito!');
+                    document.getElementById('inputNombreZona').value = '';
+                    formZona.style.display = 'none';
+                    latActual = null;
+                    lonActual = null;
+                    cargarListaZonas(); // Refrescar lista
+
+                } catch (e) {
+                    console.error(e);
+                    alert('❌ Error al guardar la zona: ' + e.message);
+                }
+            });
+        }
+
+        // Función para cargar la lista
+        async function cargarListaZonas() {
+            const targetUserId = localStorage.getItem('rs_usuario_vinculado') || USER_ID;
+            listaZonas.innerHTML = '<p style="text-align:center; color:#6b7280;">⏳ Cargando...</p>';
+
+            try {
+                const { data, error } = await sb
+                    .from('zonas_seguras')
+                    .select('id, nombre, radio_metros, creado_en')
+                    .eq('user_id', targetUserId)
+                    .order('creado_en', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    listaZonas.innerHTML = '<p style="text-align:center; color:#6b7280; font-size:14px;">📭 No tenés zonas guardadas aún.</p>';
+                    return;
+                }
+
+                listaZonas.innerHTML = data.map(zona => `
+                    <div style="padding:12px; background:#f9fafb; border-radius:8px; border-left:4px solid #0ea5e9; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:bold; color:#1f2937;">🏡 ${zona.nombre}</div>
+                            <div style="font-size:12px; color:#6b7280;">Radio: ${zona.radio_metros}m</div>
+                        </div>
+                        <button onclick="eliminarZona('${zona.id}')" style="background:#fee2e2; color:#dc2626; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; font-size:12px;">🗑️</button>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+                listaZonas.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ Error al cargar zonas.</p>';
+            }
+        }
+
+        // Función global para eliminar (necesita estar en window para el onclick del HTML)
+        window.eliminarZona = async function(id) {
+            if (!confirm('¿Seguro que querés eliminar esta Zona Segura?')) return;
+            try {
+                const { error } = await sb.from('zonas_seguras').delete().eq('id', id);
+                if (error) throw error;
+                cargarListaZonas();
+            } catch (e) {
+                alert('❌ Error al eliminar.');
+            }
+        };
+    });
     </script>
 </body>
 </html>
