@@ -796,14 +796,28 @@
         } catch (e) { alert("No se pudo activar la linterna. Verificá los permisos de cámara."); }
     }
 
-    function subirUbicacionPeriodica() {
+        function subirUbicacionPeriodica() {
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(async pos => {
             miUbicacion = pos.coords;
             try {
-                await sb.from('ubicaciones_ruta').insert({ user_id: USER_ID, lat: pos.coords.latitude, lon: pos.coords.longitude, precision: pos.coords.accuracy });
-            } catch (e) { console.error('Error insert ubicación:', e); }
-        }, (err) => { console.error('Geo error:', err); }, { enableHighAccuracy: true, timeout: 10000 });
+                // 1. Subir la ubicación a Supabase (como ya lo hacíamos)
+                await sb.from('ubicaciones_ruta').insert({ 
+                    user_id: USER_ID, 
+                    lat: pos.coords.latitude, 
+                    lon: pos.coords.longitude, 
+                    precision: pos.coords.accuracy 
+                });
+                
+                // 2. NUEVO: Verificar si salió/entró de una Zona Segura
+                await verificarZonasSeguras(pos.coords.latitude, pos.coords.longitude);
+                
+            } catch (e) { 
+                console.error('Error insert ubicación:', e); 
+            }
+        }, (err) => { 
+            console.error('Geo error:', err); 
+        }, { enableHighAccuracy: true, timeout: 10000 });
     }
 
     let mensajes = [
