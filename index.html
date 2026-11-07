@@ -1592,7 +1592,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-        // =========================================================================
+       
+// =========================================================================
     // HISTORIAL DE ACTIVIDAD (Solo Cuidador)
     // =========================================================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -1602,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const listaHistorial = document.getElementById('listaHistorial');
 
         if (btnVerHistorial) {
-            // Solo mostrar si es Cuidador
+            // Solo mostrar si es Cuidador (o si querés que el Usuario también lo vea, cambiá 'none' por 'block')
             btnVerHistorial.style.display = ES_USUARIO ? 'none' : 'block';
 
             btnVerHistorial.addEventListener('click', async function() {
@@ -1687,7 +1688,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error(e);
                     listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ Error al cargar historial</p>';
                 }
-            });
+            }); // <-- Cierra el addEventListener
+        } // <-- ¡ESTE ERA EL CORCHETE QUE FALTABA! Cierra el if (btnVerHistorial)
 
         if (btnCerrarHistorial) {
             btnCerrarHistorial.addEventListener('click', function() {
