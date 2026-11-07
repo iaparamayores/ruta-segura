@@ -115,6 +115,7 @@
         <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">🔦 Linterna</button>
         <button id="btnLugares">📌 Mis Lugares guardados</button>
         <button id="btnZonasSeguras" style="background:#e0f2fe; color:#0369a1; font-weight:bold;">🏡 Zonas Seguras (Geocercas)</button>
+        <button id="btnProbarGeofencing" style="background:#fef3c7; color:#92400e; font-weight:bold; border:2px dashed #fbbf24;">🧪 PROBAR Geofencing (temporal)</button>
         <button id="btnContactos">👥 Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
         
@@ -1859,6 +1860,92 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('❌ Error al eliminar.');
             }
         };
+    });
+        // =========================================================================
+    // BOTÓN DE PRUEBA PARA GEOFENCING (con logs detallados)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnProbar = document.getElementById('btnProbarGeofencing');
+        if (!btnProbar) return;
+
+        btnProbar.addEventListener('click', async function() {
+            if (!navigator.geolocation) {
+                alert('❌ Tu navegador no soporta geolocalización.');
+                return;
+            }
+
+            btnProbar.textContent = '📡 Probando...';
+            btnProbar.disabled = true;
+
+            try {
+                // 1. Obtener ubicación actual
+                const pos = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, { 
+                        enableHighAccuracy: true, 
+                        timeout: 10000 
+                    });
+                });
+
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                // 2. Buscar zonas del usuario
+                const { data: zonas, error } = await sb
+                    .from('zonas_seguras')
+                    .select('id, nombre, lat, lon, radio_metros, user_id')
+                    .eq('user_id', USER_ID);
+
+                let mensaje = `📍 Tu ubicación:\nLat: ${lat.toFixed(5)}\nLon: ${lon.toFixed(5)}\n\n`;
+                mensaje += `🆔 Tu USER_ID:\n${USER_ID}\n\n`;
+
+                if (error || !zonas || zonas.length === 0) {
+                    mensaje += `❌ No se encontraron zonas para tu USER_ID.\n\n`;
+                    mensaje += `Posibles causas:\n`;
+                    mensaje += `1. No guardaste zonas con este USER_ID\n`;
+                    mensaje += `2. Las zonas se guardaron con otro USER_ID\n`;
+                    alert(mensaje);
+                    btnProbar.textContent = '🧪 PROBAR Geofencing (temporal)';
+                    btnProbar.disabled = false;
+                    return;
+                }
+
+                mensaje += `✅ Zonas encontradas: ${zonas.length}\n\n`;
+
+                // 3. Calcular distancia a cada zona
+                for (const zona of zonas) {
+                    const distancia = calcularDistancia(lat, lon, zona.lat, zona.lon);
+                    const estaDentro = distancia <= zona.radio_metros;
+                    const estadoClave = `zona_${zona.id}_estado`;
+                    const estadoAnterior = localStorage.getItem(estadoClave) || 'desconocido';
+                    
+                    mensaje += `🏡 Zona: ${zona.nombre}\n`;
+                    mensaje += `   Radio: ${zona.radio_metros}m\n`;
+                    mensaje += `   Distancia: ${Math.round(distancia)}m\n`;
+                    mensaje += `   ¿Dentro?: ${estaDentro ? 'SÍ ✅' : 'NO ❌'}\n`;
+                    mensaje += `   Estado anterior: ${estadoAnterior}\n`;
+                    mensaje += `   Estado actual: ${estaDentro ? 'dentro' : 'fuera'}\n\n`;
+
+                    // 4. Si cambió el estado, registrar
+                    const estadoActual = estaDentro ? 'dentro' : 'fuera';
+                    if (estadoAnterior !== estadoActual) {
+                        const accion = estaDentro ? `Entró a ${zona.nombre}` : `Salió de ${zona.nombre}`;
+                        await registrarActividad(accion);
+                        localStorage.setItem(estadoClave, estadoActual);
+                        mensaje += `   📝 Registrado: "${accion}"\n\n`;
+                    } else {
+                        mensaje += `   ⏸️ Sin cambios (no se registra)\n\n`;
+                    }
+                }
+
+                alert(mensaje);
+
+            } catch (e) {
+                alert('❌ Error: ' + e.message);
+            }
+
+            btnProbar.textContent = '🧪 PROBAR Geofencing (temporal)';
+            btnProbar.disabled = false;
+        });
     });
     </script>
 </body>
