@@ -890,7 +890,14 @@
         setInterval(subirUbicacionPeriodica, 300000); 
         iniciarAlertaEnVivo();
         // 👇 AGREGÁ ESTA LÍNEA AQUÍ 👇
-        registrarActividad('app_abierta');
+        // Registrar "app_abierta" solo una vez por día (para no spamear el historial)
+        const hoy = new Date().toISOString().split('T')[0]; // Ej: "2026-11-07"
+        const ultimaApertura = localStorage.getItem('rs_ultima_apertura_registro');
+        
+        if (ultimaApertura !== hoy) {
+            registrarActividad('app_abierta');
+            localStorage.setItem('rs_ultima_apertura_registro', hoy);
+        }
     });
 
     let deferredPrompt;
