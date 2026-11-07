@@ -1610,19 +1610,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 listaHistorial.innerHTML = '<p style="text-align:center; color:#6b7280;">⏳ Cargando historial...</p>';
 
                 try {
-                    // Buscar el ID del usuario vinculado
-                    let usuarioId = localStorage.getItem('rs_usuario_vinculado');
+                    // Determinar qué usuario consultar
+                    let usuarioId;
                     
-                    if (!usuarioId) {
-                        // Si no hay vinculación por código, buscar por rol
-                        const r1 = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
-                        if (r1.data && r1.data.length > 0) {
-                            usuarioId = r1.data[0].user_id;
+                    if (ES_USUARIO) {
+                        // Si soy Usuario, ver mi propio historial
+                        usuarioId = USER_ID;
+                    } else {
+                        // Si soy Cuidador, ver el historial del Usuario vinculado
+                        usuarioId = localStorage.getItem('rs_usuario_vinculado');
+                        
+                        if (!usuarioId) {
+                            // Si no hay vinculación por código, buscar por rol
+                            const r1 = await sb.from('push_subs').select('user_id').eq('rol', 'usuario').limit(1);
+                            if (r1.data && r1.data.length > 0) {
+                                usuarioId = r1.data[0].user_id;
+                            }
                         }
                     }
 
                     if (!usuarioId) {
-                        listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ No hay usuario vinculado</p>';
+                        listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ No hay usuario para consultar</p>';
                         return;
                     }
 
@@ -1633,7 +1641,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         .order('creado_en', { ascending: false })
                         .limit(50);
 
-                    if (error || !data || data.length === 0) {
+                    if (error) {
+                        console.error('Error Supabase:', error);
+                        listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ Error: ' + error.message + '</p>';
+                        return;
+                    }
+
+                    if (!data || data.length === 0) {
                         listaHistorial.innerHTML = '<p style="text-align:center; color:#6b7280;">📭 Sin actividad registrada aún</p>';
                         return;
                     }
@@ -1645,11 +1659,20 @@ document.addEventListener('DOMContentLoaded', function() {
                         const horaFormateada = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 
                         let icono = '📱';
-                        let texto = 'Abrió la aplicación';
+                        let texto = act.accion;
                         
-                        if (act.accion === 'sos_activado') {
+                        if (act.accion === 'app_abierta') {
+                            icono = '📱';
+                            texto = 'Abrió la aplicación';
+                        } else if (act.accion === 'sos_activado') {
                             icono = '🚨';
                             texto = 'Activó emergencia SOS';
+                        } else if (act.accion.startsWith('Entró a ')) {
+                            icono = '🏡';
+                            texto = act.accion;
+                        } else if (act.accion.startsWith('Salió de ')) {
+                            icono = '🚶';
+                            texto = act.accion;
                         }
 
                         return `
@@ -1665,7 +1688,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     listaHistorial.innerHTML = '<p style="text-align:center; color:#dc2626;">❌ Error al cargar historial</p>';
                 }
             });
-        }
 
         if (btnCerrarHistorial) {
             btnCerrarHistorial.addEventListener('click', function() {
