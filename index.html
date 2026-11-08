@@ -132,7 +132,7 @@
         <hr style="margin:15px 0; border: 1px solid #eee;">
         
         <button id="btnInstalarManual" style="background:#1976d2; color:white; margin-top:10px; display:none;">📲 Instalar aplicación en el celular</button>
-        <button id="btnAvisos" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
+        <button id="btnAvisos" style="display:none; width:100%;padding:14px;font-size:18px;margin:6px 0;background:#6a1b9a;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔔 Activar avisos (suena con el celu cerrado)</button>
         <button id="btnGenerarCodigo" style="width:100%;padding:14px;font-size:18px;margin:6px 0;background:#059669;color:#fff;border:none;border-radius:12px;font-weight:bold;">🔗 Generar código para mi Cuidador</button>
         <button id="btnResetRol" style="width:100%;padding:12px;font-size:16px;margin:10px 0;background:#9ca3af;color:#fff;border:none;border-radius:10px;font-weight:bold;">🔄 Resetear rol (solo pruebas)</button>
         
@@ -246,6 +246,23 @@
             <div id="listaZonas" style="display:flex; flex-direction:column; gap:10px;">
                 <p style="text-align:center; color:#6b7280; font-size:14px;">Cargando...</p>
             </div>
+        </div>
+    </div>
+    <!-- MODAL DE CONFIGURACIÓN OBLIGATORIA (Solo para Cuidadores) -->
+    <div id="modalConfigObligatoria" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:16px; padding:30px; max-width:340px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+            <div style="font-size:50px; margin-bottom:15px;">🛡️🔔</div>
+            <h2 style="color:#1976d2; margin-bottom:15px; font-size:22px;">Configuración de Seguridad</h2>
+            <p style="color:#4b5563; font-size:16px; margin-bottom:20px; line-height:1.5;">
+                Para que <strong>Ruta Segura</strong> pueda avisarte si tu familiar sale de noche o no se mueve en todo el día, <strong>es obligatorio activar las alertas</strong>.
+            </p>
+            <p style="color:#059669; font-size:14px; font-weight:bold; margin-bottom:25px; background:#ecfdf5; padding:10px; border-radius:8px;">
+                ✅ El celular sonará y vibrará ante cualquier emergencia.
+            </p>
+            <button id="btnActivarObligatorio" style="width:100%; padding:16px; font-size:18px; background:#6a1b9a; color:white; border:none; border-radius:12px; font-weight:bold; cursor:pointer; margin-bottom:10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                🔔 ACTIVAR ALERTAS (Obligatorio)
+            </button>
+            <p style="font-size:12px; color:#9ca3af; margin-top:15px;">Solo se te pedirá una vez. Tus datos están seguros.</p>
         </div>
     </div>
     
@@ -1216,6 +1233,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (ins.error) throw ins.error;
             
             alert('✅ AVISOS ACTIVADOS correctamente\n🎁 Tenés 14 días de prueba Premium.');
+              localStorage.setItem('rs_push_activado', 'true');
             
             btn.style.display = 'none';
             
@@ -2080,6 +2098,39 @@ document.addEventListener('DOMContentLoaded', function() {
             btnProbar.textContent = '🧪 PROBAR Geofencing (temporal)';
             btnProbar.disabled = false;
         });
+    });
+        // =========================================================================
+    // CONFIGURACIÓN OBLIGATORIA DE NOTIFICACIONES (SOLO CUIDADORES)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalConfig = document.getElementById('modalConfigObligatoria');
+        const btnActivarObligatorio = document.getElementById('btnActivarObligatorio');
+        const btnAvisosOculto = document.getElementById('btnAvisos'); // El botón original que ahora está oculto
+
+        // 1. Si es Cuidador y NO activó los avisos, mostrar el modal a pantalla completa
+        if (!ES_USUARIO && !localStorage.getItem('rs_push_activado')) {
+            if (modalConfig) modalConfig.style.display = 'flex';
+        }
+
+        // 2. Cuando toca el botón del modal, disparamos el botón oculto de Ajustes
+        if (btnActivarObligatorio && btnAvisosOculto) {
+            btnActivarObligatorio.addEventListener('click', function() {
+                btnActivarObligatorio.textContent = '⏳ Configurando alertas...';
+                btnActivarObligatorio.disabled = true;
+                
+                // Simulamos el click en el botón original que ya tiene toda la lógica de Push
+                btnAvisosOculto.click(); 
+            });
+        }
+
+        // 3. Escuchamos cuando el proceso de Push termina con éxito
+        // (Modificamos ligeramente el flujo original para detectar el éxito)
+        const observer = setInterval(() => {
+            if (localStorage.getItem('rs_push_activado') === 'true') {
+                clearInterval(observer);
+                if (modalConfig) modalConfig.style.display = 'none';
+            }
+        }, 1000);
     });
     </script>
 </body>
