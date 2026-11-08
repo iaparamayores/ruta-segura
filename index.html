@@ -333,8 +333,8 @@
         return R * c; // Distancia en metros
     }
         
-    // =========================================================================
-    // VERIFICAR SI EL USUARIO SALIÓ/ENTRÓ DE UNA ZONA SEGURA (CON ALERTAS INTELIGENTES)
+// =========================================================================
+    // VERIFICAR SI EL USUARIO SALIÓ/ENTRÓ DE UNA ZONA SEGURA (CON ALERTAS INTELIGENTES + PUSH)
     // =========================================================================
     async function verificarZonasSeguras(lat, lon) {
         try {
@@ -360,6 +360,7 @@
                 if (estadoAnterior !== estadoActual) {
                     let accion = '';
                     const horaActual = new Date().getHours();
+                    let esAlertaCritica = false;
                     
                     if (estaDentro) {
                         accion = `Entró a ${zona.nombre}`;
@@ -367,14 +368,36 @@
                         // SALIDA: verificar si es nocturna (22:00 - 06:00)
                         if (horaActual >= 22 || horaActual < 6) {
                             accion = `🚨 SALIDA NOCTURNA de ${zona.nombre}`;
+                            esAlertaCritica = true;
                             console.warn('⚠️ Alerta nocturna detectada:', horaActual);
                         } else {
                             accion = `Salió de ${zona.nombre}`;
                         }
                     }
                     
+                    // Registrar en el historial
                     await registrarActividad(accion);
                     localStorage.setItem(claveEstado, estadoActual);
+                    
+                    // 4. Si es alerta crítica, enviar Push Notification al Cuidador
+                    if (esAlertaCritica) {
+                        try {
+                            await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ 
+                                    from: USER_ID, 
+                                    lat: lat, 
+                                    lon: lon,
+                                    tipo: 'alerta_nocturna',
+                                    mensaje: accion
+                                })
+                            });
+                            console.log('✅ Push de alerta nocturna enviado');
+                        } catch (e) {
+                            console.error('❌ Error enviando push nocturno:', e);
+                        }
+                    }
                     
                     console.log(`🏡 ${accion} (distancia: ${Math.round(distancia)}m, hora: ${horaActual})`);
                 }
@@ -383,9 +406,8 @@
             console.error('Error verificando zonas:', e);
         }
     }
-
         // =========================================================================
-    // DETECTAR INACTIVIDAD PROLONGADA DURANTE EL DÍA (08:00 - 20:00)
+    // DETECTAR INACTIVIDAD PROLONGADA DURANTE EL DÍA (08:00 - 20:00) CON PUSH
     // =========================================================================
     async function detectarInactividadDiurna() {
         try {
@@ -422,8 +444,28 @@
 
             // Si pasaron más de 4 horas sin actividad durante el día
             if (horasSinActividad >= 4) {
-                await registrarActividad('⚠️ INACTIVIDAD DIURNA DETECTADA');
+                const mensaje = '⚠️ INACTIVIDAD DIURNA DETECTADA';
+                await registrarActividad(mensaje);
                 localStorage.setItem(claveUltimaAlerta, Date.now().toString());
+                
+                // Enviar Push Notification al Cuidador
+                try {
+                    await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            from: USER_ID, 
+                            lat: null, 
+                            lon: null,
+                            tipo: 'alerta_inactividad',
+                            mensaje: mensaje
+                        })
+                    });
+                    console.log('✅ Push de inactividad enviado');
+                } catch (e) {
+                    console.error('❌ Error enviando push de inactividad:', e);
+                }
+                
                 console.warn('⚠️ Inactividad diurna detectada:', horasSinActividad, 'horas');
             }
 
