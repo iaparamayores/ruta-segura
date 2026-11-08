@@ -100,7 +100,10 @@
             <button id="btnCompartir" class="boton-accion-cuadrado"><span class="icono">&#128205;</span><span>Compartir</span></button>
             <button id="btnLlegueBien" class="boton-accion-cuadrado"><span class="icono">&#127968;</span><span>Llegué bien</span></button>
             <button id="botonVoz" class="boton-accion-cuadrado"><span class="icono">&#127908;</span><span>Hablar</span></button>
-            <button id="btnRutaRapida" class="boton-accion-cuadrado"><span class="icono">&#129517;</span><span>Ir a...</span></button>
+         <button id="btnCirculoVital" class="boton-accion-cuadrado" style="background:#059669;">
+    <span class="icono">&#127793;</span>
+    <span>Círculo Vital</span>
+</button>
         </div>
 
         <div id="espacioConsejos">💡 Consejo: Mantené presionado el botón de emergencia por 2 segundos.</div>
@@ -2132,6 +2135,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 1000);
     });
+        // Botón Círculo Vital (vincula a la otra app)
+    const btnCirculoVital = document.getElementById('btnCirculoVital');
+    if (btnCirculoVital) {
+        btnCirculoVital.addEventListener('click', function() {
+            // Abrir Círculo Vital en nueva pestaña
+            window.open('https://iaparamayores.github.io/circulo-vital/', '_blank');
+        });
+    }
     </script>
 </body>
 </html>
