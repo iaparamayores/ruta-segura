@@ -2125,24 +2125,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnAvisosOculto.click(); 
             });
         }
-
-        // 3. Escuchamos cuando el proceso de Push termina con éxito
-        // (Modificamos ligeramente el flujo original para detectar el éxito)
+// 3. Escuchamos cuando el proceso de Push termina con éxito
         const observer = setInterval(() => {
             if (localStorage.getItem('rs_push_activado') === 'true') {
                 clearInterval(observer);
                 if (modalConfig) modalConfig.style.display = 'none';
             }
         }, 1000);
+    }); // <-- Este cierra el DOMContentLoaded de Configuración Obligatoria
+
+    // =========================================================================
+    // BOTÓN CÍRCULO VITAL (Vincula a la otra app)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnCirculoVital = document.getElementById('btnCirculoVital');
+        if (btnCirculoVital) {
+            btnCirculoVital.addEventListener('click', function() {
+                window.open('https://iaparamayores.github.io/circulo-vital/', '_blank');
+            });
+        }
     });
-        // Botón Círculo Vital (vincula a la otra app)
-    const btnCirculoVital = document.getElementById('btnCirculoVital');
-    if (btnCirculoVital) {
-        btnCirculoVital.addEventListener('click', function() {
-            // Abrir Círculo Vital en nueva pestaña
-            window.open('https://iaparamayores.github.io/circulo-vital/', '_blank');
-        });
-    }
+    </script>
+</body>
+</html>
     </script>
 </body>
 </html>
