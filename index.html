@@ -860,7 +860,7 @@
         navigator.geolocation.getCurrentPosition(async pos => {
             miUbicacion = pos.coords;
             try {
-                // 1. Subir la ubicación a Supabase (como ya lo hacíamos)
+                // 1. Subir la ubicación a Supabase
                 await sb.from('ubicaciones_ruta').insert({ 
                     user_id: USER_ID, 
                     lat: pos.coords.latitude, 
@@ -868,8 +868,11 @@
                     precision: pos.coords.accuracy 
                 });
                 
-                // 2. NUEVO: Verificar si salió/entró de una Zona Segura
+                // 2. Verificar Zonas Seguras (geofencing)
                 await verificarZonasSeguras(pos.coords.latitude, pos.coords.longitude);
+                
+                // 3. NUEVO: Detectar inactividad diurna
+                await detectarInactividadDiurna();
                 
             } catch (e) { 
                 console.error('Error insert ubicación:', e); 
