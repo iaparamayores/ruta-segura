@@ -383,6 +383,54 @@
             console.error('Error verificando zonas:', e);
         }
     }
+
+        // =========================================================================
+    // DETECTAR INACTIVIDAD PROLONGADA DURANTE EL DÍA (08:00 - 20:00)
+    // =========================================================================
+    async function detectarInactividadDiurna() {
+        try {
+            const horaActual = new Date().getHours();
+            
+            // Solo verificar entre 08:00 y 20:00 (horario diurno)
+            if (horaActual < 8 || horaActual >= 20) {
+                return; // No verificar de noche (está durmiendo)
+            }
+
+            // Clave para evitar spamear: solo una alerta cada 4 horas
+            const claveUltimaAlerta = 'ultima_alerta_inactividad';
+            const ultimaAlerta = localStorage.getItem(claveUltimaAlerta);
+            
+            if (ultimaAlerta) {
+                const horasDesdeUltimaAlerta = (Date.now() - parseInt(ultimaAlerta)) / 3600000;
+                if (horasDesdeUltimaAlerta < 4) {
+                    return; // Ya alertamos hace menos de 4 horas
+                }
+            }
+
+            // Buscar la última actividad del usuario
+            const { data: ultimaActividad, error } = await sb
+                .from('actividad_ruta')
+                .select('creado_en')
+                .eq('user_id', USER_ID)
+                .order('creado_en', { ascending: false })
+                .limit(1);
+
+            if (error || !ultimaActividad || ultimaActividad.length === 0) return;
+
+            const fechaUltimaActividad = new Date(ultimaActividad[0].creado_en);
+            const horasSinActividad = (Date.now() - fechaUltimaActividad.getTime()) / 3600000;
+
+            // Si pasaron más de 4 horas sin actividad durante el día
+            if (horasSinActividad >= 4) {
+                await registrarActividad('⚠️ INACTIVIDAD DIURNA DETECTADA');
+                localStorage.setItem(claveUltimaAlerta, Date.now().toString());
+                console.warn('⚠️ Inactividad diurna detectada:', horasSinActividad, 'horas');
+            }
+
+        } catch (e) {
+            console.error('Error detectando inactividad:', e);
+        }
+    }
     // =========================================================================
     // 2. REFERENCIAS AL DOM
     // =========================================================================
