@@ -118,6 +118,7 @@
         <button id="btnLinterna" style="background:#fff9c4; color:#f57f17;">🔦 Linterna</button>
         <button id="btnLugares">📌 Mis Lugares guardados</button>
         <button id="btnZonasSeguras" style="background:#e0f2fe; color:#0369a1; font-weight:bold;">🏡 Zonas Seguras (Geocercas)</button>
+        <button id="btnTestNotificacion" style="background:#fef3c7; color:#92400e; font-weight:bold; border:2px dashed #fbbf24;"> Enviar notificación de prueba</button>
         <button id="btnProbarGeofencing" style="background:#fef3c7; color:#92400e; font-weight:bold; border:2px dashed #fbbf24;">🧪 PROBAR Geofencing (temporal)</button>
         <button id="btnContactos">👥 Contactos de confianza</button>
         <hr style="margin:15px 0; border: 1px solid #eee;">
@@ -2136,6 +2137,51 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.open('https://iaparamayores.github.io/circulo-vital/', '_blank');
             });
         }
+    });
+        // =========================================================================
+    // BOTÓN DE PRUEBA DE NOTIFICACIONES PUSH
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnTest = document.getElementById('btnTestNotificacion');
+        if (!btnTest) return;
+
+        // Solo mostrar si es Cuidador
+        if (ES_USUARIO) {
+            btnTest.style.display = 'none';
+            return;
+        }
+
+        btnTest.addEventListener('click', async function() {
+            btnTest.textContent = '📡 Enviando...';
+            btnTest.disabled = true;
+
+            try {
+                // Enviar notificación de prueba
+                await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        from: USER_ID, 
+                        lat: null, 
+                        lon: null,
+                        tipo: 'test',
+                        mensaje: ' PRUEBA: Esta es una notificación de prueba de Ruta Segura'
+                    })
+                });
+
+                alert('✅ ¡Notificación de prueba enviada!\n\nRevisá el celular del Cuidador para ver si llegó.');
+                btnTest.textContent = '✅ Enviada';
+                setTimeout(() => {
+                    btnTest.textContent = '🧪 Enviar notificación de prueba';
+                    btnTest.disabled = false;
+                }, 3000);
+
+            } catch (e) {
+                alert('❌ Error al enviar: ' + e.message);
+                btnTest.textContent = '🧪 Enviar notificación de prueba';
+                btnTest.disabled = false;
+            }
+        });
     });
     </script>
 </body>
