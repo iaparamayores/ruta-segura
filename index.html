@@ -332,8 +332,9 @@
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c; // Distancia en metros
     }
-        // =========================================================================
-    // VERIFICAR SI EL USUARIO SALIÓ/ENTRÓ DE UNA ZONA SEGURA
+        
+    // =========================================================================
+    // VERIFICAR SI EL USUARIO SALIÓ/ENTRÓ DE UNA ZONA SEGURA (CON ALERTAS INTELIGENTES)
     // =========================================================================
     async function verificarZonasSeguras(lat, lon) {
         try {
@@ -350,23 +351,32 @@
                 const distancia = calcularDistancia(lat, lon, zona.lat, zona.lon);
                 const estaDentro = distancia <= zona.radio_metros;
                 
-                // Clave única para evitar spamear (ej: "zona_123_dentro")
+                // Clave única para evitar spamear
                 const claveEstado = `zona_${zona.id}_estado`;
-                const estadoAnterior = localStorage.getItem(claveEstado); // "dentro" o "fuera"
+                const estadoAnterior = localStorage.getItem(claveEstado);
                 const estadoActual = estaDentro ? 'dentro' : 'fuera';
 
                 // 3. Si cambió el estado, registrar la actividad
                 if (estadoAnterior !== estadoActual) {
-                    const accion = estaDentro 
-                        ? `Entró a ${zona.nombre}` 
-                        : `Salió de ${zona.nombre}`;
+                    let accion = '';
+                    const horaActual = new Date().getHours();
+                    
+                    if (estaDentro) {
+                        accion = `Entró a ${zona.nombre}`;
+                    } else {
+                        // SALIDA: verificar si es nocturna (22:00 - 06:00)
+                        if (horaActual >= 22 || horaActual < 6) {
+                            accion = `🚨 SALIDA NOCTURNA de ${zona.nombre}`;
+                            console.warn('⚠️ Alerta nocturna detectada:', horaActual);
+                        } else {
+                            accion = `Salió de ${zona.nombre}`;
+                        }
+                    }
                     
                     await registrarActividad(accion);
-                    
-                    // Guardar el nuevo estado
                     localStorage.setItem(claveEstado, estadoActual);
                     
-                    console.log(`🏡 ${accion} (distancia: ${Math.round(distancia)}m)`);
+                    console.log(`🏡 ${accion} (distancia: ${Math.round(distancia)}m, hora: ${horaActual})`);
                 }
             }
         } catch (e) {
