@@ -506,7 +506,6 @@
     const panelAjustes = document.getElementById('panelAjustes');
     const cerrarAjustes = document.getElementById('cerrarAjustes');
     const btnRuta = document.getElementById('btnRuta');
-    const btnRutaRapida = document.getElementById('btnRutaRapida');
     const btnSalud = document.getElementById('btnSalud');
     const btnPolicia = document.getElementById('btnPolicia');
     const btnHospital = document.getElementById('btnHospital');
@@ -993,13 +992,6 @@
             window.open('https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(destino) + '&travelmode=walking', '_blank');
             panelAjustes.style.display = 'none'; inputDestino.style.display = 'none'; btnBuscarDestino.style.display = 'none'; inputDestino.value = '';
         } else { alert("Escribí un destino primero"); }
-    });
-
-    btnRutaRapida.addEventListener('click', () => {
-        panelAjustes.style.display = 'block'; inputDestino.style.display = 'block'; btnBuscarDestino.style.display = 'block'; inputDestino.focus();
-        inputDestino.placeholder = "Ej: Hospital Municipal, Plaza San Martín...";
-        cajaMensaje.textContent = "✏️ Escribí el destino y tocá 'Buscar ruta' o presioná Enter";
-        inputDestino.onkeypress = function(e) { if(e.key === 'Enter') btnBuscarDestino.click(); };
     });
 
     botonVoz.addEventListener('click', iniciarVoz);
