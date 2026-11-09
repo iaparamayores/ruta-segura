@@ -2148,28 +2148,23 @@ document.addEventListener('DOMContentLoaded', function() {
             btnTest.disabled = true;
 
             try {
-                if (Notification.permission !== 'granted') {
-                    const perm = await Notification.requestPermission();
-                    if (perm !== 'granted') {
-                        alert('❌ Activá permisos de notificación en Chrome');
-                        btnTest.textContent = '🧪 Enviar notificación de prueba';
-                        btnTest.disabled = false;
-                        return;
-                    }
+                // Verificar que haya Service Worker activo
+                if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
+                    alert('❌ No hay Service Worker activo. Recargá la página.');
+                    btnTest.textContent = '🧪 Enviar notificación de prueba';
+                    btnTest.disabled = false;
+                    return;
                 }
 
-                const notif = new Notification('🧪 Prueba de Ruta Segura', {
-                    body: '✅ Las notificaciones funcionan correctamente',
-                    icon: './icon-192.png',
-                    badge: './icon-192.png',
-                    tag: 'test',
-                    requireInteraction: true,
-                    vibrate: [500, 200, 500]
+                // Enviar mensaje al Service Worker para que muestre la notificación
+                navigator.serviceWorker.controller.postMessage({
+                    tipo: 'test-notification',
+                    titulo: '🧪 Prueba de Ruta Segura',
+                    cuerpo: '✅ Las notificaciones funcionan correctamente',
+                    tag: 'test'
                 });
 
-                notif.onclick = () => { window.focus(); notif.close(); };
-
-                alert('✅ Notificación enviada. Revisá la barra de notificaciones.');
+                alert('✅ Notificación enviada al Service Worker.\n\nRevisá la barra de notificaciones.');
                 btnTest.textContent = '✅ Enviada';
                 setTimeout(() => {
                     btnTest.textContent = '🧪 Enviar notificación de prueba';
