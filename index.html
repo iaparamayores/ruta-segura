@@ -996,7 +996,7 @@
         } catch (e) { alert("No se pudo activar la linterna. Verificá los permisos de cámara."); }
     }
 
-        function subirUbicacionPeriodica() {
+    function subirUbicacionPeriodica() {
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(async pos => {
             miUbicacion = pos.coords;
@@ -1012,8 +1012,11 @@
                 // 2. Verificar Zonas Seguras (geofencing)
                 await verificarZonasSeguras(pos.coords.latitude, pos.coords.longitude);
                 
-                // 3. NUEVO: Detectar inactividad diurna
+                // 3. Detectar inactividad diurna
                 await detectarInactividadDiurna();
+
+                // 4. NUEVO: Verificar si es hora del Resumen de las 20hs
+                await verificarYEnviarResumen20hs();
                 
             } catch (e) { 
                 console.error('Error insert ubicación:', e); 
