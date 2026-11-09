@@ -494,6 +494,85 @@
             console.error('Error detectando inactividad:', e);
         }
     }
+        // =========================================================================
+    // RESUMEN DIARIO AUTOMÁTICO (Se dispara a las 20:00 hs)
+    // =========================================================================
+    async function verificarYEnviarResumen20hs() {
+        try {
+            const ahora = new Date();
+            const horaActual = ahora.getHours();
+            const fechaHoy = ahora.toISOString().split('T')[0]; // Ej: "2023-10-27"
+            const claveEnvio = `resumen_20hs_enviado_${fechaHoy}`;
+
+            // 1. Verificar si ya se envió hoy (para no spamear)
+            if (localStorage.getItem(claveEnvio) === 'true') {
+                return; 
+            }
+
+            // 2. Verificar si es la hora (20:00 o más tarde)
+            if (horaActual >= 20) {
+                console.log("🌟 Hora del resumen diario. Generando...");
+                
+                // Consultamos movimientos de hoy
+                const { data: movimientos } = await sb.from('actividad_ruta')
+                    .select('accion')
+                    .eq('user_id', USER_ID)
+                    .gte('creado_en', fechaHoy + 'T00:00:00')
+                    .order('creado_en', { ascending: false })
+                    .limit(3);
+
+                // Consultamos medicación de hoy (de Círculo Vital)
+                let tomasHechas = 0;
+                let totalTomas = 0;
+                try {
+                    const { data: tomas } = await sb.from('tomas_circulo')
+                        .select('tomo')
+                        .eq('user_id', USER_ID)
+                        .gte('creado_en', fechaHoy + 'T00:00:00');
+                    
+                    if (tomas) {
+                        totalTomas = tomas.length;
+                        tomasHechas = tomas.filter(t => t.tomo === true).length;
+                    }
+                } catch (e) {
+                    console.log("No se pudo leer tomas_circulo, continuando sin ella");
+                }
+
+                // Armamos el mensaje inteligente
+                let estadoMeds = "su medicación";
+                if (totalTomas > 0) {
+                    estadoMeds = (tomasHechas === totalTomas) ? "toda la medicación ✅" : "parte de la medicación ⚠️";
+                }
+                
+                let ultimoMovimiento = "en casa";
+                if (movimientos && movimientos.length > 0) {
+                    if (movimientos[0].accion.includes('Salió')) ultimoMovimiento = "fuera de casa";
+                    if (movimientos[0].accion.includes('Entró')) ultimoMovimiento = "de regreso en casa";
+                }
+
+                const mensajePush = `✅ Resumen del día: Está ${ultimoMovimiento} y tomó ${estadoMeds}. ¡Todo en orden!`;
+
+                // 3. Enviar Push al Cuidador
+                await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        from: USER_ID, 
+                        lat: null, 
+                        lon: null,
+                        tipo: 'resumen_diario',
+                        mensaje: mensajePush
+                    })
+                });
+
+                // 4. Marcar como enviado hoy
+                localStorage.setItem(claveEnvio, 'true');
+                console.log("✅ Resumen diario enviado al cuidador");
+            }
+        } catch (e) {
+            console.error('Error en resumen automático:', e);
+        }
+    }
     // =========================================================================
     // 2. REFERENCIAS AL DOM
     // =========================================================================
