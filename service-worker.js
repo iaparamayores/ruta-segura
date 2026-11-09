@@ -117,3 +117,21 @@ self.addEventListener('notificationclick', (e) => {
     await clients.openWindow(url);
   })());
 });
+// =========================================================================
+// ESCUCHAR MENSAJES DESDE LA APP (Para notificaciones de prueba locales)
+// =========================================================================
+self.addEventListener('message', (e) => {
+  const data = e.data;
+  
+  // Si el mensaje es de tipo prueba, mostramos la notificación
+  if (data && data.tipo === 'test-notification') {
+    self.registration.showNotification(data.titulo || '🧪 Prueba', {
+      body: data.cuerpo || 'Notificación de prueba local',
+      icon: data.icon || './icon-192.png',
+      badge: data.badge || './icon-192.png',
+      tag: data.tag || 'test-local',
+      requireInteraction: true,
+      vibrate: [500, 200, 500]
+    });
+  }
+});
