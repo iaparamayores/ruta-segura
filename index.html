@@ -2138,7 +2138,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-        document.addEventListener('DOMContentLoaded', function() {
+        // =========================================================================
+    // BOTÓN DE PRUEBA DE NOTIFICACIONES (VÍA SERVICE WORKER LOCAL)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
         const btnTest = document.getElementById('btnTestNotificacion');
         if (!btnTest) return;
         if (ES_USUARIO) { btnTest.style.display = 'none'; return; }
@@ -2148,24 +2151,25 @@ document.addEventListener('DOMContentLoaded', function() {
             btnTest.disabled = true;
 
             try {
-                // Verificar que haya Service Worker activo
+                // 1. Verificar que el Service Worker esté activo
                 if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) {
-                    alert('❌ No hay Service Worker activo. Recargá la página.');
+                    alert('❌ No hay Service Worker activo.\n\nPor favor, recargá la página (F5 o deslizar hacia abajo) y volvé a intentar.');
                     btnTest.textContent = '🧪 Enviar notificación de prueba';
                     btnTest.disabled = false;
                     return;
                 }
 
-                // Enviar mensaje al Service Worker para que muestre la notificación
+                // 2. Enviar el mensaje al Service Worker
                 navigator.serviceWorker.controller.postMessage({
                     tipo: 'test-notification',
                     titulo: '🧪 Prueba de Ruta Segura',
-                    cuerpo: '✅ Las notificaciones funcionan correctamente',
-                    tag: 'test'
+                    cuerpo: '✅ Las notificaciones funcionan correctamente desde el Service Worker',
+                    tag: 'test-local'
                 });
 
-                alert('✅ Notificación enviada al Service Worker.\n\nRevisá la barra de notificaciones.');
+                alert('✅ Orden enviada al Service Worker.\n\nRevisá la barra de notificaciones de tu celular.');
                 btnTest.textContent = '✅ Enviada';
+                
                 setTimeout(() => {
                     btnTest.textContent = '🧪 Enviar notificación de prueba';
                     btnTest.disabled = false;
