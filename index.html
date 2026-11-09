@@ -2138,38 +2138,38 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
-        // =========================================================================
-    // BOTÓN DE PRUEBA DE NOTIFICACIONES PUSH
-    // =========================================================================
-    document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
         const btnTest = document.getElementById('btnTestNotificacion');
         if (!btnTest) return;
-
-        // Solo mostrar si es Cuidador
-        if (ES_USUARIO) {
-            btnTest.style.display = 'none';
-            return;
-        }
+        if (ES_USUARIO) { btnTest.style.display = 'none'; return; }
 
         btnTest.addEventListener('click', async function() {
             btnTest.textContent = '📡 Enviando...';
             btnTest.disabled = true;
 
             try {
-                // Enviar notificación de prueba
-                await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        from: USER_ID, 
-                        lat: null, 
-                        lon: null,
-                        tipo: 'test',
-                        mensaje: ' PRUEBA: Esta es una notificación de prueba de Ruta Segura'
-                    })
+                if (Notification.permission !== 'granted') {
+                    const perm = await Notification.requestPermission();
+                    if (perm !== 'granted') {
+                        alert('❌ Activá permisos de notificación en Chrome');
+                        btnTest.textContent = '🧪 Enviar notificación de prueba';
+                        btnTest.disabled = false;
+                        return;
+                    }
+                }
+
+                const notif = new Notification('🧪 Prueba de Ruta Segura', {
+                    body: '✅ Las notificaciones funcionan correctamente',
+                    icon: './icon-192.png',
+                    badge: './icon-192.png',
+                    tag: 'test',
+                    requireInteraction: true,
+                    vibrate: [500, 200, 500]
                 });
 
-                alert('✅ ¡Notificación de prueba enviada!\n\nRevisá el celular del Cuidador para ver si llegó.');
+                notif.onclick = () => { window.focus(); notif.close(); };
+
+                alert('✅ Notificación enviada. Revisá la barra de notificaciones.');
                 btnTest.textContent = '✅ Enviada';
                 setTimeout(() => {
                     btnTest.textContent = '🧪 Enviar notificación de prueba';
@@ -2177,7 +2177,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 3000);
 
             } catch (e) {
-                alert('❌ Error al enviar: ' + e.message);
+                alert('❌ Error: ' + e.message);
                 btnTest.textContent = '🧪 Enviar notificación de prueba';
                 btnTest.disabled = false;
             }
