@@ -2359,51 +2359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🔍 TEST: El script se cargó correctamente');
     console.log('🔍 ES_USUARIO:', ES_USUARIO);
     console.log('🔍 Permiso notificación:', Notification.permission);
-        // =========================================================================
-    // BOTÓN REACTIVAR NOTIFICACIONES (Para Cuidadores)
-    // =========================================================================
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnReactivar = document.getElementById('btnReactivarPush');
-        const msgReactivar = document.getElementById('msgReactivar');
         
-        if (!btnReactivar) return;
-        
-        // Solo mostrar si es Cuidador
-        if (ES_USUARIO) {
-            btnReactivar.style.display = 'none';
-            return;
-        }
-
-        btnReactivar.addEventListener('click', async function() {
-            btnReactivar.disabled = true;
-            btnReactivar.textContent = '⏳ Activando...';
-            msgReactivar.textContent = '';
-
-            try {
-                // 1. Verificar permisos
-                if (!('Notification' in window)) {
-                    msgReactivar.textContent = '❌ Tu navegador no soporta notificaciones';
-                    msgReactivar.style.color = '#dc2626';
-                    btnReactivar.disabled = false;
-                    btnReactivar.textContent = '🔔 Reactivar Notificaciones Push';
-                    return;
-                }
-
-                const perm = await Notification.requestPermission();
-                if (perm !== 'granted') {
-                    msgReactivar.textContent = '❌ Permiso denegado. Activá notificaciones en Ajustes de Chrome';
-                    msgReactivar.style.color = '#dc2626';
-                    btnReactivar.disabled = false;
-                    btnReactivar.textContent = '🔔 Reactivar Notificaciones Push';
-                    return;
-                }
-
-                // 2. Obtener clave VAPID
-                msgReactivar.textContent = 'Obteniendo clave...';
-                const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
-                const j = await r.json();
-                if (!j.publicKey) {
-                    throw new Error('No se pudo obtener la clave VAPID');
 // =========================================================================
     // BOTÓN REACTIVAR NOTIFICACIONES (Para Cuidadores) - VERSIÓN AUTOCONTENIDA
     // =========================================================================
