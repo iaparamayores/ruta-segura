@@ -2404,6 +2404,63 @@ document.addEventListener('DOMContentLoaded', function() {
                 const j = await r.json();
                 if (!j.publicKey) {
                     throw new Error('No se pudo obtener la clave VAPID');
+// =========================================================================
+    // BOTÓN REACTIVAR NOTIFICACIONES (Para Cuidadores) - VERSIÓN AUTOCONTENIDA
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnReactivar = document.getElementById('btnReactivarPush');
+        const msgReactivar = document.getElementById('msgReactivar');
+        
+        if (!btnReactivar) return;
+        
+        // Solo mostrar si es Cuidador
+        if (ES_USUARIO) {
+            btnReactivar.style.display = 'none';
+            return;
+        }
+
+        // Función auxiliar para convertir base64 a Uint8Array
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        btnReactivar.addEventListener('click', async function() {
+            btnReactivar.disabled = true;
+            btnReactivar.textContent = '⏳ Activando...';
+            msgReactivar.textContent = '';
+
+            try {
+                // 1. Verificar permisos
+                if (!('Notification' in window)) {
+                    msgReactivar.textContent = '❌ Tu navegador no soporta notificaciones';
+                    msgReactivar.style.color = '#dc2626';
+                    btnReactivar.disabled = false;
+                    btnReactivar.textContent = '🔔 Reactivar Notificaciones Push';
+                    return;
+                }
+
+                const perm = await Notification.requestPermission();
+                if (perm !== 'granted') {
+                    msgReactivar.textContent = '❌ Permiso denegado. Activá notificaciones en Ajustes de Chrome';
+                    msgReactivar.style.color = '#dc2626';
+                    btnReactivar.disabled = false;
+                    btnReactivar.textContent = '🔔 Reactivar Notificaciones Push';
+                    return;
+                }
+
+                // 2. Obtener clave VAPID
+                msgReactivar.textContent = 'Obteniendo clave...';
+                const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
+                const j = await r.json();
+                if (!j.publicKey) {
+                    throw new Error('No se pudo obtener la clave VAPID');
                 }
 
                 // 3. Desuscribir la vieja
