@@ -2264,6 +2264,74 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+        // =========================================================================
+    // RENOVACIÓN AUTOMÁTICA DE PUSH (Se ejecuta al abrir la app si es Cuidador)
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Solo ejecutar si es Cuidador
+        if (ES_USUARIO) return;
+
+        // Verificar que tenga permisos de notificación
+        if (!('Notification' in window) || Notification.permission !== 'granted') {
+            console.log('🔔 Cuidador sin permisos de notificación. No se renueva push.');
+            return;
+        }
+
+        try {
+            console.log('🔄 Renovando suscripción push automáticamente...');
+
+            // 1. Obtener clave VAPID
+            const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
+            const j = await r.json();
+            if (!j.publicKey) {
+                console.error('❌ No se pudo obtener la clave VAPID');
+                return;
+            }
+
+            // 2. Desuscribir la vieja (si existe)
+            const reg = await navigator.serviceWorker.ready;
+            const vieja = await reg.pushManager.getSubscription();
+            if (vieja) {
+                await vieja.unsubscribe();
+                console.log('✅ Desuscripción anterior eliminada');
+            }
+
+            // 3. Crear nueva suscripción
+            const sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(j.publicKey)
+            });
+
+            const json = sub.toJSON();
+
+            // 4. Borrar la fila vieja en Supabase
+            await sb.from('push_subs').delete().eq('user_id', USER_ID);
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // 5. Insertar la nueva con endpoint fresco
+            const ins = await sb.from('push_subs').insert({
+                endpoint: json.endpoint,
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+                user_id: USER_ID,
+                rol: 'cuidador',
+                premium_fin: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0]
+            });
+
+            if (ins.error) {
+                console.error('❌ Error al guardar nueva suscripción:', ins.error);
+                return;
+            }
+
+            // 6. Actualizar flag
+            localStorage.setItem('rs_push_activado', 'true');
+
+            console.log('✅ Suscripción push renovada automáticamente. Nuevo endpoint:', json.endpoint.substring(0, 50));
+
+        } catch (e) {
+            console.error('❌ Error en renovación automática de push:', e);
+        }
+    });
     </script>
 </body>
 </html>
