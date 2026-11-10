@@ -2265,11 +2265,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
         // =========================================================================
-    // RENOVACIÓN AUTOMÁTICA DE PUSH (Se ejecuta al abrir la app si es Cuidador)
+    // RENOVACIÓN AUTOMÁTICA DE PUSH (Autocontenida - no depende de otras funciones)
     // =========================================================================
     document.addEventListener('DOMContentLoaded', async function() {
         // Solo ejecutar si es Cuidador
-        if (ES_USUARIO) return;
+        if (ES_USUARIO) {
+            console.log('🔔 Es Usuario, no se renueva push');
+            return;
+        }
 
         // Verificar que tenga permisos de notificación
         if (!('Notification' in window) || Notification.permission !== 'granted') {
@@ -2278,15 +2281,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            console.log('🔄 Renovando suscripción push automáticamente...');
+            console.log('🔄 Iniciando renovación automática de push...');
+
+            // Función auxiliar para convertir base64 a Uint8Array (autocontenida)
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+                const rawData = atob(base64);
+                const outputArray = new Uint8Array(rawData.length);
+                for (let i = 0; i < rawData.length; ++i) {
+                    outputArray[i] = rawData.charCodeAt(i);
+                }
+                return outputArray;
+            }
 
             // 1. Obtener clave VAPID
             const r = await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-init');
             const j = await r.json();
+            
             if (!j.publicKey) {
                 console.error('❌ No se pudo obtener la clave VAPID');
                 return;
             }
+            
+            console.log('✅ Clave VAPID obtenida');
 
             // 2. Desuscribir la vieja (si existe)
             const reg = await navigator.serviceWorker.ready;
@@ -2303,6 +2321,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const json = sub.toJSON();
+            console.log('✅ Nueva suscripción creada. Endpoint:', json.endpoint.substring(0, 50));
 
             // 4. Borrar la fila vieja en Supabase
             await sb.from('push_subs').delete().eq('user_id', USER_ID);
@@ -2326,7 +2345,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // 6. Actualizar flag
             localStorage.setItem('rs_push_activado', 'true');
 
-            console.log('✅ Suscripción push renovada automáticamente. Nuevo endpoint:', json.endpoint.substring(0, 50));
+            console.log('✅ Suscripción push renovada automáticamente');
 
         } catch (e) {
             console.error('❌ Error en renovación automática de push:', e);
