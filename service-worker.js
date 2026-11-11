@@ -34,19 +34,29 @@ self.addEventListener('push', (e) => {
       icon: icon,
       badge: icon,
       tag: data.tag || 'general',
-      vibrate: [500, 200, 500]
+      vibrate: [500, 200, 500],
+      data: { url: data.data?.url || '/ruta-segura/' }
     })
   );
 });
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
+  
+  // URL a la que debe abrir al tocar la notificación
+  const url = e.notification.data?.url || '/ruta-segura/';
+  
   e.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientList => {
-      if (clientList.length > 0) {
-        clientList[0].focus();
-      } else {
-        clients.openWindow('/');
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // Si ya hay una ventana abierta de Ruta Segura, la enfoca
+      for (const client of clientList) {
+        if (client.url.includes('ruta-segura') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Si no, abre Ruta Segura directamente
+      if (clients.openWindow) {
+        return clients.openWindow(url);
       }
     })
   );
