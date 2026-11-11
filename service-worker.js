@@ -104,7 +104,7 @@ self.addEventListener('push', (e) => {
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   const data = e.notification.data || {};
-  const url = data.url || '/ruta-segura/';
+  const url = data.url || 'https://iaparamayores.github.io/ruta-segura/';
   
   e.waitUntil((async () => {
     const clientes = await clients.matchAll({ type: 'window', includeUncontrolled: true });
