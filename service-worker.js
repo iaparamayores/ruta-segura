@@ -1,16 +1,12 @@
-// Ruta Segura SW v3.5 - URL absoluta + diagnóstico
-const CACHE = 'ruta-segura-v5';
+// Ruta Segura SW v3.6 - URL absoluta fija + scope corregido
+const CACHE = 'ruta-segura-v6';
 const SUPA_URL = 'https://vqezdcdalprvjdtdrqzx.supabase.co';
 const SUPA_ANON = 'sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
 const APP_URL = 'https://iaparamayores.github.io/ruta-segura/';
 
-self.addEventListener('install', () => { 
-  console.log('[SW v3.5] Instalando...');
-  self.skipWaiting(); 
-});
+self.addEventListener('install', () => { self.skipWaiting(); });
 
 self.addEventListener('activate', (e) => {
-  console.log('[SW v3.5] Activado');
   e.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
@@ -46,7 +42,6 @@ self.addEventListener('fetch', (e) => {
 });
 
 self.addEventListener('push', (e) => {
-  console.log('[SW v3.5] Push recibido');
   e.waitUntil((async () => {
     let payload = {};
     try {
@@ -69,7 +64,6 @@ self.addEventListener('push', (e) => {
       vibrate = [2000, 500, 2000, 500, 2000];
     }
 
-    // URL absoluta completa
     let url = APP_URL;
     
     if (payload.data && payload.data.tipo === 'sos') {
@@ -86,8 +80,6 @@ self.addEventListener('push', (e) => {
        }
        url = (lat != null) ? (APP_URL + '?sos=1&lat=' + lat + '&lon=' + lon) : (APP_URL + '?sos=1');
     }
-
-    console.log('[SW v3.5] Mostrando notificación con URL:', url);
 
     await self.registration.showNotification(title, {
       body: body,
@@ -107,12 +99,11 @@ self.addEventListener('push', (e) => {
 });
 
 self.addEventListener('notificationclick', (e) => {
-  console.log('[SW v3.5] Click en notificación');
   e.notification.close();
   const data = e.notification.data || {};
-  const url = data.url || APP_URL;
   
-  console.log('[SW v3.5] Abriendo URL:', url);
+  // Usamos la URL absoluta fija que sabemos que funciona
+  const url = data.url || APP_URL;
   
   e.waitUntil((async () => {
     const clientes = await clients.matchAll({ type: 'window', includeUncontrolled: true });
@@ -120,7 +111,6 @@ self.addEventListener('notificationclick', (e) => {
     // Buscar si ya hay una ventana de Ruta Segura abierta
     for (const c of clientes) {
       if (c.url.includes('ruta-segura') && 'focus' in c) {
-        console.log('[SW v3.5] Enfocando ventana existente');
         await c.focus();
         if (data.tipo === 'sos' || data.tipo === 'sos-push') {
             c.postMessage({ tipo: 'sos-push', lat: data.lat, lon: data.lon });
@@ -129,8 +119,7 @@ self.addEventListener('notificationclick', (e) => {
       }
     }
     
-    // Si no hay ventana de Ruta Segura, abrir una nueva
-    console.log('[SW v3.5] Abriendo nueva ventana:', url);
+    // Si no, abrir la URL absoluta directamente
     if (clients.openWindow) {
       await clients.openWindow(url);
     }
@@ -139,7 +128,6 @@ self.addEventListener('notificationclick', (e) => {
 
 self.addEventListener('message', (e) => {
   const data = e.data;
-  
   if (data && data.tipo === 'test-notification') {
     self.registration.showNotification(data.titulo || '🧪 Prueba', {
       body: data.cuerpo || 'Notificación de prueba local',
