@@ -66,7 +66,7 @@ self.addEventListener('push', (e) => {
     }
 
     // URL a abrir al tocar (Ruta Segura, no Mis Apps)
-    let url = '/ruta-segura/';
+    let url = 'https://iaparamayores.github.io/ruta-segura/';
     
     // Si es un SOS, intentamos construir la URL con coordenadas
     if (payload.data && payload.data.tipo === 'sos') {
