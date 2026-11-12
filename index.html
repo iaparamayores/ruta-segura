@@ -554,7 +554,13 @@
                     if (movimientos[0].accion.includes('Entró')) ultimoMovimiento = "de regreso en casa";
                 }
 
-                const mensajePush = `✅ Resumen del día: Está ${ultimoMovimiento} y tomó ${estadoMeds}. ¡Todo en orden!`;
+                // Formato Híbrido: Cálido pero con datos concretos
+const mensajePush = 
+  `Hola! 👋 Te cuento cómo estuvo tu familiar hoy:\n\n` +
+  `📍 Ubicación: ${ultimoMovimiento}\n` +
+  `💊 Medicación: ${estadoMeds}\n` +
+  (totalTomas > 0 ? `   (Tomadas: ${tomasHechas}/${totalTomas})\n` : '') +
+  `\n¡Todo en orden! Que descanses. 💙`;
 
                 // 3. Enviar Push al Cuidador
                 await fetch('https://vqezdcdalprvjdtdrqzx.supabase.co/functions/v1/push-send', {
